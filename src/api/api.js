@@ -1,7 +1,5 @@
-import qs from 'qs'
+//import qs from 'qs'
 import axios from 'axios'
-
-axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 
 /*//test api
 let base = ''
@@ -39,10 +37,7 @@ export const reqGetStores = params => {
 
 
 export const reqLogin = params => {
-  return axios.post('http://106.14.47.193/xpay/admin/', qs.stringify({account:'',password:''})).then(function (response) {
-    console.log(response);
-  })
-    .catch(function (error) {
+  return axios.get('http://106.14.47.193/xpay/admin/',{ params: params }).then(res => res).catch(function (error) {
       console.log(error);
     });
 }

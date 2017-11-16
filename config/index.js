@@ -11,13 +11,6 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-      /*'/xpay/admin/': {
-        target: 'http://106.14.47.193',
-        changeOrigin: true,
-        pathRewrite: {
-          '^/xpay/admin/': '/'
-        }
-      }*/
     },
 
     // Various Dev Server settings

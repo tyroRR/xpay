@@ -44,11 +44,9 @@
             this.logining = true;
             //NProgress.start();
             var loginParams = { account: this.userInfo.account, password: this.userInfo.password };
-            reqLogin(loginParams).then(data => {
-              this.logining = false;
-              //NProgress.done();
-              let { msg, code, user } = data;
-              if (code !== 200) {
+            reqLogin(loginParams).then(res => {
+              console.log(res);
+              if (res.status !== 200) {
                 this.$message({
                   message: msg,
                   type: 'error'
@@ -57,6 +55,7 @@
                 sessionStorage.setItem('access-user', JSON.stringify(user));
                 this.$router.push({ path: '/' });
               }
+              //NProgress.done();
             });
 
           } else {

@@ -1,0 +1,108 @@
+import Vue from 'vue'
+import Router from 'vue-router'
+import Home from '@/components/Home'
+import Dashboard from '@/components/Dashboard'
+
+import ChannelReg from '@/components/channels/ChannelReg'
+import ChannelList from '@/components/channels/ChannelList'
+import StoreList from '@/components/stores/StoreList'
+import DomainName from '@/components/stores/DomainName'
+import Query from '@/components/Query'
+import Complain from '@/components/Complain'
+//import Profile from '@/components/Profile'
+
+// 懒加载方式，当路由被访问的时候才加载对应组件
+const Login = resolve => require(['@/components/Login'], resolve)
+
+Vue.use(Router)
+
+let router = new Router({
+  routes: [
+    {
+      path: '/login',
+      name: '登录',
+      component: Login,
+    },
+    {
+      path: '/',
+      name: 'home',
+      component: Home,
+      redirect: '/dashboard',
+      leaf: true, // 只有一个节点
+      menuShow: true,
+      iconCls: 'iconfont icon-home', // 图标样式class
+      children: [
+        {path: '/dashboard', component: Dashboard, name: '首页', menuShow: true}
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      name: '通道管理',
+      iconCls: 'iconfont icon-users',
+      menuShow: true,
+      children: [
+        {path: '/channel/ChannelList', component: ChannelList, name: '通道列表', menuShow: true},
+        {path: '/channel/ChannelReg', component: ChannelReg, name: '新增通道', menuShow: true}
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      name: '商户管理',
+      iconCls: 'iconfont icon-users1',
+      menuShow: true,
+      children: [
+        {path: '/store/list', component: StoreList, name: '商户列表', menuShow: true},
+        {path: '/store/domain-name', component: DomainName, name: '域名报备', menuShow: true},
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      iconCls: 'iconfont icon-home1',
+      leaf: true,
+      menuShow: true,
+      children: [
+        {path: '/query', component: Query, name: '交易查询', menuShow: true},
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      iconCls: 'iconfont icon-leaf',
+      leaf: true,
+      menuShow: true,
+      children: [
+        {path: '/complain', component: Complain, name: '投诉管理', menuShow: true},
+      ]
+    },
+   /* {
+      path: '/',
+      component: Home,
+      iconCls: 'iconfont icon-setting1',
+      leaf: true,
+      menuShow: true,
+      children: [
+        {path: 'profile', component: Profile, name: '个人信息', menuShow: true},
+      ]
+    }*/
+  ]
+})
+
+router.beforeEach((to, from, next) => {
+  // console.log('to:' + to.path)
+  if (to.path.startsWith('/login')) {
+    window.sessionStorage.removeItem('access-user')
+    next()
+  } else {
+    let user = JSON.parse(window.sessionStorage.getItem('access-user'))
+    if (!user) {
+      next({path: '/login'})
+    } else {
+      next()
+    }
+  }
+})
+
+export default router

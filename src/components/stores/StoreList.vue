@@ -75,7 +75,6 @@
   var placeholders={"id":"请输入查找ID","name":"请输入查找通道名称","type":"请输入查找通道类型"};
 
   export default {
-    name: 'app',
     data: function() {
 
       return {
@@ -187,8 +186,7 @@
 
         reqGetStores().then((res) => {
           console.log(res);
-          this.stores = res.data.stores;
-          this.total_rows = res.data.total_rows;
+          this.stores = res.data;
           this.loading = false;
           this.selected.splice(0,this.selected.length);
         })

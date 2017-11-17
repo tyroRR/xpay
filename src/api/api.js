@@ -1,6 +1,9 @@
 //import qs from 'qs'
+import Vue from 'vue'
+import Vuex from 'vuex'
 import axios from 'axios'
 
+Vue.use(Vuex)
 /*//test api
 let base = ''
 
@@ -37,9 +40,7 @@ export const reqGetStores = params => {
 
 
 export const reqLogin = params => {
-  return axios.get('http://106.14.47.193/xpay/admin/',{ params: params }).then(res => res).catch(function (error) {
-      console.log(error);
-    });
+  return axios.get('http://106.14.47.193/xpay/admin/',{ params: params }).then(res => res).catch(error => console.log(error));
 }
 
 /*export const reqGetApps = params => {
@@ -60,10 +61,10 @@ export const reqGetChannels = params => {
 export const reqPutChannels = params => {
   return axios.get(`http://106.14.47.193/xpay/${id}/channels`,
     { params:{extStoreId: "",paymentGateway: "",extStoreName: ""} }).then(res => res.data)//UPAY, CHINAUMSH5
-}
+}*/
 
 export const reqGetStores = params => {
-  return axios.get(`http://106.14.47.193/xpay/${id}/stores`,
+  return axios.get(`http://106.14.47.193/xpay/admin/10/stores`,
     { params: params }).then(res => res.data)
 }
 
@@ -71,6 +72,6 @@ export const reqPatchChannels = params => {
   return axios.patch(`http://106.14.47.193/xpay/agents/${id}store/{storeId}/channels`,
     { params:{channels: [1,2,3,4,5]}
     }).then(res => res.data)
-}*/
+}
 
 

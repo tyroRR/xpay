@@ -16,7 +16,9 @@
 </template>
 
 <script>
+  import { mapState } from 'vuex'
   import {reqLogin} from '../api/api';
+
   //import NProgress from 'nprogress'
   export default {
     data() {
@@ -37,6 +39,18 @@
         checked: true
       };
     },
+    computed: mapState({
+      // 箭头函数可使代码更简练
+      req: state => state.req,
+
+      // 传字符串参数 'req' 等同于 `state => state.req`
+      reqAlias: 'req',
+
+      // 为了能够使用 `this` 获取局部状态，必须使用常规函数
+      countPlusLocalState (state) {
+        return state.req + this.localCount
+      }
+    }),
     methods: {
       handleLogin() {
         this.$refs.AccountFrom.validate((valid) => {
@@ -47,12 +61,10 @@
             reqLogin(loginParams).then(res => {
               console.log(res);
               if (res.status !== 200) {
-                this.$message({
-                  message: msg,
-                  type: 'error'
-                });
+                console.log('error');
               } else {
-                sessionStorage.setItem('access-user', JSON.stringify(user));
+
+                sessionStorage.setItem('access-user', JSON.stringify(loginParams));
                 this.$router.push({ path: '/' });
               }
               //NProgress.done();

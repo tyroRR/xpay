@@ -17,17 +17,12 @@
 
 <script>
   import { mapState } from 'vuex'
-  import {reqLogin} from '../api/api';
-
   //import NProgress from 'nprogress'
   export default {
     data() {
       return {
         logining: false,
-        userInfo:{
-          account: '',
-          password: ''
-        },
+
         rules: {
           account: [
             {required: true, message: '请输入账号', trigger: 'blur'},
@@ -39,37 +34,21 @@
         checked: true
       };
     },
-    computed: mapState({
-      // 箭头函数可使代码更简练
-      req: state => state.req,
-
-      // 传字符串参数 'req' 等同于 `state => state.req`
-      reqAlias: 'req',
-
-      // 为了能够使用 `this` 获取局部状态，必须使用常规函数
-      countPlusLocalState (state) {
-        return state.req + this.localCount
-      }
-    }),
+    computed: {
+      ...mapState(['userInfo'])
+    },
     methods: {
       handleLogin() {
         this.$refs.AccountFrom.validate((valid) => {
           if (valid) {
             this.logining = true;
             //NProgress.start();
-            var loginParams = { account: this.userInfo.account, password: this.userInfo.password };
-            reqLogin(loginParams).then(res => {
-              console.log(res);
-              if (res.status !== 200) {
-                console.log('error');
-              } else {
-
-                sessionStorage.setItem('access-user', JSON.stringify(loginParams));
-                this.$router.push({ path: '/' });
-              }
-              //NProgress.done();
-            });
-
+            let loginParams = { account: this.userInfo.account, password: this.userInfo.password };
+            console.log(loginParams);
+            this.$store.dispatch('login',loginParams);
+            sessionStorage.setItem('access-user', JSON.stringify(loginParams));
+            this.$router.push({ path: '/' });
+            //NProgress.done();
           } else {
             console.log('error submit!!');
             return false;

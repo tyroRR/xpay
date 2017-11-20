@@ -70,8 +70,6 @@
 </template>
 
 <script>
-  import {reqGetStores} from '../../api/api';
-
   var placeholders={"id":"请输入查找ID","name":"请输入查找通道名称","type":"请输入查找通道类型"};
 
   export default {
@@ -184,13 +182,13 @@
       getStores() {
         this.loading = true;
 
-        reqGetStores().then((res) => {
+   /*     reqGetStores().then((res) => {
           console.log(res);
           this.stores = res.data;
           this.loading = false;
           this.selected.splice(0,this.selected.length);
         })
-
+*/
       },
 
       /* 获取用户列表

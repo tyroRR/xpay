@@ -16,13 +16,15 @@
 </template>
 
 <script>
-  import { mapState } from 'vuex'
   //import NProgress from 'nprogress'
   export default {
     data() {
       return {
         logining: false,
-
+        userInfo:{
+          account:'',
+          password:''
+        },
         rules: {
           account: [
             {required: true, message: '请输入账号', trigger: 'blur'},
@@ -34,9 +36,6 @@
         checked: true
       };
     },
-    computed: {
-      ...mapState(['userInfo'])
-    },
     methods: {
       handleLogin() {
         this.$refs.AccountFrom.validate((valid) => {
@@ -44,10 +43,10 @@
             this.logining = true;
             //NProgress.start();
             let loginParams = { account: this.userInfo.account, password: this.userInfo.password };
-            console.log(loginParams);
-            this.$store.dispatch('login',loginParams);
-            sessionStorage.setItem('access-user', JSON.stringify(loginParams));
-            this.$router.push({ path: '/' });
+            this.$http.post('http://106.14.47.193/xpay/admin/login',loginParams).then(
+              sessionStorage.setItem('access-user', JSON.stringify(loginParams)),
+              this.$router.push({ path: '/' })
+            );
             //NProgress.done();
           } else {
             console.log('error submit!!');

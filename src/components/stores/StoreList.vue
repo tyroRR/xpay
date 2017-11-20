@@ -18,8 +18,8 @@
             <el-input :placeholder="placeholder" v-model="keywords" style="width: 300px;">
               <el-select v-model="select" placeholder="请选择" @change="searchFieldChange" slot="prepend">
                 <el-option label="ID" value="id"></el-option>
-                <el-option label="通道名称" value="name"></el-option>
-                <el-option label="通道类型" value="type"></el-option>
+                <el-option label="商户名称" value="name"></el-option>
+                <el-option label="商户类型" value="type"></el-option>
               </el-select>
               <el-button type="danger" class="danger" slot="append" icon="el-icon-search" @click="query"></el-button>
             </el-input>
@@ -36,17 +36,16 @@
       <el-table :data="stores"
                 style="width: 100%"
                 height="443"
-                @sort-change="tableSortChange"
-                @selection-change="tableSelectionChange">
-        <el-table-column type="selection" width="60"></el-table-column>
+                @sort-change="tableSortChange"                @selection-change="tableSelectionChange">
         <el-table-column sortable="custom" prop="id" label="ID"></el-table-column>
-        <el-table-column prop="name" label="通道名称"></el-table-column>
-        <el-table-column prop="type" label="通道类型"></el-table-column>
-        <el-table-column inline-template label="操作" width="250">
-                            <span>
-                                <el-button type="primary" size="mini" @click="removeStore(row)">删除</el-button>
-                                <el-button type="primary" size="mini" @click="setCurrent(row)">编辑</el-button>
-                            </span>
+        <el-table-column prop="name" label="商户名称"></el-table-column>
+        <el-table-column prop="code" label="code"></el-table-column>
+        <el-table-column label="操作">
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+          </template>
         </el-table-column>
       </el-table>
 
@@ -70,14 +69,13 @@
 </template>
 
 <script>
-  var placeholders={"id":"请输入查找ID","name":"请输入查找通道名称","type":"请输入查找通道类型"};
+  var placeholders={"id":"请输入查找ID","name":"请输入查找商户名称","type":"请输入查找商户类型"};
 
   export default {
     data: function() {
 
       return {
-        stores: [
-        ],
+        stores: [],
         create: {
           id: '',
           name: '',
@@ -160,7 +158,7 @@
         this.filter.page = val;
         this.getStores();
       },
-      setCurrent(store){
+      handleEdit(store){
         this.currentId=store.id;
         this.update.name=store.name;
         this.update.is_active=store.is_active;
@@ -181,7 +179,15 @@
       //获取用户列表
       getStores() {
         this.loading = true;
-
+        this.$http.get('http://106.14.47.193/xpay/admin/10/stores').then(res => {
+          console.log(res.data.data);
+          this.stores = res.data.data;
+          this.loading = false;
+          this.selected.splice(0,this.selected.length);
+        }) .catch((response)=> {
+          this.$message.error('错了哦，这是一条错误消息');
+          this.loading = false;
+        });
    /*     reqGetStores().then((res) => {
           console.log(res);
           this.stores = res.data;
@@ -242,13 +248,16 @@
         });
       },
 
-      // 删除单个用户
-      removeStore(store) {
-        this.$confirm('此操作将永久删除用户 ' + store.username + ', 是否继续?', '提示', { type: 'warning' })
+      /*// 删除单个用户
+      handleDelete(row) {
+        console.log(this.stores[0]);
+        this.$confirm('此操作将删除商户 ' + this.stores[row].name + ', 是否继续?', '提示', { type: 'warning' })
           .then(() => {
             // 向请求服务端删除
+            let channelId = this.stores[row]
+            this.$http.get(`http://106.14.47.193/xpay/admin/10/channels/${channelId}`);
             var resource = this.$resource(this.url + "{/id}");
-            resource.delete({ id: store.id })
+            resource.delete({ id: stores.id })
               .then((response) => {
                 this.$message.success('成功删除了用户' + store.username + '!');
                 this.getStores();
@@ -285,13 +294,14 @@
           .catch(() => {
             this.$Message('已取消操作!');
           });
-      },
+      },*/
 
-      // 更新用户资料
+      // 更新资料
       updateStore() {
         this.$refs.update.validate((valid) => {
           if (valid) {
             this.updateLoading=true;
+            this.$http.patch('http://106.14.47.193/xpay/admin/10/stores')
             var actions = {
               update: {method: 'patch'}
             }

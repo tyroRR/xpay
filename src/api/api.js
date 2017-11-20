@@ -4,7 +4,7 @@ import axios from 'axios'
 axios.defaults.timeout = 10000;
 axios.defaults.baseURL = 'http://106.14.47.193';
 
-//POST传参序列化(添加请求拦截器)
+/*//POST传参序列化(添加请求拦截器)
 axios.interceptors.request.use(config => {
   // 在发送请求之前做某件事
   if(config.method  === 'post'){
@@ -42,11 +42,11 @@ axios.interceptors.response.use(res =>{
   }
   // 返回 response 里的错误信息
   return Promise.reject(error.response.data)
-})
+})*/
 
 export default {
   reqLogin: params => {
-    return axios.get('/xpay/admin/',{ params: params })
+    return axios.post('/xpay/admin/',params)
   }
 }
 

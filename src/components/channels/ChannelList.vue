@@ -3,274 +3,349 @@
     <el-col :span="24" class="warp-breadcrum">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item :to="{ path: '/' }"><b>首页</b></el-breadcrumb-item>
-        <el-breadcrumb-item>通道管理</el-breadcrumb-item>
-        <el-breadcrumb-item>通道列表</el-breadcrumb-item>
+        <el-breadcrumb-item>商户管理</el-breadcrumb-item>
+        <el-breadcrumb-item>商户列表</el-breadcrumb-item>
       </el-breadcrumb>
     </el-col>
-
-    <el-col :span="24" class="warp-main">
+    <el-col :span="24" class="warp-main"
+            v-loading="loading"
+            element-loading-text="拼命加载中"
+            element-loading-spinner="el-icon-loading"
+            element-loading-background="rgba(0, 0, 0, 0.8)">
+      <!-- 查询 -->
       <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
-        <el-form :inline="true" :model="filters" class="demo-form-inline">
-          <el-form-item label="ID">
-            <el-input v-model="filters.id" placeholder="请输入ID"></el-input>
-          </el-form-item>
-          <el-form-item label="通道名称">
-            <el-input v-model="filters.name" placeholder="请输入通道名称"></el-input>
-          </el-form-item>
-          <el-form-item label="通道类型">
-            <el-select v-model="filters.state" placeholder="请输入通道类型">
-              <el-option label="type1" value="1"></el-option>
-              <el-option label="type2" value="2"></el-option>
+        <el-form :inline="true" class="demo-form-inline">
+          <el-input :placeholder="placeholder" v-model="keywords" style="width: 300px;">
+            <el-select v-model="select" placeholder="请选择" @change="searchFieldChange" slot="prepend">
+              <el-option label="通道ID" value="id"></el-option>
+              <el-option label="通道名称" value="name"></el-option>
+              <el-option label="通道类型" value="type"></el-option>
             </el-select>
-          </el-form-item><el-form-item>
-          <el-button type="primary" icon="search" @click="searchClick">查询</el-button>
-          <el-button type="success" icon="plus" @click="addClick">新增</el-button>
-        </el-form-item>
+            <el-button type="danger" class="danger" slot="append" icon="el-icon-search" @click="query"></el-button>
+          </el-input>
+          <el-form-item>
+            <div class="btn-edit">
+              <el-button type="primary" @click="dialogCreateVisible = true">添加</el-button>
+              <el-button type="primary" icon="delete" :disabled="selected.length==0" @click="removeStores()"  >删除</el-button>
+            </div>
+          </el-form-item>
         </el-form>
       </el-col>
 
-      <el-table
-        :data="channelList"
-        v-loading="listLoading"
-        border
-        @selection-change="selectionChange"
-        style="width: 100%">
-        <el-table-column
-          type="selection"
-          width="55">
-        </el-table-column>
-        <el-table-column
-          prop="id"
-          label="ID">
-        </el-table-column>
-        <el-table-column
-          prop="name"
-          label="通道名称">
-        </el-table-column>
-        <el-table-column
-          prop="type"
-          label="通道类型">
-        </el-table-column>
-        <el-table-column
-          label="操作">
-          <template slot-scope="scope">
-            <el-button :plain="true" type="success" size="small" icon="edit" @click="editClick(scope.row)">编辑</el-button>
-            <el-button :plain="true" type="danger" size="small" icon="delete" @click="deleteClick(scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
+      <!-- 商户列表-->
+      <el-table :data="stores"
+                style="width: 100%"
+                height="680"
+                @sort-change="tableSortChange"                @selection-change="tableSelectionChange">
+        <el-table-column type="selection" width="60"></el-table-column>
+        <el-table-column sortable="custom" prop="extStoreId" label="通道ID"></el-table-column>
+        <el-table-column prop="extStoreName" label="通道名称"></el-table-column>
+        <el-table-column prop="id" label="商户ID"></el-table-column>
+        <el-table-column prop="paymentGateway" label="paymentGateway"></el-table-column>
+        <el-table-column prop="lastUseTime" label="lastUseTime"></el-table-column>
+        <el-table-column prop="updateDate" label="updateDate"></el-table-column>
+        <el-table-column label="操作">
+             <template slot-scope="scope">
+               <el-button
+                 size="mini"
+                 @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+               <el-button
+                 size="mini"
+                 type="danger"
+                 @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+             </template>
+         </el-table-column>
       </el-table>
 
-      <el-row style="margin-top: 20px" type="flex" justify="end">
-        <el-col :span="6" >
-          <el-button :plain="true" type="danger" size="small" icon="delete" @click="removeSelection">删除所选</el-button>
-        </el-col>
-        <el-col :span="18" >
-          <el-pagination
-            style="float: right"
-            @size-change="pageSizeChange"
-            @current-change="currentPageChange"
-            :current-page="currentPage"
-            :page-sizes="[10, 20, 30, 50]"
-            :page-size="pageSize"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="total">
-          </el-pagination>
-        </el-col>
-      </el-row>
-
-      <el-dialog title="编辑" v-model="editFormVisible" :close-on-click-modal="false">
-        <el-form :model="editForm" label-width="80px" :rules="editFormRules" ref="editForm">
-          <el-form-item label="ID" prop="id">
-            <el-input-number v-model="editForm.id"></el-input-number>
-          </el-form-item>
-          <el-form-item label="通道名称" prop="name">
-            <el-input v-model="editForm.name" auto-complete="off"></el-input>
-          </el-form-item>
-          <el-form-item label="通道类型" prop="type">
-            <el-input-number v-model="editForm.id" auto-complete="off"></el-input-number>
-          </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-          <el-button @click.native="editFormVisible = false">取消</el-button>
-          <el-button type="primary" @click.native="editSubmit" :loading="editLoading">提交</el-button>
-        </div>
-      </el-dialog>
+      <!--分页begin-->
+      <el-pagination class="paging"
+                     :current-page="filter.page"
+                     :page-sizes="[10, 20, 50, 100]"
+                     :page-size="filter.per_page"
+                     layout="total, sizes, prev, pager, next, jumper"
+                     :total="total_rows"
+                     @size-change="pageSizeChange"
+                     @current-change="pageCurrentChange">
+      </el-pagination>
+      <!--分页end-->
 
     </el-col>
+
+
+
   </el-row>
 </template>
 
 <script>
+  var placeholders={"id":"请输入查找ID","name":"请输入查找商户名称","type":"请输入查找商户类型"};
 
   export default {
-    data (){
+    data: function() {
+
       return {
-        //列表数据
-        channelList: [{
-          id: '1',
-          name: '1',
-          type: 1
-        }, {
-          id: '2',
-          name: '2',
-          type: '2'
-        }],
-        //显示加载中样式
-        listLoading: false,
-        //搜索表单
-        filters: {
+        stores: [],
+        create: {
           id: '',
           name: '',
-          state: ''
+          type: '',
+          is_active: true
         },
-        //多选值
-        multipleSelection: [],
-        //当前页
-        currentPage: 3,
-        //分页大小
-        pageSize: 100,
-        //总记录数
-        total: 1000,
-        //删除的弹出框
-        deleteVisible: false,
-        //编辑界面是否显示
-        editFormVisible: false,
-        editLoading: false,
-        editFormRules: {
+        currentId:'',
+        update:{
+          id: '',
+          name: '',
+          type: '',
+          is_active: true
+        },
+        rules: {
+          id: [
+            { required: true, message: '请输入ID', trigger: 'blur' },
+            { pattern:/^[0-9]*/, message: 'ID为数字'}
+          ],
           name: [
-            {required: true, message: '请输入姓名', trigger: 'blur'}
+            { required: true, message: '请输入用户名', trigger: 'blur' },
+          ],
+          type: [
+            { required: true, message: '请输入通道类型', trigger: 'blur' },
           ]
         },
-        //编辑界面数据
-        editForm: {
-          id: 0,
-          name: '',
-          type: ''
-        }
-      }
+        filter: {
+          per_page: 10, // 页大小
+          page: 1, // 当前页
+          id:'',
+          name:'',
+          type:'',
+          sorts:''
+        },
+        total_rows: 0,
+        keywords: '', //搜索框的关键字内容
+        select: '', //搜索框的搜索字段
+        loading: true,
+        selected: [], //已选择项
+        dialogCreateVisible: false, //创建对话框的显示状态
+        dialogUpdateVisible: false, //编辑对话框的显示状态
+        createLoading: false,
+        updateLoading: false,
+        placeholder:placeholders["id"]
+      };
     },
-    methods:{
-      /*表格重新加载数据
-      loadingData:function() {
-        var _self = this;
-        _self.loading = true;
-        setTimeout(function(){
-          console.info("加载数据成功");
-          _self.loading = false;
-        },300);
-      },*/
+    mounted: function() {
+      this.getStores();
+    },
+    methods: {
+      tableSelectionChange(val) {
+        this.selected = val;
+      },
+      tableSortChange(val) {
+        console.log(`排序属性: ${val.prop}`);
+        console.log(`排序: ${val.order}`);
+        if(val.prop!=null){
+          if(val.order=='descending'){
+            this.filter.sorts = '-'+val.prop;
+          }
+          else{
+            this.filter.sorts = ''+val.prop;
+          }
+        }
+        else{
+          this.filter.sorts = '';
+        }
+        this.getStores();
+      },
+      searchFieldChange(val) {
+        this.placeholder=placeholders[val];
+        console.log(`搜索字段： ${val} `);
+      },
+      pageSizeChange(val) {
+        console.log(`每页 ${val} 条`);
+        this.filter.per_page = val;
+        this.getStores();
+      },
+      pageCurrentChange(val) {
+        console.log(`当前页: ${val}`);
+        this.filter.page = val;
+        this.getStores();
+      },
+      setCurrent(store){
+        this.currentId=store.id;
+        this.update.name=store.name;
+        this.update.is_active=store.is_active;
+        this.dialogUpdateVisible=true;
+      },
+      // 重置表单
+      reset() {
+        this.$refs.create.resetFields();
+      },
+      query(){
+        this.filter.id='';
+        this.filter.name='';
+        this.filter.type='';
+        this.filter[this.select]=this.keywords;
+        this.getStores();
+      },
+
       //获取用户列表
-      getData:function() {
-        let para = {
-          currentPage: this.currentPage,
-          id: this.filters.id,
-          name: this.filters.name,
-          type: this.filters.type
-        };
-        this.listLoading = true;
-        reqGetChannelListPage(para).then((res) => {
-          this.channelList = res.data.channelList;
-          this.total = res.data.total;
-          this.listLoading = false;
-        })
+      getStores() {
+        this.loading = true;
+        this.$http.get('http://106.14.47.193/xpay/admin/10/channels').then(res => {
+          console.log(res.data.data);
+          this.stores = res.data.data;
+          this.loading = false;
+          this.selected.splice(0,this.selected.length);
+        }) .catch((response)=> {
+          this.$message.error('错了哦，这是一条错误消息');
+          this.loading = false;
+        });
+        /*     reqGetStores().then((res) => {
+               console.log(res);
+               this.stores = res.data;
+               this.loading = false;
+               this.selected.splice(0,this.selected.length);
+             })
+     */
       },
-      //表格编辑事件
-      editClick:function(row) {
-        console.log(row);
-        this.editFormVisible = true;
-        this.editForm = Object.assign({}, row);
-      },
-      //表格删除事件
-      deleteClick:function(row) {
-        var _self = this;
-        this.$confirm('确认删除' + row.name +'吗?', '提示', {
-          type: 'warning'
-        }).then(function(){
-          _self.$message({
-            message: row.name + '删除成功',
-            type: 'success'
+
+      /* 获取用户列表
+      getStores() {
+        this.loading = true;
+
+        var resource = this.$resource(this.url);
+        resource.query(this.filter)
+          .then((response) => {
+            this.stores = response.data.datas;
+            this.total_rows = response.data.total_rows;
+            this.loading = false;
+            this.selected.splice(0,this.selected.length);
+          })
+          .catch((response)=> {
+            this.$message.error('错了哦，这是一条错误消息');
+            this.loading = false;
           });
-          _self.getData();//重新加载数据
-        }).catch(function(e){
-          if(e != "cancel")
-            console.log("出现错误：" + e);
+
+      },*/
+
+      // 创建用户
+      createStore(){
+        // 主动校验
+        this.$refs.create.validate((valid) => {
+          if (valid) {
+            this.createLoading=true;
+            var resource = this.$resource(this.url);
+            resource.save(this.create)
+              .then((response) => {
+                this.$message.success('创建用户成功！');
+                this.dialogCreateVisible=false;
+                this.createLoading=false;
+                this.reset();
+                this.getStores();
+              })
+              .catch((response) => {
+                var data=response.data;
+                if(data instanceof Array){
+                  this.$message.error(data[0]["message"]);
+                }
+                else if(data instanceof Object){
+                  this.$message.error(data["message"]);
+                }
+                this.createLoading=false;
+              });
+          }
+          else {
+            return false;
+          }
         });
       },
-      //新建事件
-      addClick:function() {
-        var _self = this;
-        this.editFormVisible = true;
-        //_self.getData();//重新加载数据
-      },
-      //表格查询事件
-      searchClick:function() {
-        alert("搜索");
-        var _self = this;
-        _self.getData();//重新加载数据
-      },
-      //表格勾选事件
-      selectionChange:function(val) {
-        for(var i=0;i<val.length;i++) {
-          var row = val[i];
-        }
-        this.multipleSelection = val;
-        console.info(val);
-      },
-      //删除所选，批量删除
-      removeSelection:function() {
-        var _self = this;
-        var multipleSelection = this.multipleSelection;
-        if(multipleSelection.length < 1) {
-          _self.$message({
-            message: '请至少选中一条记录',
-            type: 'error'
+
+      // 删除单个用户
+      removeStore(store) {
+        this.$confirm('此操作将永久删除用户 ' + store.username + ', 是否继续?', '提示', { type: 'warning' })
+          .then(() => {
+            // 向请求服务端删除
+            var resource = this.$resource(this.url + "{/id}");
+            resource.delete({ id: store.id })
+              .then((response) => {
+                this.$message.success('成功删除了用户' + store.username + '!');
+                this.getStores();
+              })
+              .catch((response) => {
+                this.$message.error('删除失败!');
+              });
+          })
+          .catch(() => {
+            this.$message.info('已取消操作!');
           });
-          return;
-        }
-        var ids = "";
-        for(var i=0;i<multipleSelection.length;i++) {
-          var row = multipleSelection[i];
-          ids += row.name + ","
-        }
-        this.$confirm('确认删除' + ids +'吗?', '提示', {
-          type: 'warning'
-        }).then(function(){
-          _self.$message({
-            message: ids + '删除成功',
-            type: 'success'
+      },
+      //删除多个用户
+      removeStores() {
+        this.$confirm('此操作将永久删除 ' + this.selected.length + ' 个用户, 是否继续?', '提示', { type: 'warning' })
+          .then(() => {
+            console.log(this.selected);
+            var ids = [];
+            //提取选中项的id
+            $.each(this.selected,(i, user)=> {
+              ids.push(user.id);
+            });
+            // 向请求服务端删除
+            var resource = this.$resource(this.url);
+            resource.remove({ids: ids.join(",") })
+              .then((response) => {
+                this.$message.success('删除了' + this.selected.length + '个用户!');
+                this.getStores();
+              })
+              .catch((response) => {
+                this.$message.error('删除失败!');
+              });
+          })
+          .catch(() => {
+            this.$Message('已取消操作!');
           });
-          _self.getData();//重新加载数据
-        }).catch(function(e){
-          if(e != "cancel")
-            console.log("出现错误：" + e);
+      },
+
+      // 更新用户资料
+      updateStore() {
+        this.$refs.update.validate((valid) => {
+          if (valid) {
+            this.updateLoading=true;
+            var actions = {
+              update: {method: 'patch'}
+            }
+            var resource = this.$resource(this.url,{},actions);
+            resource.update({"ids":this.currentId},this.update)
+              .then((response) => {
+                this.$message.success('修改用户资料成功！');
+                this.dialogUpdateVisible=false;
+                this.updateLoading=false;
+                this.getStores();
+              })
+              .catch((response) => {
+                var data=response.data;
+                console.log(data);
+                if(data instanceof Array){
+                  this.$message.error(data[0]["message"]);
+                }
+                else if(data instanceof Object){
+                  this.$message.error(data["message"]);
+                }
+                this.updateLoading=false;
+              });
+          }
+          else {
+            return false;
+          }
         });
-      },
-      //分页大小修改事件
-      pageSizeChange:function(val) {
-        console.log('每页 ' + val +' 条');
-        this.pageSize = val;
-        var _self = this;
-        _self.getData();//重新加载数据
-      },
-      //当前页修改事件
-      currentPageChange:function(val) {
-        this.currentPage = val;
-        console.log('当前页: ' + val);
-        var _self = this;
-        _self.getData();//重新加载数据
-      },
-      //保存点击事件
-      editSubmit:function(){
-        console.info(this.editForm);
-      },
-      mounted() {
-        this.getData();
       }
+
     }
   }
-
 </script>
 
 <style>
+  .paging{
+    text-align: center;
+    margin:12px 0;
+  }
+  .btn-edit{
+    float: right;
+  }
 
 </style>

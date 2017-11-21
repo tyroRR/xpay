@@ -87,7 +87,6 @@
                      :current-page="filter.currentPage"
                      :page-sizes="[10, 20, 50, 100]"
                      :page-size="filter.pageSize"
-                     :page-count="this.totalRows/this.filter.pageSize"
                      layout="total, sizes, prev, pager, next, jumper"
                      :total="totalRows"
                      @size-change="pageSizeChange"

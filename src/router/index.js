@@ -4,8 +4,8 @@ import Home from '@/components/Home'
 import Dashboard from '@/components/Dashboard'
 
 import ChannelReg from '@/components/channels/ChannelReg'
-import ChannelList from '@/components/channels/ChannelList'
-import StoreList from '@/components/stores/StoreList'
+import Channels from '@/components/channels/Channels'
+import stores from '@/components/stores/stores'
 import DomainName from '@/components/stores/DomainName'
 import Query from '@/components/Query'
 import Complain from '@/components/Complain'
@@ -42,7 +42,7 @@ let router = new Router({
       iconCls: 'iconfont icon-users',
       menuShow: true,
       children: [
-        {path: '/channel/ChannelList', component: ChannelList, name: '通道列表', menuShow: true},
+        {path: '/channel/channelList', component: Channels, name: '通道列表', menuShow: true},
         {path: '/channel/ChannelReg', component: ChannelReg, name: '新增通道', menuShow: true}
       ]
     },
@@ -53,7 +53,7 @@ let router = new Router({
       iconCls: 'iconfont icon-users1',
       menuShow: true,
       children: [
-        {path: '/store/list', component: StoreList, name: '商户列表', menuShow: true},
+        {path: '/store/storeList', component: stores, name: '商户列表', menuShow: true},
         {path: '/store/domain-name', component: DomainName, name: '域名报备', menuShow: true},
       ]
     },

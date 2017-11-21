@@ -77,12 +77,12 @@
     border: 1px solid #eaeaea;
     box-shadow: 0 0 25px #cac6c6;
 
-    background: -ms-linear-gradient(top, #fff, #6495ed);        /* IE 10 */
-    background:-moz-linear-gradient(top,#b8c4cb,#f6f6f8);/*火狐*/
-    background:-webkit-gradient(linear, 0% 0%, 0% 100%,from(#b8c4cb), to(#f6f6f8));/*谷歌*/
-    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#fff), to(#6495ed));      /* Safari 4-5, Chrome 1-9*/
-    background: -webkit-linear-gradient(top, #fff, #6495ed,#fff);   /*Safari5.1 Chrome 10+*/
-    background: -o-linear-gradient(top, #fff, #6495ed);  /*Opera 11.10+*/
+    background: -ms-linear-gradient(top, #fff, #6495ed);
+    background:-moz-linear-gradient(top,#b8c4cb,#f6f6f8);
+    background:-webkit-gradient(linear, 0% 0%, 0% 100%,from(#b8c4cb), to(#f6f6f8));
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#fff), to(#6495ed));
+    background: -webkit-linear-gradient(top, #fff, #6495ed,#fff);
+    background: -o-linear-gradient(top, #fff, #6495ed);
 
     .title {
       margin: 0px auto 40px auto;

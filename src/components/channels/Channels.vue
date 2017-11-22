@@ -24,7 +24,7 @@
               <el-option label="lastUseTime" value="lastUseTime"></el-option>
               <el-option label="updateDate" value="updateDate"></el-option>
             </el-select>
-            <el-button slot="append" icon="el-icon-search" @click="query">查询</el-button>
+            <el-button slot="append" icon="el-icon-search" @click="getChannels">查询</el-button>
           </el-input>
           <el-form-item>
             <div class="btn-edit">
@@ -39,14 +39,15 @@
       <el-table :data="channels"
                 style="width: 100%"
                 height="680"
-                @sort-change="tableSortChange"                @selection-change="tableSelectionChange">
+                :default-sort = "{prop: 'updateDate', order: 'descending'}"
+                @selection-change="tableSelectionChange">
         <el-table-column type="selection" width="60"></el-table-column>
-        <el-table-column sortable="custom" prop="extStoreId" label="通道ID"></el-table-column>
+        <el-table-column prop="extStoreId" label="通道ID"></el-table-column>
         <el-table-column prop="extStoreName" label="通道名称"></el-table-column>
-        <el-table-column prop="id" label="商户ID"></el-table-column>
+        <el-table-column sortable prop="id" label="商户ID"></el-table-column>
         <el-table-column prop="paymentGateway" label="支付方式"></el-table-column>
-        <el-table-column prop="lastUseTime" label="lastUseTime"></el-table-column>
-        <el-table-column prop="updateDate" label="updateDate"></el-table-column>
+        <el-table-column sortable prop="lastUseTime" label="lastUseTime"></el-table-column>
+        <el-table-column sortable prop="updateDate" label="updateDate"></el-table-column>
         <el-table-column label="操作">
              <template slot-scope="scope">
                <el-button
@@ -82,7 +83,6 @@
               </div>
           </el-dialog>
 
-      <!--分页begin-->
       <el-pagination class="paging"
                      :current-page="filter.currentPage"
                      :page-sizes="[10, 20, 50, 100]"
@@ -92,7 +92,6 @@
                      @size-change="pageSizeChange"
                      @current-change="pageCurrentChange">
       </el-pagination>
-      <!--分页end-->
 
     </el-col>
 
@@ -152,13 +151,13 @@
         filter: {
           pageSize: 10,
           currentPage: 1,
+          beginIndex: 0,
           extStoreId: "",
           extStoreName: "",
           id:"",
           paymentGateway: "",
           lastUseTime: "",
           updateDate: "",
-          sorts:''
         },
         totalRows: 0,
         keywords: '', //搜索框的关键字内容
@@ -179,24 +178,10 @@
       tableSelectionChange(val) {
         this.selected = val;
       },
-      tableSortChange(val) {
-        console.log(`排序属性: ${val.prop}`);
-        console.log(`排序: ${val.order}`);
-        if(val.prop!=null){
-          if(val.order=='descending'){
-            this.filter.sorts = '-'+val.prop;
-          }
-          else{
-            this.filter.sorts = ''+val.prop;
-          }
-        }
-        else{
-          this.filter.sorts = '';
-        }
-        this.getChannels();
-      },
       searchFieldChange(val) {
-        this.placeholder=placeholders[val];
+        this.select = val;
+        console.log(this.select);
+        this.placeholder = placeholders[val];
         console.log(`搜索字段： ${val} `);
       },
       pageSizeChange(val) {
@@ -219,29 +204,34 @@
       reset() {
         this.$refs.create.resetFields();
       },
-      // 查询
-      query(){
-        this.filter.extStoreId='';
-        this.filter.extStoreName='';
-        this.filter.id='';
-        this.filter.paymentGateway='';
-        this.filter.lastUseTime='';
-        this.filter.updateDate='';
-        this.filter[this.select]=this.keywords;
-        this.getChannels();
-      },
-
       //获取通道列表
       getChannels() {
         this.loading = true;
         this.$http.get('http://106.14.47.193/xpay/admin/10/channels').then(res => {
-          console.log(res.data.data);
+          //console.log(res.data.data);
           this.channels = res.data.data;
-          this.totalRows = res.data.data.length;
+          //查询
+          //console.log(this.select);
+          let queryData = [];
+          if(this.keywords !==""){
+            for (var i=0,lenI=this.channels.length;i<lenI;i++) {
+              //console.log(this.channels[i][this.select]);
+              //console.log(this.keywords);
+              let reg = new RegExp(this.keywords);
+              if(this.channels[i][this.select].match(reg)){
+                queryData.push(this.channels[i]);
+                //console.log(queryData);
+              }
+            }
+          }
+          else queryData = this.channels;
+          this.totalRows = queryData.length;
+          //分页
+          this.filter.beginIndex = (this.filter.currentPage-1)*10;
+          this.channels = queryData.splice(this.filter.beginIndex,this.filter.pageSize);
           this.loading = false;
           this.selected.splice(0,this.selected.length);
         })
-      //this.selected.splice(0,this.selected.length);
       },
 
       // 新增通道
@@ -284,12 +274,6 @@
                   this.$message.info('已取消操作!');
                 });
             },
-
-      //分页
-      paginate(totalRows,pageSize,currentPage) {
-        let pageNumber = totalRows/pageSize ;
-
-      }
 
       //删除多个通道
       /*removeChannels() {

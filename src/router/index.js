@@ -9,7 +9,6 @@ import stores from '@/components/stores/stores'
 import DomainName from '@/components/stores/DomainName'
 import Query from '@/components/Query'
 import Complain from '@/components/Complain'
-//import Profile from '@/components/Profile'
 
 // 懒加载方式，当路由被访问的时候才加载对应组件
 const Login = resolve => require(['@/components/Login'], resolve)
@@ -77,16 +76,6 @@ let router = new Router({
         {path: '/complain', component: Complain, name: '投诉管理', menuShow: true},
       ]
     },
-   /* {
-      path: '/',
-      component: Home,
-      iconCls: 'iconfont icon-setting1',
-      leaf: true,
-      menuShow: true,
-      children: [
-        {path: 'profile', component: Profile, name: '个人信息', menuShow: true},
-      ]
-    }*/
   ]
 })
 

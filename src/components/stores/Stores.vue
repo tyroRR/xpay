@@ -15,18 +15,19 @@
       <!-- 查询 -->
       <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
         <el-form :inline="true" class="demo-form-inline">
-            <el-input :placeholder="placeholder" v-model="keywords" style="width: 300px;">
-              <el-select v-model="select" placeholder="请选择" @change="searchFieldChange" slot="prepend">
+            <el-input :placeholder="placeholder" v-model="keywords" style="width: 30%;">
+              <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:110px">
                 <el-option label="ID" value="id"></el-option>
                 <el-option label="商户名称" value="name"></el-option>
                 <el-option label="商户类型" value="type"></el-option>
+                <el-option label="商户通道" value="channels"></el-option>
               </el-select>
-              <el-button type="danger" class="danger" slot="append" icon="el-icon-search" @click="query"></el-button>
+              <el-button slot="append" icon="el-icon-search" @click="getStores">查询</el-button>
             </el-input>
           <el-form-item>
             <div class="btn-edit">
-              <el-button type="primary" @click="dialogCreateVisible = true">添加</el-button>
-              <el-button type="primary" icon="delete" :disabled="selected.length==0" @click="removeStores()"  >删除</el-button>
+              <el-button type="primary" icon="el-icon-plus" @click="dialogCreateVisible = true">添加</el-button>
+              <el-button type="primary" icon="el-icon-delete" :disabled="selected.length==0">删除</el-button>
             </div>
           </el-form-item>
         </el-form>
@@ -35,31 +36,42 @@
       <!-- 商户列表-->
       <el-table :data="stores"
                 style="width: 100%"
-                height="443"
-                @sort-change="tableSortChange"                @selection-change="tableSelectionChange">
-        <el-table-column sortable="custom" prop="id" label="ID"></el-table-column>
+                height="680"
+                :default-sort = "{prop: 'id', order: 'descending'}"
+                @selection-change="tableSelectionChange">
+        <el-table-column sortable prop="id" label="ID"></el-table-column>
         <el-table-column prop="name" label="商户名称"></el-table-column>
         <el-table-column prop="code" label="code"></el-table-column>
+        <el-table-column label="商户通道">
+          <template slot-scope="scope">
+            <el-button
+              size="mini" type="primary"
+              @click="handleView(scope.$index, scope.row)">查看
+            </el-button>
+          </template>
+        </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
             <el-button
               size="mini"
               @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              @click="removeChannel(scope.$index, scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
 
-      <!--分页begin-->
       <el-pagination class="paging"
-                     :current-page="filter.page"
+                     :current-page="filter.currentPage"
                      :page-sizes="[10, 20, 50, 100]"
-                     :page-size="filter.per_page"
+                     :page-size="filter.pageSize"
                      layout="total, sizes, prev, pager, next, jumper"
-                     :total="total_rows"
+                     :total="totalRows"
                      @size-change="pageSizeChange"
                      @current-change="pageCurrentChange">
       </el-pagination>
-      <!--分页end-->
 
     </el-col>
 
@@ -69,7 +81,12 @@
 </template>
 
 <script>
-  var placeholders={"id":"请输入查找ID","name":"请输入查找商户名称","type":"请输入查找商户类型"};
+  let placeholders = {
+    "id":"请输入ID",
+    "name":"请输入商户名称",
+    "type":"请输入商户类型",
+    "channels":"请输入商户通道"
+  };
 
   export default {
     data: function() {
@@ -79,14 +96,14 @@
         create: {
           id: '',
           name: '',
-          type: '',
+          code: '',
           is_active: true
         },
         currentId:'',
         update:{
           id: '',
           name: '',
-          type: '',
+          code: '',
           is_active: true
         },
         rules: {
@@ -95,23 +112,23 @@
             { pattern:/^[0-9]*/, message: 'ID为数字'}
           ],
           name: [
-            { required: true, message: '请输入用户名', trigger: 'blur' },
+            { required: true, message: '请输入商户名称', trigger: 'blur' },
           ],
-          type: [
-            { required: true, message: '请输入通道类型', trigger: 'blur' },
+          code: [
+            { required: true, message: '请输入code', trigger: 'blur' },
           ]
         },
         filter: {
-          per_page: 10, // 页大小
-          page: 1, // 当前页
+          pageSize: 10,
+          currentPage: 1,
+          beginIndex: 0,
           id:'',
           name:'',
-          type:'',
-          sorts:''
+          code:'',
         },
-        total_rows: 0,
+        totalRows: 0,
         keywords: '', //搜索框的关键字内容
-        select: '', //搜索框的搜索字段
+        select: 'id', //搜索框的搜索字段
         loading: true,
         selected: [], //已选择项
         dialogCreateVisible: false, //创建对话框的显示状态
@@ -128,22 +145,6 @@
       tableSelectionChange(val) {
         this.selected = val;
       },
-      tableSortChange(val) {
-        console.log(`排序属性: ${val.prop}`);
-        console.log(`排序: ${val.order}`);
-        if(val.prop!=null){
-          if(val.order=='descending'){
-            this.filter.sorts = '-'+val.prop;
-          }
-          else{
-            this.filter.sorts = ''+val.prop;
-          }
-        }
-        else{
-          this.filter.sorts = '';
-        }
-        this.getStores();
-      },
       searchFieldChange(val) {
         this.placeholder=placeholders[val];
         console.log(`搜索字段： ${val} `);
@@ -159,176 +160,42 @@
         this.getStores();
       },
       handleEdit(store){
-        this.currentId=store.id;
-        this.update.name=store.name;
+        this.currentId = store.id;
+        this.update.name = store.name;
         this.update.is_active=store.is_active;
         this.dialogUpdateVisible=true;
+      },
+      handleView(index,row){
+        
       },
       // 重置表单
       reset() {
         this.$refs.create.resetFields();
       },
-      query(){
-        this.filter.id='';
-        this.filter.name='';
-        this.filter.type='';
-        this.filter[this.select]=this.keywords;
-        this.getStores();
-      },
-
       //获取用户列表
       getStores() {
         this.loading = true;
         this.$http.get('http://106.14.47.193/xpay/admin/10/stores').then(res => {
           console.log(res.data.data);
           this.stores = res.data.data;
-          this.loading = false;
-          this.selected.splice(0,this.selected.length);
-        }) .catch((response)=> {
-          this.$message.error('错了哦，这是一条错误消息');
-          this.loading = false;
-        });
-   /*     reqGetStores().then((res) => {
-          console.log(res);
-          this.stores = res.data;
+          //查询
+          let queryData = [];
+          if(this.keywords !==""){
+            for (var i=0,lenI=this.stores.length;i<lenI;i++) {
+              let reg = new RegExp(this.keywords);
+              if(this.stores[i][this.select].match(reg)){
+                queryData.push(this.stores[i]);
+              }
+            }
+          }
+          else queryData = this.stores;
+          this.totalRows = queryData.length;
+          //分页
+          this.filter.beginIndex = (this.filter.currentPage-1)*10;
+          this.stores = queryData.splice(this.filter.beginIndex,this.filter.pageSize);
           this.loading = false;
           this.selected.splice(0,this.selected.length);
         })
-*/
-      },
-
-      /* 获取用户列表
-      getStores() {
-        this.loading = true;
-
-        var resource = this.$resource(this.url);
-        resource.query(this.filter)
-          .then((response) => {
-            this.stores = response.data.datas;
-            this.total_rows = response.data.total_rows;
-            this.loading = false;
-            this.selected.splice(0,this.selected.length);
-          })
-          .catch((response)=> {
-            this.$message.error('错了哦，这是一条错误消息');
-            this.loading = false;
-          });
-
-      },*/
-
-      // 创建用户
-      createStore(){
-        // 主动校验
-        this.$refs.create.validate((valid) => {
-          if (valid) {
-            this.createLoading=true;
-            var resource = this.$resource(this.url);
-            resource.save(this.create)
-              .then((response) => {
-                this.$message.success('创建用户成功！');
-                this.dialogCreateVisible=false;
-                this.createLoading=false;
-                this.reset();
-                this.getStores();
-              })
-              .catch((response) => {
-                var data=response.data;
-                if(data instanceof Array){
-                  this.$message.error(data[0]["message"]);
-                }
-                else if(data instanceof Object){
-                  this.$message.error(data["message"]);
-                }
-                this.createLoading=false;
-              });
-          }
-          else {
-            return false;
-          }
-        });
-      },
-
-      /*// 删除单个用户
-      handleDelete(row) {
-        console.log(this.stores[0]);
-        this.$confirm('此操作将删除商户 ' + this.stores[row].name + ', 是否继续?', '提示', { type: 'warning' })
-          .then(() => {
-            // 向请求服务端删除
-            let channelId = this.stores[row]
-            this.$http.get(`http://106.14.47.193/xpay/admin/10/channels/${channelId}`);
-            var resource = this.$resource(this.url + "{/id}");
-            resource.delete({ id: stores.id })
-              .then((response) => {
-                this.$message.success('成功删除了用户' + store.username + '!');
-                this.getStores();
-              })
-              .catch((response) => {
-                this.$message.error('删除失败!');
-              });
-          })
-          .catch(() => {
-            this.$message.info('已取消操作!');
-          });
-      },
-      //删除多个用户
-      removeStores() {
-        this.$confirm('此操作将永久删除 ' + this.selected.length + ' 个用户, 是否继续?', '提示', { type: 'warning' })
-          .then(() => {
-            console.log(this.selected);
-            var ids = [];
-            //提取选中项的id
-            $.each(this.selected,(i, user)=> {
-              ids.push(user.id);
-            });
-            // 向请求服务端删除
-            var resource = this.$resource(this.url);
-            resource.remove({ids: ids.join(",") })
-              .then((response) => {
-                this.$message.success('删除了' + this.selected.length + '个用户!');
-                this.getStores();
-              })
-              .catch((response) => {
-                this.$message.error('删除失败!');
-              });
-          })
-          .catch(() => {
-            this.$Message('已取消操作!');
-          });
-      },*/
-
-      // 更新资料
-      updateStore() {
-        this.$refs.update.validate((valid) => {
-          if (valid) {
-            this.updateLoading=true;
-            this.$http.patch('http://106.14.47.193/xpay/admin/10/stores')
-            var actions = {
-              update: {method: 'patch'}
-            }
-            var resource = this.$resource(this.url,{},actions);
-            resource.update({"ids":this.currentId},this.update)
-              .then((response) => {
-                this.$message.success('修改用户资料成功！');
-                this.dialogUpdateVisible=false;
-                this.updateLoading=false;
-                this.getStores();
-              })
-              .catch((response) => {
-                var data=response.data;
-                console.log(data);
-                if(data instanceof Array){
-                  this.$message.error(data[0]["message"]);
-                }
-                else if(data instanceof Object){
-                  this.$message.error(data["message"]);
-                }
-                this.updateLoading=false;
-              });
-          }
-          else {
-            return false;
-          }
-        });
       }
 
     }

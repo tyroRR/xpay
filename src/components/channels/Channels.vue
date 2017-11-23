@@ -208,17 +208,15 @@
       getChannels() {
         this.loading = true;
         this.$http.get('http://106.14.47.193/xpay/admin/10/channels').then(res => {
-          //console.log(res.data.data);
+          console.log(res.data.data);
           this.channels = res.data.data;
           //查询
           //console.log(this.select);
           let queryData = [];
           if(this.keywords !==""){
-            for (var i=0,lenI=this.channels.length;i<lenI;i++) {
-              //console.log(this.channels[i][this.select]);
-              //console.log(this.keywords);
+            for (var i=0,len=this.channels.length;i<len;i++) {
               let reg = new RegExp(this.keywords);
-              if(this.channels[i][this.select].match(reg)){
+              if(this.channels[i][this.select].toString().match(reg)!==null){
                 queryData.push(this.channels[i]);
                 //console.log(queryData);
               }
@@ -231,12 +229,13 @@
           this.channels = queryData.splice(this.filter.beginIndex,this.filter.pageSize);
           this.loading = false;
           this.selected.splice(0,this.selected.length);
+        }).catch(e => {
+          console.log(e)
         })
       },
 
       // 新增通道
       createChannel(){
-        // 主动校验
         this.$refs.create.validate((valid) => {
           if (valid) {
             this.createLoading = true;

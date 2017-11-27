@@ -16,7 +16,6 @@
 </template>
 
 <script>
-  //import NProgress from 'nprogress'
   export default {
     data() {
       return {
@@ -41,13 +40,11 @@
         this.$refs.AccountFrom.validate((valid) => {
           if (valid) {
             this.logining = true;
-            //NProgress.start();
             let loginParams = { account: this.userInfo.account, password: this.userInfo.password };
-            this.$http.post('http://106.14.47.193/xpay/admin/login',loginParams).then(
-              sessionStorage.setItem('access-user', JSON.stringify(loginParams)),
+            this.$http.post('http://106.14.47.193/xpay/admin/login',loginParams).then(res => {
+              sessionStorage.setItem('access-user', JSON.stringify(res.data.data));
               this.$router.push({ path: '/' })
-            );
-            //NProgress.done();
+            })
           } else {
             console.log('error submit!!');
             return false;

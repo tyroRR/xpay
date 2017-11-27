@@ -3,8 +3,8 @@
     <el-col :span="24" class="warp-breadcrum">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item :to="{ path: '/' }"><b>首页</b></el-breadcrumb-item>
-        <el-breadcrumb-item>通道管理</el-breadcrumb-item>
-        <el-breadcrumb-item>通道列表</el-breadcrumb-item>
+        <el-breadcrumb-item>商户列表</el-breadcrumb-item>
+        <el-breadcrumb-item>商户通道</el-breadcrumb-item>
       </el-breadcrumb>
     </el-col>
     <el-col :span="24" class="warp-main"
@@ -45,39 +45,39 @@
         <el-table-column prop="paymentGateway" label="通道类型"></el-table-column>
         <el-table-column sortable prop="updateDate" label="末次使用时间"></el-table-column>
         <el-table-column label="操作">
-             <template slot-scope="scope">
-               <el-button
-                 size="mini"
-                 @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-               <el-button
-                 size="mini"
-                 type="danger"
-                 @click="removeChannel(scope.$index, scope.row)">删除</el-button>
-             </template>
-         </el-table-column>
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+            <el-button
+              size="mini"
+              type="danger"
+              @click="removeChannel(scope.$index, scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
       </el-table>
 
       <!-- 新增通道-->
-          <el-dialog title="新增通道" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
-              <el-form id="#create" :model="create" :rules="rules" ref="create" label-width="100px">
-                  <el-form-item label="通道ID" prop="extStoreId">
-                      <el-input v-model="create.extStoreId"></el-input>
-                  </el-form-item>
-                  <el-form-item label="通道名称" prop="extStoreName">
-                      <el-input v-model="create.extStoreName"></el-input>
-                  </el-form-item>
-                  <el-form-item label="通道类型" prop="paymentGateway">
-                    <el-select v-model="create.paymentGateway" placeholder="请选择">
-                      <el-option label="UPAY" value="UPAY"></el-option>
-                      <el-option label="CHINAUMSH5" value="CHINAUMSH5"></el-option>
-                    </el-select>
-                  </el-form-item>
-              </el-form>
-              <div slot="footer" class="dialog-footer">
-                  <el-button @click="dialogCreateVisible = false">取 消</el-button>
-                  <el-button type="primary" :loading="createLoading" @click="createChannel">确 定</el-button>
-              </div>
-          </el-dialog>
+      <el-dialog title="新增通道" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
+        <el-form id="#create" :model="create" :rules="rules" ref="create" label-width="100px">
+          <el-form-item label="通道ID" prop="extStoreId">
+            <el-input v-model="create.extStoreId"></el-input>
+          </el-form-item>
+          <el-form-item label="通道名称" prop="extStoreName">
+            <el-input v-model="create.extStoreName"></el-input>
+          </el-form-item>
+          <el-form-item label="通道类型" prop="paymentGateway">
+            <el-select v-model="create.paymentGateway" placeholder="请选择">
+              <el-option label="UPAY" value="UPAY"></el-option>
+              <el-option label="CHINAUMSH5" value="CHINAUMSH5"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogCreateVisible = false">取 消</el-button>
+          <el-button type="primary" :loading="createLoading" @click="createChannel">确 定</el-button>
+        </div>
+      </el-dialog>
 
       <el-pagination class="paging"
                      :current-page="filter.currentPage"
@@ -252,23 +252,23 @@
 
       // 删除单个通道
       removeChannel(index,row) {
-              console.log(index, row);
-              this.$confirm('此操作将删除通道 ' + row.extStoreName + ', 是否继续?', '提示', { type: 'warning' })
-                .then(() => {
-                  // 向请求服务端删除
-                  let channelId = row.id  ;
-                  this.$http.delete(`http://106.14.47.193/xpay/admin/10/${this.userInfo.id}/${channelId}`).then(() => {
-                      this.$message.success('成功删除了通道' + row.extStoreName + '!');
-                      this.getChannels();
-                    })
-                    .catch(() => {
-                      this.$message.error('删除失败!');
-                    });
-                })
-                .catch(() => {
-                  this.$message.info('已取消操作!');
-                });
-            },
+        console.log(index, row);
+        this.$confirm('此操作将删除通道 ' + row.extStoreName + ', 是否继续?', '提示', { type: 'warning' })
+          .then(() => {
+            // 向请求服务端删除
+            let channelId = row.id  ;
+            this.$http.delete(`http://106.14.47.193/xpay/admin/10/${this.userInfo.id}/${channelId}`).then(() => {
+              this.$message.success('成功删除了通道' + row.extStoreName + '!');
+              this.getChannels();
+            })
+              .catch(() => {
+                this.$message.error('删除失败!');
+              });
+          })
+          .catch(() => {
+            this.$message.info('已取消操作!');
+          });
+      },
 
       //删除多个通道
       /*removeChannels() {

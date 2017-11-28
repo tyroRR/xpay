@@ -16,6 +16,9 @@
 </template>
 
 <script>
+  //import {bus} from '../bus.js'
+  import { getToken, setToken, removeToken } from '@/utils/auth'
+
   export default {
     data() {
       return {
@@ -42,8 +45,9 @@
             this.logining = true;
             let loginParams = { account: this.userInfo.account, password: this.userInfo.password };
             this.$http.post('http://106.14.47.193/xpay/admin/login',loginParams).then(res => {
+              setToken(res.data.data.token);
               sessionStorage.setItem('access-user', JSON.stringify(res.data.data));
-              this.$router.push({ path: '/' })
+              this.$router.push({ path: '/' });
             })
           } else {
             console.log('error submit!!');

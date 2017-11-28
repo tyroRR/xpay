@@ -3,8 +3,9 @@
     <el-col :span="24" class="warp-breadcrum">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item :to="{ path: '/' }"><b>首页</b></el-breadcrumb-item>
-        <el-breadcrumb-item>商户列表</el-breadcrumb-item>
-        <el-breadcrumb-item>商户通道</el-breadcrumb-item>
+        <el-breadcrumb-item>商户管理</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/store/storeList' }">商户列表</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/store/storeChannels' }">商户通道</el-breadcrumb-item>
       </el-breadcrumb>
     </el-col>
     <el-col :span="24" class="warp-main"
@@ -104,7 +105,6 @@
 
   export default {
     data: function() {
-
       return {
         userInfo:{
           id:'',
@@ -151,7 +151,7 @@
         totalRows: 0,
         keywords: '', //搜索框的关键字内容
         select: 'extStoreId', //搜索框的搜索字段
-        loading: true,
+        loading: false,
         selected: [], //已选择项
         dialogCreateVisible: false, //创建对话框的显示状态
         dialogUpdateVisible: false, //编辑对话框的显示状态
@@ -169,6 +169,9 @@
         this.userInfo.name = userInfo.name;
       }
       this.getChannels()
+    },
+    destroyed: function () {
+      sessionStorage.removeItem('channelData');
     },
     methods: {
       tableSelectionChange(val) {
@@ -203,31 +206,25 @@
       //获取通道列表
       getChannels() {
         this.loading = true;
-        this.$http.get(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/channels`).then(res => {
-          console.log(res.data.data);
-          this.channels = res.data.data;
-          //查询
-          //console.log(this.select);
-          let queryData = [];
-          if(this.keywords !==""){
-            for (var i=0,len=this.channels.length;i<len;i++) {
-              let reg = new RegExp(this.keywords);
-              if(this.channels[i][this.select].toString().match(reg)!==null){
-                queryData.push(this.channels[i]);
-                //console.log(queryData);
-              }
+        this.channels = JSON.parse(sessionStorage.getItem('channelData'));
+        //查询
+        let queryData = [];
+        if(this.keywords !==""){
+          for (var i=0,len=this.channels.length;i<len;i++) {
+            let reg = new RegExp(this.keywords);
+            if(this.channels[i][this.select].toString().match(reg)!==null){
+              queryData.push(this.channels[i]);
+              //console.log(queryData);
             }
           }
-          else queryData = this.channels;
-          this.totalRows = queryData.length;
-          //分页
-          this.filter.beginIndex = (this.filter.currentPage-1)*10;
-          this.channels = queryData.splice(this.filter.beginIndex,this.filter.pageSize);
-          this.loading = false;
-          this.selected.splice(0,this.selected.length);
-        }).catch(e => {
-          console.log(e)
-        })
+        }
+        else queryData = this.channels;
+        this.totalRows = queryData.length;
+        //分页
+        this.filter.beginIndex = (this.filter.currentPage-1)*10;
+        this.channels = queryData.splice(this.filter.beginIndex,this.filter.pageSize);
+        this.loading = false;
+        this.selected.splice(0,this.selected.length);
       },
 
       // 新增通道
@@ -237,7 +234,7 @@
             this.createLoading = true;
             this.$http.put(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/channels`).then(res => {
               console.log(res);
-              this.$message.success('创建用户成功！');
+              this.$message.success('新增通道成功！');
               this.dialogCreateVisible = false;
               this.createLoading = false;
               this.reset();
@@ -257,7 +254,7 @@
           .then(() => {
             // 向请求服务端删除
             let channelId = row.id  ;
-            this.$http.delete(`http://106.14.47.193/xpay/admin/10/${this.userInfo.id}/${channelId}`).then(() => {
+            this.$http.delete(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/${channelId}`).then(() => {
               this.$message.success('成功删除了通道' + row.extStoreName + '!');
               this.getChannels();
             })

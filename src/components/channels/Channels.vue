@@ -95,6 +95,7 @@
 </template>
 
 <script>
+
   let placeholders = {
     "extStoreId": "请输入通道ID",
     "extStoreName": "请输入通道名称",
@@ -161,7 +162,7 @@
       };
     },
     mounted: function() {
-      var userInfo = sessionStorage.getItem('access-user');
+      let userInfo = sessionStorage.getItem('access-user');
       if (userInfo) {
         userInfo = JSON.parse(userInfo);
         this.userInfo.id = userInfo.id;
@@ -237,11 +238,15 @@
             this.createLoading = true;
             this.$http.put(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/channels`).then(res => {
               console.log(res);
-              this.$message.success('创建用户成功！');
+              this.$message.success('创建通道成功！');
               this.dialogCreateVisible = false;
               this.createLoading = false;
               this.reset();
               this.getChannels();
+            }).catch(() =>{
+              this.$message.error('创建通道失败！');
+              this.reset();
+              this.createLoading = false;
             })
           }
           else {

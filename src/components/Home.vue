@@ -13,7 +13,7 @@
       </div>
       <div class="topbar-account topbar-btn">
         <el-dropdown trigger="click">
-          <span class="el-dropdown-link userinfo-inner"><i class="iconfont icon-user"></i> {{sysUserName}}  <i
+          <span class="el-dropdown-link userinfo-inner"><i class="iconfont icon-user"></i>{{sysUserName}}<i
             class="iconfont icon-down"></i></span>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item>
@@ -71,18 +71,14 @@
 </template>
 
 <script>
-  import {bus} from '../bus.js'
+ // import {bus} from '../bus.js'
+  import { getToken, setToken, removeToken } from '@/utils/auth'
+
   export default {
     name: 'home',
-    created(){
-      bus.$on('setUserName', (text) => {
-        this.sysUserName = text;
-      })
-    },
     data () {
       return {
         sysUserName: '',
-        sysUserAvatar: '',
         collapsed: false,
       }
     },
@@ -105,18 +101,16 @@
         this.$confirm('确认退出吗?', '提示', {
           //type: 'warning'
         }).then(() => {
-          sessionStorage.removeItem('access-user');
+          removeToken();
           _this.$router.push('/login');
-        }).catch(() => {
-
-        });
+        })
       }
     },
     mounted() {
-      var user = sessionStorage.getItem('access-user');
-      if (user) {
-        user = JSON.parse(user);
-        this.sysUserName = user.name || '';
+      let userInfo = sessionStorage.getItem('access-user');
+      if (userInfo) {
+        userInfo = JSON.parse(userInfo);
+        this.sysUserName = userInfo.name;
       }
     }
   }

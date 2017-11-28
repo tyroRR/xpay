@@ -1,11 +1,14 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import { getToken, setToken, removeToken } from '@/utils/auth'
 import Home from '@/components/Home'
 import Dashboard from '@/components/Dashboard'
 
 import ChannelReg from '@/components/channels/ChannelReg'
 import Channels from '@/components/channels/Channels'
-import stores from '@/components/stores/stores'
+import Stores from '@/components/stores/Stores'
+import AppList from '@/components/stores/AppList'
+import StoreChannels from '@/components/stores/StoreChannels'
 import DomainName from '@/components/stores/DomainName'
 import Query from '@/components/Query'
 import Complain from '@/components/Complain'
@@ -52,8 +55,10 @@ let router = new Router({
       iconCls: 'iconfont icon-users1',
       menuShow: true,
       children: [
-        {path: '/store/storeList', component: stores, name: '商户列表', menuShow: true},
-        {path: '/store/domain-name', component: DomainName, name: '域名报备', menuShow: true},
+        {path: '/store/storeList', component: Stores, name: '商户列表', menuShow: true},
+        {path: '/store/AppList', component: AppList, name: 'App列表', menuShow: true},
+        {path: '/store/storeChannels', component: StoreChannels, name: '商户通道'},
+        {path: '/store/domainName', component: DomainName, name: '域名报备', menuShow: true},
       ]
     },
     {
@@ -82,11 +87,11 @@ let router = new Router({
 router.beforeEach((to, from, next) => {
   // console.log('to:' + to.path)
   if (to.path.startsWith('/login')) {
-    window.sessionStorage.removeItem('access-user')
+    //window.sessionStorage.removeItem('access-user')
     next()
   } else {
-    let user = JSON.parse(window.sessionStorage.getItem('access-user'))
-    if (!user) {
+    let token = getToken();
+    if (!token) {
       next({path: '/login'})
     } else {
       next()

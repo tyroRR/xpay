@@ -10,7 +10,7 @@ import Stores from '@/components/stores/Stores'
 import AppList from '@/components/stores/AppList'
 import StoreChannels from '@/components/stores/StoreChannels'
 import DomainName from '@/components/stores/DomainName'
-import Query from '@/components/Query'
+import Orders from '@/components/Orders'
 import Complain from '@/components/Complain'
 
 // 懒加载方式，当路由被访问的时候才加载对应组件
@@ -68,7 +68,7 @@ let router = new Router({
       leaf: true,
       menuShow: true,
       children: [
-        {path: '/query', component: Query, name: '交易查询', menuShow: true},
+        {path: '/orders', component: Orders, name: '交易查询', menuShow: true},
       ]
     },
     {

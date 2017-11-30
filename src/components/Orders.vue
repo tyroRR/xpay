@@ -37,6 +37,7 @@
             <el-input style='width:240px; margin-left:15px' placeholder="请输入文件名(默认excel-list)" prefix-icon="el-icon-document" v-model="filename"></el-input>
             <el-button style='margin-left:10px' type="info" icon="document" @click="handleDownload" :loading="downloadLoading">导出excel</el-button>
           </el-form-item>
+          <upload-excel @on-selected-file='selected'></upload-excel>
         </el-form>
       </el-col>
       <!-- 商户列表-->
@@ -111,7 +112,7 @@
 </template>
 
 <script>
-  import uploadExcel from 'UploadExcel.vue'
+  import uploadExcel from './UploadExcel.vue'
 
   export default {
     components: { uploadExcel },

@@ -16,7 +16,6 @@
 </template>
 
 <script>
-  //import {bus} from '../bus.js'
   import { getToken, setToken, removeToken } from '@/utils/auth'
 
   export default {

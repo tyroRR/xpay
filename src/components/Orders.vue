@@ -33,12 +33,17 @@
             </el-col>
           </el-form-item>
           <el-button type="info" icon="el-icon-search" @click="getOrders">查询</el-button>
+          <el-form-item>
+            <el-input style='width:240px; margin-left:15px' placeholder="请输入文件名(默认excel-list)" prefix-icon="el-icon-document" v-model="filename"></el-input>
+            <el-button style='margin-left:10px' type="info" icon="document" @click="handleDownload" :loading="downloadLoading">导出excel</el-button>
+          </el-form-item>
         </el-form>
       </el-col>
       <!-- 商户列表-->
       <el-table :data="orders"
                 style="width: 100%"
                 height="680"
+                show-summary
                 :default-sort = "{prop: 'id', order: 'descending'}">
         <el-table-column type="expand">
           <template slot-scope="props">
@@ -106,7 +111,10 @@
 </template>
 
 <script>
+  import uploadExcel from 'UploadExcel.vue'
+
   export default {
+    components: { uploadExcel },
     data: function() {
       return {
         pickerOptions: {
@@ -134,7 +142,10 @@
           beginIndex: 0,
         },
         totalRows: 0,
-        loading: true
+        loading: true,
+        filename: '',
+        updateLoading: false,
+        downloadLoading: false
       };
     },
     mounted: function() {
@@ -161,6 +172,12 @@
         }
         else return val;
       },
+      selected(data) {
+        this.orders = data
+      },
+      getSummaries(param){
+
+      },
       pageSizeChange(val) {
         console.log(`每页 ${val} 条`);
         this.filter.per_page = val;
@@ -175,8 +192,8 @@
         if(this.pickerTime){
           this.loading = true;
           let url;
-          if(this.storeId){
-            url = `http://106.14.47.193/xpay/admin/${this.userInfo.id}/orders?storeId=${this.storeId}&startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`
+          if(this.filter.storeId){
+            url = `http://106.14.47.193/xpay/admin/${this.userInfo.id}/orders?storeId=${this.filter.storeId}&startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`
           }
           else url = `http://106.14.47.193/xpay/admin/${this.userInfo.id}/orders?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`;
           this.$http.get(url).then(res => {
@@ -185,12 +202,28 @@
               this.filter.beginIndex = (this.filter.currentPage-1)*10;
               this.orders = res.data.data.splice(this.filter.beginIndex,this.filter.pageSize);
             }
+            else this.orders = [];
             this.loading = false;
           }).catch(() => {
-            this.$message.error("只能获取两天内的订单信息！");
+            this.$message.error("未查询到有效订单 或 查询订单超过两天！");
             this.loading = false
           })
         }else this.$message.error("请选择查询日期")
+      },
+      handleDownload() {
+        this.downloadLoading = true;
+        require.ensure([], () => {
+          const { export_json_to_excel } = require('@/utils/Export2Excel');
+          const tHeader = ['id', 'appId', 'storeId', 'storeChannelId', 'orderNo', 'orderTime','sellerOrderNo','payChannel','totalFee','ip','createDate','notifyUrl','returnUrl','codeUrl','status','settle','remoteQueralbe','subject','refundable'];
+          const filterVal = ['id', 'appId', 'storeId', 'storeChannelId', 'orderNo', 'orderTime','sellerOrderNo','payChannel','totalFee','ip','createDate','notifyUrl','returnUrl','codeUrl','status','settle','remoteQueralbe','subject','refundable'];
+          const list = this.orders;
+          const data = this.formatJson(filterVal, list);
+          export_json_to_excel(tHeader, data, '列表excel');
+          this.downloadLoading = false;
+        })
+      },
+      formatJson(filterVal, jsonData) {
+        return jsonData.map(v => filterVal.map(j => v[j]))
       }
     }
   }

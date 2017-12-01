@@ -22,7 +22,6 @@
                 <el-option label="code" value="code"></el-option>
                 <el-option label="客服联系方式" value="csrTel"></el-option>
                 <el-option label="同步异步地址" value="proxyUrl"></el-option>
-                <el-option label="商户通道" value="channels"></el-option>
               </el-select>
               <el-button slot="append" icon="el-icon-search" @click="getStores">查询</el-button>
             </el-input>
@@ -118,6 +117,15 @@
           code: '',
           csrTel: '',
           proxyUrl: ''
+        },
+        currentId:'',
+        update:{
+          name: '',
+          bailPercentage: '',
+          code: '',
+          csrTel: '',
+          proxyUrl: '',
+          is_active: true
         },
         rules: {
           appId: [

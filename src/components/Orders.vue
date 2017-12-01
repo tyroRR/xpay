@@ -14,7 +14,7 @@
       <!-- 查询 -->
       <el-col :span="24" class="toolbar" style="padding-bottom: 0">
         <el-form :inline="true" class="demo-form-inline">
-          <el-form-item label="商户ID">
+          <el-form-item label="商户名称">
             <el-input v-model="filter.storeId" placeholder="请输入商户ID"></el-input>
           </el-form-item>
           <el-form-item label="下单时间">
@@ -46,7 +46,7 @@
                 :summary-method="getSummaries"
                 show-summary
                 :default-sort = "{prop: 'id', order: 'descending'}">
-        <el-table-column sortable prop="storeId" label="storeId"></el-table-column>
+        <el-table-column prop="name" label="商户名称"></el-table-column>
         <el-table-column sortable prop="storeChannelId" label="storeChannelId"></el-table-column>
         <el-table-column prop="orderNo" label="订单号"></el-table-column>
         <el-table-column prop="orderTime" label="下单时间"></el-table-column>
@@ -95,6 +95,10 @@
           account:'',
           name:''
         },
+        storesInfo:{
+          id:'',
+          name:''
+        },
         orders: [],
         filter: {
           storeId:'',
@@ -123,6 +127,13 @@
       let endTime = end.getFullYear()+'-'+this.zeroFill(end.getMonth()+1)+'-'+this.zeroFill(end.getDate());
       this.pickerTime = [];
       this.pickerTime.push(startTime,endTime);
+      this.$http.get(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/stores`).then(res => {
+        let resData = res.data.data;
+        resData.map(data => {
+          this.storesInfo.name = data.name;
+        });
+        console.log(this.storesInfo.name);
+      });
       this.getOrders();
     },
     methods: {
@@ -180,8 +191,14 @@
           }
           else url = `http://106.14.47.193/xpay/admin/${this.userInfo.id}/orders?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`;
           this.$http.get(url).then(res => {
-            //分页
             if (res.data.data){
+              let orders = res.data.data;
+              orders.forEach((order) => {
+                console.log(this.storesInfo.name);
+                order.name = this.storesInfo.name;
+                console.log(order);
+              });
+              //分页
               this.filter.beginIndex = (this.filter.currentPage-1)*10;
               this.orders = res.data.data.splice(this.filter.beginIndex,this.filter.pageSize);
             }

@@ -118,15 +118,6 @@
           csrTel: '',
           proxyUrl: ''
         },
-        currentId:'',
-        update:{
-          name: '',
-          bailPercentage: '',
-          code: '',
-          csrTel: '',
-          proxyUrl: '',
-          is_active: true
-        },
         rules: {
           appId: [
             { required: true, message: '请输入appId', trigger: 'blur' },
@@ -205,7 +196,6 @@
       getStores() {
         this.loading = true;
         this.$http.get(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/stores`).then(res => {
-          console.log(res.data.data);
           this.stores = res.data.data;
           //查询
           let queryData = [];

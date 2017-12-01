@@ -1,6 +1,6 @@
 <template>
   <el-form-item>
-    <el-button :loading="loading" type="info" @click="handleUpload">select excel file</el-button>
+    <el-button :loading="loading" type="info" @click="handleUpload">选择excel文件导入</el-button>
     <input id="excel-upload-input" type="file" accept=".xlsx, .xls" class="c-hide" @change="handkeFileChange">
   </el-form-item>
 </template>
@@ -16,7 +16,7 @@
     },
     methods: {
       generateDate(excelData) {
-        this.excelData= results
+        this.excelData= excelData
         this.loading = false
         this.$emit('on-selected-file', this.excelData)
       },
@@ -34,8 +34,8 @@
           const workbook = XLSX.read(btoa(fixedData), { type: 'base64' })
           const firstSheetName = workbook.SheetNames[0]
           const worksheet = workbook.Sheets[firstSheetName]
-          const results = XLSX.utils.sheet_to_json(worksheet)
-          this.generateDate({ header, results })
+          const excelData = XLSX.utils.sheet_to_json(worksheet)
+          this.generateDate(excelData)
         }
         reader.readAsArrayBuffer(itemFile)
       },

@@ -52,8 +52,8 @@
         <el-table-column prop="orderTime" label="下单时间"></el-table-column>
         <el-table-column prop="sellerOrderNo" label="卖家单号"></el-table-column>
         <el-table-column prop="payChannel" label="支付方式"></el-table-column>
-        <el-table-column prop="status" label="状态"></el-table-column>
         <el-table-column prop="returnUrl" label="returnUrl"></el-table-column>
+        <el-table-column prop="status" label="状态"></el-table-column>
         <el-table-column prop="totalFee" label="金额"></el-table-column>
       </el-table>
 
@@ -139,7 +139,7 @@
           if (index === 0) {
             sums[index] = '总计';
           }
-          if (index === 6) {
+          if (index === 7) {
             const counts = data.map(item => item[column.property]);
             let count = 0;
             counts.forEach(status => {
@@ -147,7 +147,7 @@
                   count++
                 }
               });
-              sums[index] = `成功${count}笔`;
+              sums[index] = `成功 ${count} 笔`;
           }
           const values = data.map(item => Number(item[column.property]));
           if (index === 8) {

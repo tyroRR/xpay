@@ -17,10 +17,7 @@
             class="iconfont icon-down"></i></span>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item>
-              <router-link to="/user/profile"><span style="color: #555;font-size: 14px;">个人信息</span></router-link>
-            </el-dropdown-item>
-            <el-dropdown-item>
-              <router-link :to="'/user/changepwd'"><span style="color: #555;font-size: 14px;">修改密码</span></router-link>
+              <router-link to="/dashboard"><span style="color: #555;font-size: 14px;">首页</span></router-link>
             </el-dropdown-item>
             <el-dropdown-item divided @click.native="logout">退出登录</el-dropdown-item>
           </el-dropdown-menu>

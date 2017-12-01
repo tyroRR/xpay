@@ -26,10 +26,7 @@
             <el-button slot="append" icon="el-icon-search" @click="getChannels">查询</el-button>
           </el-input>
           <el-form-item>
-            <div class="btn-edit">
-              <el-button type="primary" icon="el-icon-plus" @click="dialogCreateVisible = true">添加</el-button>
-              <el-button type="primary" icon="el-icon-delete" :disabled="selected.length==0" @click="removeChannels()">删除</el-button>
-            </div>
+            <el-button type="primary" icon="el-icon-plus" @click="dialogCreateVisible = true">添加</el-button>
           </el-form-item>
         </el-form>
       </el-col>
@@ -40,16 +37,12 @@
                 height="680"
                 :default-sort = "{prop: 'updateDate', order: 'descending'}"
                 @selection-change="tableSelectionChange">
-        <el-table-column type="selection" width="60"></el-table-column>
         <el-table-column prop="extStoreId" label="通道ID"></el-table-column>
         <el-table-column prop="extStoreName" label="通道名称"></el-table-column>
         <el-table-column prop="paymentGateway" label="通道类型"></el-table-column>
         <el-table-column sortable prop="updateDate" label="末次使用时间"></el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
-            <el-button
-              size="mini"
-              @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
             <el-button
               size="mini"
               type="danger"
@@ -116,16 +109,7 @@
           extStoreId: "",
           extStoreName: "",
           paymentGateway: "",
-          updateDate: "",
-          is_active: true
-        },
-        currentId:'',
-        update:{
-          extStoreId: "",
-          extStoreName: "",
-          paymentGateway: "",
-          updateDate: "",
-          is_active: true
+          updateDate: ""
         },
         rules: {
           extStoreId: [
@@ -154,9 +138,7 @@
         loading: false,
         selected: [], //已选择项
         dialogCreateVisible: false, //创建对话框的显示状态
-        dialogUpdateVisible: false, //编辑对话框的显示状态
         createLoading: false,
-        updateLoading: false,
         placeholder:placeholders["extStoreId"]
       };
     },
@@ -193,12 +175,6 @@
         this.filter.currentPage = val;
         this.getChannels();
       },
-      setCurrent(channel){
-        this.currentId=channel.id;
-        this.update.name=channel.name;
-        this.update.is_active=channel.is_active;
-        this.dialogUpdateVisible=true;
-      },
       // 重置表单
       reset() {
         this.$refs.create.resetFields();
@@ -226,7 +202,6 @@
         this.loading = false;
         this.selected.splice(0,this.selected.length);
       },
-
       // 新增通道
       createChannel(){
         this.$refs.create.validate((valid) => {
@@ -246,7 +221,6 @@
           }
         });
       },
-
       // 删除单个通道
       removeChannel(index,row) {
         console.log(index, row);
@@ -265,68 +239,7 @@
           .catch(() => {
             this.$message.info('已取消操作!');
           });
-      },
-
-      //删除多个通道
-      /*removeChannels() {
-        this.$confirm('此操作将删除 ' + this.selected.length + ' 个通道, 是否继续?', '提示', { type: 'warning' })
-          .then(() => {
-            console.log(this.selected);
-            let ids = [];
-            //提取选中项的id
-            $.each(this.selected,(i, channel)=> {
-              ids.push(channel.id);
-            });
-            // 向请求服务端删除
-            var resource = this.$resource(this.url);
-            resource.remove({ids: ids.join(",") })
-              .then((response) => {
-                this.$message.success('删除了' + this.selected.length + '个通道!');
-                this.getChannels();
-              })
-              .catch((response) => {
-                this.$message.error('删除失败!');
-              });
-          })
-          .catch(() => {
-            this.$message('已取消操作!');
-          });
-      },*/
-
-      // 修改通道资料
-      /*updateChannel() {
-        this.$refs.update.validate((valid) => {
-          if (valid) {
-            this.updateLoading=true;
-            var actions = {
-              update: {method: 'patch'}
-            }
-            var resource = this.$resource(this.url,{},actions);
-            resource.update({"ids":this.currentId},this.update)
-              .then((response) => {
-                this.$message.success('修改通道资料成功！');
-                this.dialogUpdateVisible=false;
-                this.updateLoading=false;
-                this.getChannels();
-              })
-              .catch((response) => {
-                var data=response.data;
-                console.log(data);
-                if(data instanceof Array){
-                  this.$message.error(data[0]["message"]);
-                }
-                else if(data instanceof Object){
-                  this.$message.error(data["message"]);
-                }
-                this.updateLoading=false;
-              });
-          }
-          else {
-            return false;
-          }
-        });
-      }*/
-
+      }
     }
   }
 </script>

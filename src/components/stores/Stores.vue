@@ -17,8 +17,6 @@
         <el-form :inline="true" class="demo-form-inline">
             <el-input :placeholder="placeholder" v-model="keywords" style="width: 30%;">
               <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:130px">
-                <el-option label="ID" value="id"></el-option>
-                <el-option label="appId" value="appId"></el-option>
                 <el-option label="商户名称" value="name"></el-option>
                 <el-option label="费率" value="bailPercentage"></el-option>
                 <el-option label="code" value="code"></el-option>
@@ -29,10 +27,7 @@
               <el-button slot="append" icon="el-icon-search" @click="getStores">查询</el-button>
             </el-input>
           <el-form-item>
-            <div class="btn-edit">
-              <el-button type="primary" icon="el-icon-plus" @click="dialogCreateVisible = true">添加</el-button>
-              <el-button type="primary" icon="el-icon-delete" :disabled="selected.length==0">删除</el-button>
-            </div>
+            <el-button type="primary" icon="el-icon-plus" @click="dialogCreateVisible = true">添加</el-button>
           </el-form-item>
         </el-form>
       </el-col>
@@ -41,10 +36,8 @@
       <el-table :data="stores"
                 style="width: 100%"
                 height="680"
-                :default-sort = "{prop: 'id', order: 'descending'}"
+                :default-sort = "{prop: 'bailPercentage', order: 'descending'}"
                 @selection-change="tableSelectionChange">
-        <el-table-column sortable prop="id" label="ID"></el-table-column>
-        <el-table-column sortable prop="appId" label="appId"></el-table-column>
         <el-table-column prop="name" label="商户名称"></el-table-column>
         <el-table-column sortable prop="bailPercentage" label="费率"></el-table-column>
         <el-table-column prop="code" label="code"></el-table-column>
@@ -58,19 +51,9 @@
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column label="操作">
-          <template slot-scope="scope">
-            <el-button
-              size="mini"
-              @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-            <el-button
-              size="mini"
-              type="danger"
-              @click="removeChannel(scope.$index, scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
       </el-table>
 
+      <!-- 新增商户-->
       <el-dialog title="新增商户" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
         <el-form id="#create" :model="create" :rules="rules" ref="create" label-width="120px">
           <el-form-item label="商户名称" prop="name">
@@ -112,8 +95,6 @@
 
 <script>
   let placeholders = {
-    "id":"请输入ID",
-    "appId":"请输入appId",
     "name":"请输入商户名称",
     "bailPercentage":"请输入费率",
     "code":"请输入code",
@@ -132,30 +113,13 @@
         },
         stores: [],
         create: {
-          id: '',
-          appId: '',
           name: '',
           bailPercentage: '',
           code: '',
           csrTel: '',
           proxyUrl: ''
         },
-        currentId:'',
-        update:{
-          id: '',
-          appId: '',
-          name: '',
-          bailPercentage: '',
-          code: '',
-          csrTel: '',
-          proxyUrl: '',
-          is_active: true
-        },
         rules: {
-          id: [
-            { required: true, message: '请输入ID', trigger: 'blur' },
-            { pattern:/^[0-9]*$/, message: 'ID为数字'}
-          ],
           appId: [
             { required: true, message: '请输入appId', trigger: 'blur' },
             { pattern:/^[0-9]*$/, message: 'appId为数字'}
@@ -181,8 +145,6 @@
           pageSize: 10,
           currentPage: 1,
           beginIndex: 0,
-          id: '',
-          appId: '',
           name: '',
           bailPercentage: '',
           code: '',
@@ -191,14 +153,12 @@
         },
         totalRows: 0,
         keywords: '', //搜索框的关键字内容
-        select: 'id', //搜索框的搜索字段
+        select: 'name', //搜索框的搜索字段
         loading: true,
         selected: [], //已选择项
         dialogCreateVisible: false, //创建对话框的显示状态
-        dialogUpdateVisible: false, //编辑对话框的显示状态
         createLoading: false,
-        updateLoading: false,
-        placeholder:placeholders["id"]
+        placeholder:placeholders["name"]
       };
     },
     mounted: function() {
@@ -228,12 +188,6 @@
         console.log(`当前页: ${val}`);
         this.filter.page = val;
         this.getStores();
-      },
-      handleEdit(store){
-        this.currentId = store.id;
-        this.update.name = store.name;
-        this.update.is_active=store.is_active;
-        this.dialogUpdateVisible=true;
       },
       // 重置表单
       reset() {

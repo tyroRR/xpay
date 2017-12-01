@@ -37,62 +37,23 @@
             <el-input style='width:240px; margin-left:15px' placeholder="请输入文件名(默认excel-list)" prefix-icon="el-icon-document" v-model="filename"></el-input>
             <el-button style='margin-left:10px' type="info" icon="document" @click="handleDownload" :loading="downloadLoading">导出excel</el-button>
           </el-form-item>
-          <upload-excel @on-selected-file='selected'></upload-excel>
         </el-form>
       </el-col>
       <!-- 商户列表-->
       <el-table :data="orders"
                 style="width: 100%"
                 height="680"
+                :summary-method="getSummaries"
                 show-summary
                 :default-sort = "{prop: 'id', order: 'descending'}">
-        <el-table-column type="expand">
-          <template slot-scope="props">
-            <el-form label-position="left" inline class="demo-table-expand">
-              <el-form-item label="ip">
-                <span>{{ props.row.ip }}</span>
-              </el-form-item>
-              <el-form-item label="createDate">
-                <span>{{ props.row.createDate }}</span>
-              </el-form-item>
-              <el-form-item label="notifyUrl">
-                <span>{{ props.row.notifyUrl }}</span>
-              </el-form-item>
-              <el-form-item label="totalFeeAsFloat">
-                <span>{{ props.row.totalFeeAsFloat }}</span>
-              </el-form-item>
-              <el-form-item label="returnUrl">
-                <span>{{ props.row.returnUrl }}</span>
-              </el-form-item>
-              <el-form-item label="settle">
-                <span>{{ props.row.settle }}</span>
-              </el-form-item>
-              <el-form-item label="codeUrl">
-                <span>{{ props.row.codeUrl }}</span>
-              </el-form-item>
-              <el-form-item label="remoteQueralbe">
-                <span>{{ props.row.remoteQueralbe }}</span>
-              </el-form-item>
-              <el-form-item label="status">
-                <span>{{ props.row.status }}</span>
-              </el-form-item>
-              <el-form-item label="refundable">
-                <span>{{ props.row.refundable }}</span>
-              </el-form-item>
-              <el-form-item label="subject">
-                <span>{{ props.row.subject }}</span>
-              </el-form-item>
-            </el-form>
-          </template>
-        </el-table-column>
-        <el-table-column sortable prop="id" label="ID"></el-table-column>
-        <el-table-column sortable prop="appId" label="appId"></el-table-column>
         <el-table-column sortable prop="storeId" label="storeId"></el-table-column>
         <el-table-column sortable prop="storeChannelId" label="storeChannelId"></el-table-column>
         <el-table-column prop="orderNo" label="订单号"></el-table-column>
         <el-table-column prop="orderTime" label="下单时间"></el-table-column>
         <el-table-column prop="sellerOrderNo" label="卖家单号"></el-table-column>
         <el-table-column prop="payChannel" label="支付方式"></el-table-column>
+        <el-table-column prop="status" label="状态"></el-table-column>
+        <el-table-column prop="returnUrl" label="returnUrl"></el-table-column>
         <el-table-column prop="totalFee" label="金额"></el-table-column>
       </el-table>
 
@@ -112,10 +73,9 @@
 </template>
 
 <script>
-  import uploadExcel from './UploadExcel.vue'
+  import {count} from "../../../vuex/examples/counter-hot/store/getters";
 
   export default {
-    components: { uploadExcel },
     data: function() {
       return {
         pickerOptions: {
@@ -145,7 +105,6 @@
         totalRows: 0,
         loading: true,
         filename: '',
-        updateLoading: false,
         downloadLoading: false
       };
     },
@@ -173,11 +132,34 @@
         }
         else return val;
       },
+      getSummaries(param) {
+        const { columns, data } = param;
+        const sums = [];
+        columns.forEach((column, index) => {
+          if (index === 0) {
+            sums[index] = '总计';
+          }
+          if (index === 6) {
+            const counts = data.map(item => item[column.property]);
+            let count = 0;
+            counts.forEach(status => {
+                if(status === "SUCCESS"){
+                  count++
+                }
+              });
+              sums[index] = `成功${count}笔`;
+          }
+          const values = data.map(item => Number(item[column.property]));
+          if (index === 8) {
+            sums[index] = values.reduce( (prev, curr) => prev+curr, 0 );
+            sums[index] += ' 元';
+          }
+        });
+
+        return sums;
+      },
       selected(data) {
         this.orders = data
-      },
-      getSummaries(param){
-
       },
       pageSizeChange(val) {
         console.log(`每页 ${val} 条`);
@@ -219,7 +201,7 @@
           const filterVal = ['id', 'appId', 'storeId', 'storeChannelId', 'orderNo', 'orderTime','sellerOrderNo','payChannel','totalFee','ip','createDate','notifyUrl','returnUrl','codeUrl','status','settle','remoteQueralbe','subject','refundable'];
           const list = this.orders;
           const data = this.formatJson(filterVal, list);
-          export_json_to_excel(tHeader, data, '列表excel');
+          export_json_to_excel(tHeader, data, this.filename);
           this.downloadLoading = false;
         })
       },
@@ -234,12 +216,6 @@
   .paging{
     text-align: center;
     margin:12px 0;
-  }
-  .btn-edit{
-    float: right;
-  }
-  .demo-table-expand {
-    font-size: 0;
   }
   .demo-table-expand label {
     width: 150px;

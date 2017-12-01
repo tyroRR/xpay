@@ -44,9 +44,13 @@
             this.logining = true;
             let loginParams = { account: this.userInfo.account, password: this.userInfo.password };
             this.$http.post('http://106.14.47.193/xpay/admin/login',loginParams).then(res => {
+              this.logining = false;
               setToken(res.data.data.token);
               sessionStorage.setItem('access-user', JSON.stringify(res.data.data));
               this.$router.push({ path: '/' });
+            }).catch(()=>{
+              this.logining = false;
+              this.$message.error("用户名或密码错误！")
             })
           } else {
             console.log('error submit!!');

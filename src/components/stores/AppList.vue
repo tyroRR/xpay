@@ -17,18 +17,15 @@
         <el-form :inline="true" class="demo-form-inline">
           <el-input :placeholder="placeholder" v-model="keywords" style="width: 30%;">
             <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:130px">
-              <el-option label="ID" value="id"></el-option>
-              <el-option label="appId" value="appId"></el-option>
+              <el-option label="App名称" value="name"></el-option>
               <el-option label="token" value="token"></el-option>
-              <el-option label="expiredAt" value="expiredAt"></el-option>
+              <el-option label="key" value="key"></el-option>
+              <el-option label="secret" value="secret"></el-option>
             </el-select>
             <el-button slot="append" icon="el-icon-search" @click="getApps">查询</el-button>
           </el-input>
           <el-form-item>
-            <div class="btn-edit">
-              <el-button type="primary" icon="el-icon-plus" @click="dialogCreateVisible = true">添加</el-button>
-              <el-button type="primary" icon="el-icon-delete" :disabled="selected.length==0">删除</el-button>
-            </div>
+            <el-button type="primary" icon="el-icon-plus" @click="dialogCreateVisible = true">添加</el-button>
           </el-form-item>
         </el-form>
       </el-col>
@@ -39,22 +36,10 @@
                 height="680"
                 :default-sort = "{prop: 'id', order: 'descending'}"
                 @selection-change="tableSelectionChange">
-        <el-table-column sortable prop="id" label="ID"></el-table-column>
-        <el-table-column sortable prop="appId" label="appId"></el-table-column>
         <el-table-column prop="name" label="App名称"></el-table-column>
         <el-table-column prop="token" label="token"></el-table-column>
-        <el-table-column prop="expiredAt" label="expiredAt"></el-table-column>
-        <el-table-column label="操作">
-          <template slot-scope="scope">
-            <el-button
-              size="mini"
-              @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-            <el-button
-              size="mini"
-              type="danger"
-              @click="removeApp(scope.$index, scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
+        <el-table-column prop="key" label="key"></el-table-column>
+        <el-table-column prop="secret" label="secret"></el-table-column>
       </el-table>
 
       <el-dialog title="新增App" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
@@ -86,16 +71,14 @@
 
 <script>
   let placeholders = {
-    "id":"请输入ID",
-    "appId":"请输入appId",
     "name":"请输入App名称",
     "token":"请输入token",
-    "expiredAt":"请输入expiredAt",
+    "key":"请输入key",
+    "secret":"请输入secret"
   };
 
   export default {
     data: function() {
-
       return {
         userInfo:{
           id:'',
@@ -106,15 +89,6 @@
         create: {
           name: ''
         },
-        currentId:'',
-        update:{
-          id: '',
-          appId: '',
-          name: '',
-          token: '',
-          expiredAt: '',
-          is_active: true
-        },
         rules: {
           name: [
             { required: true, message: '请输入商户名称', trigger: 'blur' },
@@ -124,22 +98,20 @@
           pageSize: 10,
           currentPage: 1,
           beginIndex: 0,
-          id: '',
-          appId: '',
           name: '',
           token: '',
-          expiredAt: ''
+          key: '',
+          secret: ''
         },
         totalRows: 0,
         keywords: '', //搜索框的关键字内容
-        select: 'id', //搜索框的搜索字段
+        select: 'name', //搜索框的搜索字段
         loading: true,
         selected: [], //已选择项
         dialogCreateVisible: false, //创建对话框的显示状态
         dialogUpdateVisible: false, //编辑对话框的显示状态
         createLoading: false,
-        updateLoading: false,
-        placeholder:placeholders["id"]
+        placeholder:placeholders["name"]
       };
     },
     mounted: function() {
@@ -169,8 +141,6 @@
         console.log(`当前页: ${val}`);
         this.filter.page = val;
         this.getApps();
-      },
-      handleEdit(){
       },
       // 重置表单
       reset() {

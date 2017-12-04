@@ -11,6 +11,9 @@
       <div class="topbar-title">
         <span style="font-size: 18px;color: #fff;">后台管理系统</span>
       </div>
+      <div class="topbar-recharge">
+        <p style="font-size: 18px;color: #fff;">充值</p>
+      </div>
       <div class="topbar-account topbar-btn">
         <el-dropdown trigger="click">
           <span class="el-dropdown-link userinfo-inner"><i class="iconfont icon-user"></i>{{sysUserName}}<i
@@ -147,6 +150,13 @@
         margin-left: 2px;
       }
       .topbar-title {
+        float: left;
+        text-align: left;
+        width: 200px;
+        padding-left: 10px;
+        border-left: 1px solid #000;
+      }
+      .topbar-recharge {
         float: left;
         text-align: left;
         width: 200px;

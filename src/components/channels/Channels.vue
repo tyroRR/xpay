@@ -24,6 +24,9 @@
             </el-select>
             <el-button slot="append" icon="el-icon-search" @click="getChannels">查询</el-button>
           </el-input>
+          <el-form-item>
+            <el-button type="primary" icon="el-icon-plus" @click="dialogCreateVisible = true">添加</el-button>
+          </el-form-item>
         </el-form>
       </el-col>
 
@@ -46,6 +49,28 @@
              </template>
          </el-table-column>
       </el-table>
+
+      <!-- 新增通道-->
+      <el-dialog title="新增通道" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
+        <el-form id="#create" :model="create" :rules="rules" ref="create" label-width="100px">
+          <el-form-item label="通道ID" prop="extStoreId">
+            <el-input v-model="create.extStoreId"></el-input>
+          </el-form-item>
+          <el-form-item label="通道名称" prop="extStoreName">
+            <el-input v-model="create.extStoreName"></el-input>
+          </el-form-item>
+          <el-form-item label="通道类型" prop="paymentGateway">
+            <el-select v-model="create.paymentGateway" placeholder="请选择">
+              <el-option label="UPAY" value="UPAY"></el-option>
+              <el-option label="CHINAUMSH5" value="CHINAUMSH5"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogCreateVisible = false">取 消</el-button>
+          <el-button type="primary" :loading="createLoading" @click="createChannel">确 定</el-button>
+        </div>
+      </el-dialog>
 
       <el-pagination class="paging"
                      :current-page="filter.currentPage"
@@ -97,7 +122,7 @@
         rules: {
           extStoreId: [
             { required: true, message: '请输入通道ID', trigger: 'blur' },
-            { pattern:/^[0-9]*/, message: 'ID为数字'}
+            { pattern:/^[0-9]*$/, message: 'ID为数字'}
           ],
           extStoreName: [
             { required: true, message: '请输入用户名', trigger: 'blur' },
@@ -189,6 +214,30 @@
         }).catch(e => {
           console.log(e)
         })
+      },
+
+      // 新增通道
+      createChannel(){
+        this.$refs.create.validate((valid) => {
+          if (valid) {
+            this.createLoading = true;
+            this.$http.put(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/channels`).then(res => {
+              console.log(res);
+              this.$message.success('创建通道成功！');
+              this.dialogCreateVisible = false;
+              this.createLoading = false;
+              this.reset();
+              this.getChannels();
+            }).catch(() =>{
+              this.$message.error('创建通道失败！');
+              this.reset();
+              this.createLoading = false;
+            })
+          }
+          else {
+            return false;
+          }
+        });
       },
 
       // 删除单个通道

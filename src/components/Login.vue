@@ -8,7 +8,6 @@
     <el-form-item prop="password">
       <el-input type="password" v-model="userInfo.password" auto-complete="off" placeholder="密码"></el-input>
     </el-form-item>
-    <el-checkbox v-model="checked" checked class="remember">记住密码</el-checkbox>
     <el-form-item style="width:100%;">
       <el-button type="primary" style="width:100%;" @click.native.prevent="handleLogin" :loading="logining">登录</el-button>
     </el-form-item>
@@ -33,8 +32,7 @@
           password: [
             {required: true, message: '请输入密码', trigger: 'blur'},
           ]
-        },
-        checked: true
+        }
       };
     },
     methods: {
@@ -47,6 +45,7 @@
               this.logining = false;
               setToken(res.data.data.token);
               sessionStorage.setItem('access-user', JSON.stringify(res.data.data));
+              sessionStorage.setItem('role', res.data.data.role);
               this.$router.push({ path: '/' });
             }).catch(()=>{
               this.logining = false;
@@ -92,9 +91,6 @@
       margin: 0px auto 40px auto;
       text-align: center;
       color: #505458;
-    }
-    .remember {
-      margin: 0px 0px 35px 0px;
     }
   }
 </style>

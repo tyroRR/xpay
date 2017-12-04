@@ -4,7 +4,8 @@ import { getToken, setToken, removeToken } from '@/utils/auth'
 import Home from '@/components/Home'
 import Dashboard from '@/components/Dashboard'
 
-import ChannelReg from '@/components/channels/ChannelReg'
+import AddAdmin from '@/components/system/AddAdmin'
+import ChangePassword from '@/components/system/ChangePassword'
 import Channels from '@/components/channels/Channels'
 import Stores from '@/components/stores/Stores'
 import AppList from '@/components/stores/AppList'
@@ -14,9 +15,9 @@ import Orders from '@/components/Orders'
 import Complain from '@/components/Complain'
 
 // 懒加载方式，当路由被访问的时候才加载对应组件
-const Login = resolve => require(['@/components/Login'], resolve)
+const Login = resolve => require(['@/components/Login'], resolve);
 
-Vue.use(Router)
+Vue.use(Router);
 
 let router = new Router({
   routes: [
@@ -40,12 +41,12 @@ let router = new Router({
     {
       path: '/',
       component: Home,
-      name: '通道管理',
+      name: '系统管理',
       iconCls: 'iconfont icon-users',
       menuShow: true,
       children: [
-        {path: '/channel/channelList', component: Channels, name: '通道列表', menuShow: true},
-        {path: '/channel/ChannelReg', component: ChannelReg, name: '新增通道', menuShow: true}
+        {path: '/system/addAdmin', component: AddAdmin, name: '创建商户管理员', menuShow: true},
+        {path: '/system/changePassword', component: ChangePassword, name: '修改管理员密码', menuShow: true}
       ]
     },
     {
@@ -59,6 +60,17 @@ let router = new Router({
         {path: '/store/AppList', component: AppList, name: 'App列表', menuShow: true},
         {path: '/store/storeChannels', component: StoreChannels, name: '商户通道'},
         {path: '/store/domainName', component: DomainName, name: '域名报备', menuShow: true},
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      name: '通道管理',
+      iconCls: 'iconfont icon-users',
+      leaf: true,
+      menuShow: true,
+      children: [
+        {path: '/channel/channelList', component: Channels, name: '通道列表', menuShow: true}
       ]
     },
     {
@@ -82,7 +94,7 @@ let router = new Router({
       ]
     },
   ]
-})
+});
 
 router.beforeEach((to, from, next) => {
   // console.log('to:' + to.path)
@@ -97,6 +109,6 @@ router.beforeEach((to, from, next) => {
       next()
     }
   }
-})
+});
 
 export default router

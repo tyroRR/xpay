@@ -46,7 +46,15 @@
           <template slot-scope="scope">
             <el-button
               size="mini" type="primary"
-              @click="viewChannel(scope.$index, scope.row)">查看
+              @click="viewChannel(scope.row)">查看
+            </el-button>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作">
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              @click="setCurrent(scope.row)">编辑
             </el-button>
           </template>
         </el-table-column>
@@ -74,6 +82,34 @@
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogCreateVisible = false">取 消</el-button>
           <el-button type="primary" :loading="createLoading" @click="createStore">确 定</el-button>
+        </div>
+      </el-dialog>
+
+      <!-- 修改商户信息-->
+      <el-dialog title="修改商户信息" v-model="dialogUpdateVisible" :visible.sync="dialogUpdateVisible" :close-on-click-modal="false">
+        <el-form id="#update" :model="update" :rules="rules" ref="update" label-width="120px">
+          <el-form-item label="商户名称" prop="name">
+            <el-input v-model="update.name"></el-input>
+          </el-form-item>
+          <el-form-item label="appId" prop="appId">
+            <el-input v-model="update.appId"></el-input>
+          </el-form-item>
+          <el-form-item label="费率" prop="bailPercentage">
+            <el-input v-model="update.bailPercentage"></el-input>
+          </el-form-item>
+          <el-form-item label="日限额" prop="dailyLimit">
+            <el-input v-model="update.dailyLimit"></el-input>
+          </el-form-item>
+          <el-form-item label="客服联系方式" prop="csrTel">
+            <el-input v-model="update.csrTel"></el-input>
+          </el-form-item>
+          <el-form-item label="同步异步地址" prop="proxyUrl">
+            <el-input v-model="update.proxyUrl"></el-input>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogUpdateVisible = false">取 消</el-button>
+          <el-button type="primary" :loading="updateLoading" @click="updateStore">确 定</el-button>
         </div>
       </el-dialog>
 
@@ -118,6 +154,15 @@
           csrTel: '',
           proxyUrl: ''
         },
+        update:{
+          id: '',
+          name: '',
+          bailPercentage: '',
+          code: '',
+          csrTel: '',
+          proxyUrl: '',
+          dailyLimit: ''
+        },
         rules: {
           appId: [
             { required: true, message: '请输入appId', trigger: 'blur' },
@@ -138,7 +183,11 @@
           ],
           proxyUrl: [
             { required: true, message: '请输入同步异步地址', trigger: 'blur' },
-          ]
+          ],
+          dailyLimit: [
+            { required: true, message: '请输入日限额', trigger: 'blur' },
+            { pattern:/^[0-9]*$/, message: '日限额为数字'}
+          ],
         },
         filter: {
           pageSize: 10,
@@ -156,7 +205,9 @@
         loading: true,
         selected: [], //已选择项
         dialogCreateVisible: false, //创建对话框的显示状态
+        dialogUpdateVisible: false, //修改对话框的显示状态
         createLoading: false,
+        updateLoading: false,
         placeholder:placeholders["name"]
       };
     },
@@ -240,8 +291,43 @@
         });
       },
 
-     //查看商户通道列表
-     viewChannel(index,row){
+      setCurrent(row){
+        console.log(row);
+        this.update.id=row.id;
+        this.update.name=row.name;
+        this.update.bailPercentage=row.bailPercentage;
+        this.update.code=row.code;
+        this.update.csrTel=row.csrTel;
+        this.update.proxyUrl=row.proxyUrl;
+        this.update.dailyLimit=row.dailyLimit;
+        this.dialogUpdateVisible=true;
+      },
+      //修改商户信息
+      updateStore(){
+        this.$refs.update.validate((valid) => {
+          if (valid) {
+            this.updateLoading=true;
+            this.$http.patch(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/stores/${this.update.id}`).then(res => {
+              row = res.data.data;
+              console(row);
+              this.$message.success('修改商户信息成功！');
+              this.dialogUpdateVisible = false;
+              this.updateLoading = false;
+              this.getStores();
+            }).catch(() =>{
+              this.$message.error('修改商户信息失败！');
+              this.dialogUpdateVisible = false;
+              this.updateLoading = false;
+            })
+          }
+          else {
+            return false;
+          }
+        });
+      },
+
+      //查看商户通道列表
+      viewChannel(row){
         if(row.channels){
           sessionStorage.setItem('channelData', JSON.stringify(row.channels));
           this.$router.push({ path: '/store/storeChannels' });

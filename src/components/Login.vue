@@ -43,6 +43,15 @@
             let loginParams = { account: this.userInfo.account, password: this.userInfo.password };
             this.$http.post('http://106.14.47.193/xpay/admin/login',loginParams).then(res => {
               this.logining = false;
+              this.$http.get(`http://106.14.47.193/xpay/admin/${res.data.data.id}/stores`).then(res => {
+                let storeInfo = res.data.data.map(val => [val.id,val.name,val.code]);
+                sessionStorage.setItem('storeInfo',JSON.stringify(storeInfo));
+              });
+              if(res.data.data.role === "STORE"){
+                this.$http.get(`http://106.14.47.193/xpay/admin/${res.data.data.id}/stores`).then(res =>
+                {sessionStorage.setItem('storeId',res.data.data[0].id)});
+                console.log(sessionStorage.getItem('storeId'));
+              }
               setToken(res.data.data.token);
               sessionStorage.setItem('access-user', JSON.stringify(res.data.data));
               sessionStorage.setItem('role', res.data.data.role);

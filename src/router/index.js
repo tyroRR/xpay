@@ -4,12 +4,15 @@ import { getToken, setToken, removeToken } from '@/utils/auth'
 import Home from '@/components/Home'
 import Dashboard from '@/components/Dashboard'
 
-import AddAdmin from '@/components/system/AddAdmin'
-import ChangePassword from '@/components/system/ChangePassword'
+import CreateAdmin from '@/components/system/CreateAdmin'
+import EditAdmin from '@/components/system/EditAdmin'
+import IncreaseQuota from '@/components/system/IncreaseQuota'
 import Channels from '@/components/channels/Channels'
+import Recharge from '@/components/Recharge/Recharge'
+import RechargeList from '@/components/Recharge/RechargeList'
 import Stores from '@/components/stores/Stores'
-import AppList from '@/components/stores/AppList'
 import StoreChannels from '@/components/stores/StoreChannels'
+import AppList from '@/components/stores/AppList'
 import DomainName from '@/components/stores/DomainName'
 import Orders from '@/components/Orders'
 import Complain from '@/components/Complain'
@@ -41,12 +44,24 @@ let router = new Router({
     {
       path: '/',
       component: Home,
+      name: '在线充值',
+      iconCls: 'iconfont icon-users',
+      menuShow: true,
+      children: [
+        {path: '/recharge/rechargeOrder', component: Recharge, name: '充值', menuShow: true},
+        {path: '/recharge/rechargeList', component: RechargeList, name: '充值记录', menuShow: true}
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
       name: '系统管理',
       iconCls: 'iconfont icon-users',
       menuShow: true,
       children: [
-        {path: '/system/addAdmin', component: AddAdmin, name: '创建商户管理员', menuShow: true},
-        {path: '/system/changePassword', component: ChangePassword, name: '修改管理员密码', menuShow: true}
+        {path: '/system/createAdmin', component: CreateAdmin, name: '创建商户管理员', menuShow: true},
+        {path: '/system/editAdmin', component: EditAdmin, name: '修改管理员密码', menuShow: true},
+        {path: '/system/increaseQuota', component: IncreaseQuota, name: '增加商户额度', menuShow: true}
       ]
     },
     {
@@ -92,7 +107,7 @@ let router = new Router({
       children: [
         {path: '/complain', component: Complain, name: '投诉管理', menuShow: true},
       ]
-    },
+    }
   ]
 });
 

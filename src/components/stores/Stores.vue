@@ -139,7 +139,6 @@
 
   export default {
     data: function() {
-
       return {
         userInfo:{
           id:'',

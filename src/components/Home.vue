@@ -11,9 +11,6 @@
       <div class="topbar-title">
         <span style="font-size: 18px;color: #fff;">后台管理系统</span>
       </div>
-      <div class="topbar-recharge">
-        <p style="font-size: 18px;color: #fff;">充值</p>
-      </div>
       <div class="topbar-account topbar-btn">
         <el-dropdown trigger="click">
           <span class="el-dropdown-link userinfo-inner"><i class="iconfont icon-user"></i>{{sysUserName}}<i
@@ -21,6 +18,9 @@
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item>
               <router-link to="/dashboard"><span style="color: #555;font-size: 14px;">首页</span></router-link>
+            </el-dropdown-item>
+            <el-dropdown-item>
+              <router-link to="/profile"><span style="color: #555;font-size: 14px;">账户信息</span></router-link>
             </el-dropdown-item>
             <el-dropdown-item divided @click.native="logout">退出登录</el-dropdown-item>
           </el-dropdown-menu>
@@ -156,13 +156,6 @@
         padding-left: 10px;
         border-left: 1px solid #000;
       }
-      .topbar-recharge {
-        float: left;
-        text-align: left;
-        width: 200px;
-        padding-left: 10px;
-        border-left: 1px solid #000;
-      }
       .topbar-account {
         float: right;
         padding-right: 12px;
@@ -197,7 +190,7 @@
       }
 
       .el-menu {
-        height: 100%; /*写给不支持calc()的浏览器*/
+        height: 100%;
         height: -moz-calc(100% - 80px);
         height: -webkit-calc(100% - 80px);
         height: calc(100% - 80px);

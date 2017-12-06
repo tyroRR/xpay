@@ -18,7 +18,6 @@
           <el-input :placeholder="placeholder" v-model="keywords" style="width: 30%;">
             <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:130px">
               <el-option label="App名称" value="name"></el-option>
-              <el-option label="token" value="token"></el-option>
               <el-option label="key" value="key"></el-option>
               <el-option label="secret" value="secret"></el-option>
             </el-select>
@@ -34,10 +33,8 @@
       <el-table :data="apps"
                 style="width: 100%"
                 height="680"
-                :default-sort = "{prop: 'id', order: 'descending'}"
                 @selection-change="tableSelectionChange">
         <el-table-column prop="name" label="App名称"></el-table-column>
-        <el-table-column prop="token" label="token"></el-table-column>
         <el-table-column prop="key" label="key"></el-table-column>
         <el-table-column prop="secret" label="secret"></el-table-column>
       </el-table>
@@ -72,7 +69,6 @@
 <script>
   let placeholders = {
     "name":"请输入App名称",
-    "token":"请输入token",
     "key":"请输入key",
     "secret":"请输入secret"
   };
@@ -99,7 +95,6 @@
           currentPage: 1,
           beginIndex: 0,
           name: '',
-          token: '',
           key: '',
           secret: ''
         },
@@ -108,8 +103,7 @@
         select: 'name', //搜索框的搜索字段
         loading: true,
         selected: [], //已选择项
-        dialogCreateVisible: false, //创建对话框的显示状态
-        dialogUpdateVisible: false, //编辑对话框的显示状态
+        dialogCreateVisible: false,
         createLoading: false,
         placeholder:placeholders["name"]
       };
@@ -172,7 +166,7 @@
         })
       },
 
-      // 新增商户
+      // 新增App
       createApp(){
         this.$refs.create.validate((valid) => {
           if (valid) {

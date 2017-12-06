@@ -50,7 +50,7 @@
       }
     },
     mounted: function(){
-      this.storesInfo = JSON.parse(sessionStorage.getItem('storeInfo'));
+      this.storesInfo = JSON.parse(sessionStorage.getItem('storesInfo'));
       console.log(this.storesInfo);
     },
     methods: {

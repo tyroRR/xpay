@@ -43,16 +43,24 @@
             let loginParams = { account: this.userInfo.account, password: this.userInfo.password };
             this.$http.post('http://106.14.47.193/xpay/admin/login',loginParams).then(res => {
               this.logining = false;
-              this.$http.get(`http://106.14.47.193/xpay/admin/${res.data.data.id}/stores`).then(res => {
-                let storeInfo = res.data.data.map(val => [val.id,val.name,val.code]);
-                sessionStorage.setItem('storeInfo',JSON.stringify(storeInfo));
-              });
-              if(res.data.data.role === "STORE"){
-                this.$http.get(`http://106.14.47.193/xpay/admin/${res.data.data.id}/stores`).then(res =>
-                {sessionStorage.setItem('storeId',res.data.data[0].id)});
+              setToken(res.data.data.token);
+              let role = res.data.data.role;
+              if(role === "ADMIN"){
+                this.$http.get(`http://106.14.47.193/xpay/admin/agents`).then(res =>{
+                  let agentsInfo = res.data.data.map(val => [val.id,val.account,val.password,val.name]);
+                  sessionStorage.setItem('agentsInfo',JSON.stringify(agentsInfo));
+                })
+              }
+              if(role === "AGENT"||role === "ADMIN"){
+                this.$http.get(`http://106.14.47.193/xpay/admin/${res.data.data.id}/stores`).then(res => {
+                  let storesInfo = res.data.data.map(val => [val.id,val.name,val.code,val.agentId]);
+                  sessionStorage.setItem('storesInfo',JSON.stringify(storesInfo));
+                })
+              }
+              if(role === "STORE"){
+                sessionStorage.setItem('storeId',res.data.data.id);
                 console.log(sessionStorage.getItem('storeId'));
               }
-              setToken(res.data.data.token);
               sessionStorage.setItem('access-user', JSON.stringify(res.data.data));
               sessionStorage.setItem('role', res.data.data.role);
               this.$router.push({ path: '/' });

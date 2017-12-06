@@ -17,9 +17,9 @@
         <el-form :inline="true" class="demo-form-inline">
             <el-input :placeholder="placeholder" v-model="keywords" style="width: 30%;">
               <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:130px">
+                <el-option label="商户ID" value="code"></el-option>
                 <el-option label="商户名称" value="name"></el-option>
                 <el-option label="费率" value="bailPercentage"></el-option>
-                <el-option label="code" value="code"></el-option>
                 <el-option label="客服联系方式" value="csrTel"></el-option>
                 <el-option label="同步异步地址" value="proxyUrl"></el-option>
               </el-select>
@@ -37,11 +37,11 @@
                 height="680"
                 :default-sort = "{prop: 'bailPercentage', order: 'descending'}"
                 @selection-change="tableSelectionChange">
+        <el-table-column prop="code" label="商户ID"></el-table-column>
         <el-table-column prop="name" label="商户名称"></el-table-column>
         <el-table-column sortable prop="bailPercentage" label="费率"></el-table-column>
-        <el-table-column prop="code" label="code"></el-table-column>
         <el-table-column prop="csrTel" label="客服联系方式"></el-table-column>
-        <el-table-column prop="proxyUrl" label="同步异步地址"></el-table-column>
+        <el-table-column prop="proxyUrl" label="异步通知地址"></el-table-column>
         <el-table-column label="商户通道">
           <template slot-scope="scope">
             <el-button
@@ -75,8 +75,18 @@
           <el-form-item label="客服联系方式" prop="csrTel">
             <el-input v-model="create.csrTel"></el-input>
           </el-form-item>
-          <el-form-item label="同步异步地址" prop="proxyUrl">
+          <el-form-item label="异步通知地址" prop="proxyUrl">
             <el-input v-model="create.proxyUrl"></el-input>
+          </el-form-item>
+          <el-form-item prop="agent" label="代理商">
+            <el-select v-model="create.agent" placeholder="请选择代理商">
+              <el-option
+                v-for="item in agentsInfo"
+                :key="item[0]"
+                :label="item[3]"
+                :value="item[0]">
+              </el-option>
+            </el-select>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -103,7 +113,7 @@
           <el-form-item label="客服联系方式" prop="csrTel">
             <el-input v-model="update.csrTel"></el-input>
           </el-form-item>
-          <el-form-item label="同步异步地址" prop="proxyUrl">
+          <el-form-item label="异步通知地址" prop="proxyUrl">
             <el-input v-model="update.proxyUrl"></el-input>
           </el-form-item>
         </el-form>
@@ -132,9 +142,9 @@
   let placeholders = {
     "name":"请输入商户名称",
     "bailPercentage":"请输入费率",
-    "code":"请输入code",
+    "code":"请输入商户ID",
     "csrTel":"请输入客服联系方式",
-    "proxyUrl":"请输入同步异步地址",
+    "proxyUrl":"请输入异步通知地址",
   };
 
   export default {
@@ -145,13 +155,15 @@
           account:'',
           name:''
         },
+        agentsInfo:{},
         stores: [],
         create: {
           name: '',
           bailPercentage: '',
           code: '',
           csrTel: '',
-          proxyUrl: ''
+          proxyUrl: '',
+          agent: ''
         },
         update:{
           id: '',
@@ -175,13 +187,13 @@
             { pattern:/^[0-9]*$/, message: '费率为数字'}
           ],
           code: [
-            { required: true, message: '请输入code', trigger: 'blur' },
+            { required: true, message: '请输入商户ID', trigger: 'blur' },
           ],
           csrTel: [
             { required: true, message: '请输入客服联系方式', trigger: 'blur' },
           ],
           proxyUrl: [
-            { required: true, message: '请输入同步异步地址', trigger: 'blur' },
+            { required: true, message: '请输入异步通知地址', trigger: 'blur' },
           ],
           dailyLimit: [
             { required: true, message: '请输入日限额', trigger: 'blur' },
@@ -211,6 +223,7 @@
       };
     },
     mounted: function() {
+      this.agentsInfo = JSON.parse(sessionStorage.getItem('agentsInfo'));
       let userInfo = sessionStorage.getItem('access-user');
       if (userInfo) {
         userInfo = JSON.parse(userInfo);
@@ -279,7 +292,7 @@
               this.reset();
               this.getStores();
             }).catch(() =>{
-              this.$message.error('创建用户失败！');
+              this.$message.error('创建商户失败！');
               this.reset();
               this.createLoading = false;
             })

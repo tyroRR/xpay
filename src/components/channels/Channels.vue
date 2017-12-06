@@ -60,9 +60,30 @@
             <el-input v-model="create.extStoreName"></el-input>
           </el-form-item>
           <el-form-item label="通道类型" prop="paymentGateway">
-            <el-select v-model="create.paymentGateway" placeholder="请选择">
-              <el-option label="UPAY" value="UPAY"></el-option>
-              <el-option label="CHINAUMSH5" value="CHINAUMSH5"></el-option>
+            <el-select v-model="create.paymentGateway" placeholder="请选择通道类型">
+              <el-option label="银商H5" value="CHINAUMSH5"></el-option>
+              <el-option label="银商APP" value="CHINAUMSAPP"></el-option>
+            </el-select>
+          </el-form-item>
+          <template v-if="create.paymentGateway === 'CHINAUMSH5'||create.paymentGateway === 'CHINAUMSAPP'">
+            <el-form-item label="终端号" prop="tid">
+              <el-input v-model="create.chinaUmsProps.tid"></el-input>
+            </el-form-item>
+            <el-form-item label="消息源ID" prop="msgSrcId">
+              <el-input v-model="create.chinaUmsProps.msgSrcId"></el-input>
+            </el-form-item>
+            <el-form-item label="消息源" prop="msgSrc">
+              <el-input v-model="create.chinaUmsProps.msgSrc"></el-input>
+            </el-form-item>
+          </template>
+          <el-form-item label="代理商" prop="agent">
+            <el-select v-model="create.agent" placeholder="请选择代理商">
+              <el-option
+                v-for="item in agentsInfo"
+                :key="item[0]"
+                :label="item[3]"
+                :value="item[0]">
+              </el-option>
             </el-select>
           </el-form-item>
         </el-form>
@@ -105,12 +126,18 @@
           account:'',
           name:''
         },
+        agentsInfo:{},
         channels: [],
         create: {
           extStoreId: "",
           extStoreName: "",
           paymentGateway: "",
-          updateDate: ""
+          chinaUmsProps:{
+            tid: "",
+            msgSrcId: "",
+            msgSrc: ""
+          },
+          agent: ""
         },
         currentId:'',
         update:{
@@ -129,6 +156,18 @@
           ],
           paymentGateway: [
             { required: true, message: '请输入通道类型', trigger: 'blur' },
+          ],
+          tid: [
+            { required: true, message: '请输入终端号', trigger: 'blur' },
+          ],
+          msgSrcId: [
+            { required: true, message: '请输入消息源ID', trigger: 'blur' },
+          ],
+          msgSrc: [
+            { required: true, message: '请输入消息源', trigger: 'blur' },
+          ],
+          agent: [
+            { required: true, message: '请输入代理商', trigger: 'blur' },
           ]
         },
         filter: {
@@ -153,6 +192,7 @@
       };
     },
     mounted: function() {
+      this.agentsInfo = JSON.parse(sessionStorage.getItem('agentsInfo'));
       let userInfo = sessionStorage.getItem('access-user');
       if (userInfo) {
         userInfo = JSON.parse(userInfo);

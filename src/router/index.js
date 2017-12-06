@@ -8,6 +8,7 @@ import CreateAdmin from '@/components/system/CreateAdmin'
 import EditAdmin from '@/components/system/EditAdmin'
 import IncreaseQuota from '@/components/system/IncreaseQuota'
 import Channels from '@/components/channels/Channels'
+import AgentList from '@/components/AgentList'
 import Recharge from '@/components/Recharge/Recharge'
 import RechargeList from '@/components/Recharge/RechargeList'
 import Stores from '@/components/stores/Stores'
@@ -75,6 +76,16 @@ let router = new Router({
         {path: '/store/AppList', component: AppList, name: 'App列表', menuShow: true},
         {path: '/store/storeChannels', component: StoreChannels, name: '商户通道'},
         {path: '/store/domainName', component: DomainName, name: '域名报备', menuShow: true},
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      iconCls: 'iconfont icon-users',
+      leaf: true,
+      menuShow: true,
+      children: [
+        {path: '/agent/agentList', component: AgentList, name: '代理商列表', menuShow: true}
       ]
     },
     {

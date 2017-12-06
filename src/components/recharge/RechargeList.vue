@@ -131,7 +131,7 @@
       let endTime = end.getFullYear()+'-'+this.zeroFill(end.getMonth()+1)+'-'+this.zeroFill(end.getDate());
       this.pickerTime = [];
       this.pickerTime.push(startTime,endTime);
-      this.storesInfo = JSON.parse(sessionStorage.getItem('storeInfo'));
+      this.storesInfo = JSON.parse(sessionStorage.getItem('storesInfo'));
       this.getRecharges();
     },
     methods: {

@@ -14,7 +14,7 @@
             element-loading-spinner="el-icon-loading"
             element-loading-background="rgba(0, 0, 0, 0.8)">
       <!-- 查询 -->
-      <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
+      <el-col :span="24" class="toolbar">
         <el-form :inline="true" class="demo-form-inline">
           <el-input :placeholder="placeholder" v-model="keywords" style="width: 35%">
             <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:130px">
@@ -25,9 +25,9 @@
             </el-select>
             <el-button slot="append" icon="el-icon-search" @click="getChannels">查询</el-button>
           </el-input>
-          <el-form-item>
+          <template v-if="userInfo.role === 'ADMIN'">
             <el-button type="primary" icon="el-icon-plus" @click="dialogCreateVisible = true">添加</el-button>
-          </el-form-item>
+          </template>
         </el-form>
       </el-col>
 
@@ -51,27 +51,29 @@
         </el-table-column>
       </el-table>
 
-      <!-- 新增通道-->
-      <el-dialog title="新增通道" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
-        <el-form id="#create" :model="create" :rules="rules" ref="create" label-width="100px">
-          <el-form-item label="通道ID" prop="extStoreId">
-            <el-input v-model="create.extStoreId"></el-input>
-          </el-form-item>
-          <el-form-item label="通道名称" prop="extStoreName">
-            <el-input v-model="create.extStoreName"></el-input>
-          </el-form-item>
-          <el-form-item label="通道类型" prop="paymentGateway">
-            <el-select v-model="create.paymentGateway" placeholder="请选择">
-              <el-option label="UPAY" value="UPAY"></el-option>
-              <el-option label="CHINAUMSH5" value="CHINAUMSH5"></el-option>
-            </el-select>
-          </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogCreateVisible = false">取 消</el-button>
-          <el-button type="primary" :loading="createLoading" @click="createChannel">确 定</el-button>
-        </div>
-      </el-dialog>
+      <template v-if="userInfo.role === 'ADMIN'">
+        <!-- 新增通道-->
+        <el-dialog title="新增通道" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
+          <el-form id="#create" :model="create" :rules="rules" ref="create" label-width="100px">
+            <el-form-item label="通道ID" prop="extStoreId">
+              <el-input v-model="create.extStoreId"></el-input>
+            </el-form-item>
+            <el-form-item label="通道名称" prop="extStoreName">
+              <el-input v-model="create.extStoreName"></el-input>
+            </el-form-item>
+            <el-form-item label="通道类型" prop="paymentGateway">
+              <el-select v-model="create.paymentGateway" placeholder="请选择">
+                <el-option label="UPAY" value="UPAY"></el-option>
+                <el-option label="CHINAUMSH5" value="CHINAUMSH5"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogCreateVisible = false">取 消</el-button>
+            <el-button type="primary" :loading="createLoading" @click="createChannel">确 定</el-button>
+          </div>
+        </el-dialog>
+      </template>
 
       <el-pagination class="paging"
                      :current-page="filter.currentPage"

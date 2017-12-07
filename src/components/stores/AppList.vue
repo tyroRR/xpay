@@ -13,7 +13,7 @@
             element-loading-spinner="el-icon-loading"
             element-loading-background="rgba(0, 0, 0, 0.8)">
       <!-- 查询 -->
-      <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
+      <el-col :span="24" class="toolbar">
         <el-form :inline="true" class="demo-form-inline">
           <el-input :placeholder="placeholder" v-model="keywords" style="width: 30%;">
             <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:130px">
@@ -23,9 +23,9 @@
             </el-select>
             <el-button slot="append" icon="el-icon-search" @click="getApps">查询</el-button>
           </el-input>
-          <el-form-item>
+          <template v-if="userInfo.role === 'ADMIN'">
             <el-button type="primary" icon="el-icon-plus" @click="dialogCreateVisible = true">添加</el-button>
-          </el-form-item>
+          </template>
         </el-form>
       </el-col>
 
@@ -39,17 +39,19 @@
         <el-table-column prop="secret" label="secret"></el-table-column>
       </el-table>
 
-      <el-dialog title="新增App" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
-        <el-form id="#create" :model="create" :rules="rules" ref="create" label-width="120px">
-          <el-form-item label="App名称" prop="name">
-            <el-input v-model="create.name"></el-input>
-          </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogCreateVisible = false">取 消</el-button>
-          <el-button type="primary" :loading="createLoading" @click="createApp">确 定</el-button>
-        </div>
-      </el-dialog>
+      <template v-if="userInfo.role === 'ADMIN'">
+        <el-dialog title="新增App" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
+          <el-form id="#create" :model="create" :rules="rules" ref="create" label-width="120px">
+            <el-form-item label="App名称" prop="name">
+              <el-input v-model="create.name"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogCreateVisible = false">取 消</el-button>
+            <el-button type="primary" :loading="createLoading" @click="createApp">确 定</el-button>
+          </div>
+        </el-dialog>
+      </template>
 
       <el-pagination class="paging"
                      :current-page="filter.currentPage"
@@ -60,9 +62,7 @@
                      @size-change="pageSizeChange"
                      @current-change="pageCurrentChange">
       </el-pagination>
-
     </el-col>
-
   </el-row>
 </template>
 
@@ -123,17 +123,18 @@
         this.selected = val;
       },
       searchFieldChange(val) {
+        this.select = val;
         this.placeholder=placeholders[val];
         console.log(`搜索字段： ${val} `);
       },
       pageSizeChange(val) {
         console.log(`每页 ${val} 条`);
-        this.filter.per_page = val;
+        this.filter.pageSize = val;
         this.getApps();
       },
       pageCurrentChange(val) {
         console.log(`当前页: ${val}`);
-        this.filter.page = val;
+        this.filter.currentPage = val;
         this.getApps();
       },
       // 重置表单
@@ -145,7 +146,9 @@
         this.loading = true;
         this.$http.get(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/apps`).then(res => {
           console.log(res.data.data);
-          this.apps = res.data.data;
+          if(res.data.data){
+            this.apps = res.data.data;
+          }
           //查询
           let queryData = [];
           if(this.keywords !==""){

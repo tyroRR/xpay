@@ -172,12 +172,12 @@
       },
       pageSizeChange(val) {
         console.log(`每页 ${val} 条`);
-        this.filter.per_page = val;
+        this.filter.pageSize = val;
         this.getRecharges();
       },
       pageCurrentChange(val) {
         console.log(`当前页: ${val}`);
-        this.filter.page = val;
+        this.filter.currentPage = val;
         this.getRecharges();
       },
       getRecharges() {

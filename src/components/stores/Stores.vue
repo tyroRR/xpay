@@ -13,8 +13,8 @@
             element-loading-spinner="el-icon-loading"
             element-loading-background="rgba(0, 0, 0, 0.8)">
       <!-- 查询 -->
-      <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
-        <el-form :inline="true" class="demo-form-inline">
+      <el-col :span="24" class="toolbar">
+        <el-form :inline="true" class="demo-form-inline" >
             <el-input :placeholder="placeholder" v-model="keywords" style="width: 30%;">
               <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:130px">
                 <el-option label="商户ID" value="code"></el-option>
@@ -25,9 +25,9 @@
               </el-select>
               <el-button slot="append" icon="el-icon-search" @click="getStores">查询</el-button>
             </el-input>
-          <el-form-item>
+          <template v-if="userInfo.role === 'ADMIN'">
             <el-button type="primary" icon="el-icon-plus" @click="dialogCreateVisible = true">添加</el-button>
-          </el-form-item>
+          </template>
         </el-form>
       </el-col>
 
@@ -50,78 +50,83 @@
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column label="操作">
-          <template slot-scope="scope">
-            <el-button
-              size="mini"
-              @click="setCurrent(scope.row)">编辑
-            </el-button>
-          </template>
-        </el-table-column>
+        <template v-if="userInfo.role === 'ADMIN'">
+          <el-table-column label="操作">
+            <template slot-scope="scope">
+              <el-button
+                size="mini"
+                @click="setCurrent(scope.row)">编辑
+              </el-button>
+            </template>
+          </el-table-column>
+        </template>
       </el-table>
 
-      <!-- 新增商户-->
-      <el-dialog title="新增商户" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
-        <el-form id="#create" :model="create" :rules="rules" ref="create" label-width="120px">
-          <el-form-item label="商户名称" prop="name">
-            <el-input v-model="create.name"></el-input>
-          </el-form-item>
-          <el-form-item label="appId" prop="appId">
-            <el-input v-model="create.appId"></el-input>
-          </el-form-item>
-          <el-form-item label="费率" prop="bailPercentage">
-            <el-input v-model="create.bailPercentage"></el-input>
-          </el-form-item>
-          <el-form-item label="客服联系方式" prop="csrTel">
-            <el-input v-model="create.csrTel"></el-input>
-          </el-form-item>
-          <el-form-item label="异步通知地址" prop="proxyUrl">
-            <el-input v-model="create.proxyUrl"></el-input>
-          </el-form-item>
-          <el-form-item prop="agent" label="代理商">
-            <el-select v-model="create.agent" placeholder="请选择代理商">
-              <el-option
-                v-for="item in agentsInfo"
-                :key="item[0]"
-                :label="item[3]"
-                :value="item[0]">
-              </el-option>
-            </el-select>
-          </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogCreateVisible = false">取 消</el-button>
-          <el-button type="primary" :loading="createLoading" @click="createStore">确 定</el-button>
-        </div>
-      </el-dialog>
 
-      <!-- 修改商户信息-->
-      <el-dialog title="修改商户信息" v-model="dialogUpdateVisible" :visible.sync="dialogUpdateVisible" :close-on-click-modal="false">
-        <el-form id="#update" :model="update" :rules="rules" ref="update" label-width="120px">
-          <el-form-item label="商户名称" prop="name">
-            <el-input v-model="update.name"></el-input>
-          </el-form-item>
-          <el-form-item label="appId" prop="appId">
-            <el-input v-model="update.appId"></el-input>
-          </el-form-item>
-          <el-form-item label="费率" prop="bailPercentage">
-            <el-input v-model="update.bailPercentage"></el-input>
-          </el-form-item>
-          <el-form-item label="日限额" prop="dailyLimit">
-            <el-input v-model="update.dailyLimit"></el-input>
-          </el-form-item>
-          <el-form-item label="客服联系方式" prop="csrTel">
-            <el-input v-model="update.csrTel"></el-input>
-          </el-form-item>
-          <el-form-item label="异步通知地址" prop="proxyUrl">
-            <el-input v-model="update.proxyUrl"></el-input>
-          </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogUpdateVisible = false">取 消</el-button>
-          <el-button type="primary" :loading="updateLoading" @click="updateStore">确 定</el-button>
-        </div>
-      </el-dialog>
+      <template v-if="userInfo.role === 'ADMIN'">
+        <!-- 新增商户-->
+        <el-dialog title="新增商户" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
+          <el-form id="#create" :model="create" :rules="rules" ref="create" label-width="120px">
+            <el-form-item label="商户名称" prop="name">
+              <el-input v-model="create.name"></el-input>
+            </el-form-item>
+            <el-form-item label="appId" prop="appId">
+              <el-input v-model="create.appId"></el-input>
+            </el-form-item>
+            <el-form-item label="费率" prop="bailPercentage">
+              <el-input v-model="create.bailPercentage"></el-input>
+            </el-form-item>
+            <el-form-item label="客服联系方式" prop="csrTel">
+              <el-input v-model="create.csrTel"></el-input>
+            </el-form-item>
+            <el-form-item label="异步通知地址" prop="proxyUrl">
+              <el-input v-model="create.proxyUrl"></el-input>
+            </el-form-item>
+            <el-form-item prop="agent" label="代理商">
+              <el-select v-model="create.agentId" placeholder="请选择代理商">
+                <el-option
+                  v-for="item in agentsInfo"
+                  :key="item[0]"
+                  :label="item[3]"
+                  :value="item[0]">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogCreateVisible = false">取 消</el-button>
+            <el-button type="primary" :loading="createLoading" @click="createStore">确 定</el-button>
+          </div>
+        </el-dialog>
+
+        <!-- 修改商户信息-->
+        <el-dialog title="修改商户信息" v-model="dialogUpdateVisible" :visible.sync="dialogUpdateVisible" :close-on-click-modal="false">
+          <el-form id="#update" :model="update" :rules="rules" ref="update" label-width="120px">
+            <el-form-item label="商户名称" prop="name">
+              <el-input v-model="update.name"></el-input>
+            </el-form-item>
+            <el-form-item label="appId" prop="appId">
+              <el-input v-model="update.appId"></el-input>
+            </el-form-item>
+            <el-form-item label="费率" prop="bailPercentage">
+              <el-input v-model="update.bailPercentage"></el-input>
+            </el-form-item>
+            <el-form-item label="日限额" prop="dailyLimit">
+              <el-input v-model="update.dailyLimit"></el-input>
+            </el-form-item>
+            <el-form-item label="客服联系方式" prop="csrTel">
+              <el-input v-model="update.csrTel"></el-input>
+            </el-form-item>
+            <el-form-item label="异步通知地址" prop="proxyUrl">
+              <el-input v-model="update.proxyUrl"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogUpdateVisible = false">取 消</el-button>
+            <el-button type="primary" :loading="updateLoading" @click="updateStore">确 定</el-button>
+          </div>
+        </el-dialog>
+      </template>
 
       <el-pagination class="paging"
                      :current-page="filter.currentPage"
@@ -132,9 +137,7 @@
                      @size-change="pageSizeChange"
                      @current-change="pageCurrentChange">
       </el-pagination>
-
     </el-col>
-
   </el-row>
 </template>
 
@@ -153,7 +156,8 @@
         userInfo:{
           id:'',
           account:'',
-          name:''
+          name:'',
+          role:''
         },
         agentsInfo:{},
         stores: [],
@@ -163,7 +167,7 @@
           code: '',
           csrTel: '',
           proxyUrl: '',
-          agent: ''
+          agentId: ''
         },
         update:{
           id: '',
@@ -230,6 +234,7 @@
         this.userInfo.id = userInfo.id;
         this.userInfo.account = userInfo.account;
         this.userInfo.name = userInfo.name;
+        this.userInfo.role = userInfo.role;
       }
       this.getStores()
     },
@@ -238,17 +243,18 @@
         this.selected = val;
       },
       searchFieldChange(val) {
+        this.select = val;
         this.placeholder=placeholders[val];
         console.log(`搜索字段： ${val} `);
       },
       pageSizeChange(val) {
         console.log(`每页 ${val} 条`);
-        this.filter.per_page = val;
+        this.filter.pageSize = val;
         this.getStores();
       },
       pageCurrentChange(val) {
         console.log(`当前页: ${val}`);
-        this.filter.page = val;
+        this.filter.currentPage = val;
         this.getStores();
       },
       // 重置表单
@@ -259,7 +265,9 @@
       getStores() {
         this.loading = true;
         this.$http.get(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/stores`).then(res => {
-          this.stores = res.data.data;
+          if(res.data.data){
+            this.stores = res.data.data;
+          }
           //查询
           let queryData = [];
           if(this.keywords !==""){

@@ -119,7 +119,9 @@
       getAgents() {
         this.loading = true;
         this.$http.get(`http://106.14.47.193/xpay/admin/agents`).then(res => {
-          this.agents = res.data.data;
+          if(res.data.data){
+            this.agents = res.data.data;
+          }
           //查询
           let queryData = [];
           if(this.keywords !==""){

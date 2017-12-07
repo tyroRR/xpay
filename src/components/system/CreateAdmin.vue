@@ -19,7 +19,7 @@
           <el-input v-model="formCreate.name"></el-input>
         </el-form-item>
         <el-form-item prop="agent" label="代理商">
-          <el-select v-model="formCreate.agent" @change="onChange" placeholder="请选择代理商">
+          <el-select v-model="formCreate.agentId" @change="onChange" placeholder="请选择代理商">
             <el-option
               v-for="item in agentsInfo"
               :key="item[0]"
@@ -29,11 +29,11 @@
           </el-select>
         </el-form-item>
         <el-form-item prop="store" label="商户">
-          <el-select v-model="formCreate.store" placeholder="请选择商户">
+          <el-select v-model="formCreate.storeId" placeholder="请选择商户">
             <el-option
-              v-for="item in temStoresInfo"
+              v-for="item in tempStoresInfo"
               :key="item[0]"
-              :label="item[3]"
+              :label="item[1]"
               :value="item[0]">
             </el-option>
           </el-select>
@@ -60,12 +60,12 @@
           account: '',
           password: '',
           name: '',
-          agent: '',
-          store: '',
+          agentId: '',
+          storeId: '',
           role: ''
         },
         agentsInfo:{},
-        temStoresInfo:{},
+        tempStoresInfo:{},
         rules: {
           account: [
             { required: true, message: '请输入账号', trigger: 'blur' },
@@ -99,12 +99,12 @@
       },
       onChange() {
         let storesInfo = JSON.parse(sessionStorage.getItem('storesInfo'));
-        this.temStoresInfo = storesInfo.map(info => {
-          if(this.formCreate.agent){
-            console.log(info[3])
+        this.tempStoresInfo = storesInfo.filter(info => {
+          if(this.formCreate.agentId === info[3]){
+            return info;
           }
         });
-        console.log(this.temStoresInfo);
+        console.log(this.tempStoresInfo);
       }
     }
   }

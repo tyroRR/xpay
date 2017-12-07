@@ -58,11 +58,13 @@
                 })
               }
               if(role === "STORE"){
-                sessionStorage.setItem('storeId',res.data.data.id);
+                sessionStorage.setItem('storeId',res.data.data.storeId);
                 console.log(sessionStorage.getItem('storeId'));
               }
               sessionStorage.setItem('access-user', JSON.stringify(res.data.data));
               sessionStorage.setItem('role', res.data.data.role);
+              //this.$router.addRoutes(extendsRoutes);
+              //console.log(extendsRoutes);
               this.$router.push({ path: '/' });
             }).catch(()=>{
               this.logining = false;

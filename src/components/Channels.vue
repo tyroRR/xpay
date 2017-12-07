@@ -230,8 +230,9 @@
       getChannels() {
         this.loading = true;
         this.$http.get(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/channels`).then(res => {
-          console.log(res.data.data);
-          this.channels = res.data.data;
+          if(res.data.data){
+            this.channels = res.data.data;
+          }
           //查询
           //console.log(this.select);
           let queryData = [];

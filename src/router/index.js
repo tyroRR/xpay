@@ -29,108 +29,114 @@ let router = new Router({
       path: '/login',
       name: '登录',
       component: Login,
+    },
+    {
+      path: '/',
+      name: 'home',
+      component: Home,
+      redirect: '/dashboard',
+      leaf: true, // 只有一个节点
+      menuShow: true,
+      iconCls: 'iconfont icon-home', // 图标样式class
+      children: [
+        {path: '/dashboard', component: Dashboard, name: '首页', menuShow: true}
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      name: '在线充值',
+      iconCls: 'iconfont icon-users',
+      menuShow: true,
+      children: [
+        {path: '/recharge/rechargeOrder', component: Recharge, name: '充值', meta: { role: 'STORE'}, menuShow: true},
+        {path: '/recharge/rechargeList', component: RechargeList, name: '充值记录', meta: { role: ['AGENT','STORE'] }, menuShow: true}
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      name: '系统管理',
+      meta: { role: 'ADMIN'},
+      iconCls: 'iconfont icon-users',
+      menuShow: true,
+      children: [
+        {path: '/system/createAdmin', component: CreateAdmin, name: '创建商户管理员', menuShow: true},
+        {path: '/system/editAdmin', component: EditAdmin, name: '修改管理员密码', menuShow: true},
+        {path: '/system/increaseQuota', component: IncreaseQuota, name: '增加商户额度', menuShow: true}
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      name: '商户管理',
+      iconCls: 'iconfont icon-users1',
+      menuShow: true,
+      children: [
+        {path: '/store/storeList', component: Stores, name: '商户列表', menuShow: true},
+        {path: '/store/storeChannels', component: StoreChannels, name: '商户通道'},
+        {path: '/store/domainName', component: DomainName, name: '域名报备', menuShow: true},
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      meta: { role: 'ADMIN'},
+      iconCls: 'iconfont icon-users',
+      leaf: true,
+      menuShow: true,
+      children: [
+        {path: '/agent/agentList', component: AgentList, name: '代理商列表', menuShow: true}
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      meta: { role: 'ADMIN'},
+      iconCls: 'iconfont icon-users',
+      leaf: true,
+      menuShow: true,
+      children: [
+        {path: '/agent/AppList', component: AppList, name: 'App列表', meta: { role:['ADMIN','AGENT']}, menuShow: true}
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      name: '通道管理',
+      meta: { role: 'ADMIN'},
+      iconCls: 'iconfont icon-users',
+      leaf: true,
+      menuShow: true,
+      children: [
+        {path: '/channel/channelList', component: Channels, name: '通道列表', menuShow: true}
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      iconCls: 'iconfont icon-home1',
+      leaf: true,
+      menuShow: true,
+      children: [
+        {path: '/orders', component: Orders, name: '交易查询', menuShow: true},
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      iconCls: 'iconfont icon-leaf',
+      leaf: true,
+      menuShow: true,
+      children: [
+        {path: '/complain', component: Complain, name: '投诉管理', menuShow: true},
+      ]
     }
   ]
 });
 
-const asyncRouterMap = [
-  {
-    path: '/',
-    name: 'home',
-    component: Home,
-    redirect: '/dashboard',
-    leaf: true, // 只有一个节点
-    menuShow: true,
-    iconCls: 'iconfont icon-home', // 图标样式class
-    children: [
-      {path: '/dashboard', component: Dashboard, name: '首页', menuShow: true}
-    ]
-  },
-  {
-    path: '/',
-    component: Home,
-    name: '在线充值',
-    iconCls: 'iconfont icon-users',
-    menuShow: true,
-    children: [
-      {path: '/recharge/rechargeOrder', component: Recharge, name: '充值', meta: { role: 'STORE' }, menuShow: true},
-      {path: '/recharge/rechargeList', component: RechargeList, name: '充值记录', menuShow: true}
-    ]
-  },
-  {
-    path: '/',
-    component: Home,
-    name: '系统管理',
-    meta: { role: 'ADMIN' },
-    iconCls: 'iconfont icon-users',
-    menuShow: true,
-    children: [
-      {path: '/system/createAdmin', component: CreateAdmin, name: '创建商户管理员', menuShow: true},
-      {path: '/system/editAdmin', component: EditAdmin, name: '修改管理员密码', menuShow: true},
-      {path: '/system/increaseQuota', component: IncreaseQuota, name: '增加商户额度', menuShow: true}
-    ]
-  },
-  {
-    path: '/',
-    component: Home,
-    name: '商户管理',
-    iconCls: 'iconfont icon-users1',
-    menuShow: true,
-    children: [
-      {path: '/store/storeList', component: Stores, name: '商户列表', menuShow: true},
-      {path: '/store/storeChannels', component: StoreChannels, name: '商户通道'},
-      {path: '/store/AppList', component: AppList, name: 'App列表', meta: { role: ['ADMIN','AGENT'] }, menuShow: true},
-      {path: '/store/domainName', component: DomainName, name: '域名报备', meta: { role: ['ADMIN','AGENT'] }, menuShow: true},
-    ]
-  },
-  {
-    path: '/',
-    component: Home,
-    meta: { role: 'ADMIN' },
-    iconCls: 'iconfont icon-users',
-    leaf: true,
-    menuShow: true,
-    children: [
-      {path: '/agent/agentList', component: AgentList, name: '代理商列表', menuShow: true}
-    ]
-  },
-  {
-    path: '/',
-    component: Home,
-    name: '通道管理',
-    meta: { role: 'ADMIN' }, //页面需要的权限
-    iconCls: 'iconfont icon-users',
-    leaf: true,
-    menuShow: true,
-    children: [
-      {path: '/channel/channelList', component: Channels, name: '通道列表', menuShow: true}
-    ]
-  },
-  {
-    path: '/',
-    component: Home,
-    iconCls: 'iconfont icon-home1',
-    leaf: true,
-    menuShow: true,
-    children: [
-      {path: '/orders', component: Orders, name: '交易查询', menuShow: true},
-    ]
-  },
-  {
-    path: '/',
-    component: Home,
-    meta: { role: 'ADMIN' },
-    iconCls: 'iconfont icon-leaf',
-    leaf: true,
-    menuShow: true,
-    children: [
-      {path: '/complain', component: Complain, name: '投诉管理', menuShow: true},
-    ]
-  }
-];
-
 router.beforeEach((to, from, next) => {
-  //console.log('to:' + to.path)
+  // console.log('to:' + to.path)
   if (to.path.startsWith('/login')) {
     //window.sessionStorage.removeItem('access-user')
     next()
@@ -139,35 +145,7 @@ router.beforeEach((to, from, next) => {
     if (!token) {
       next({path: '/login'})
     } else {
-      const role = sessionStorage.getItem('role');
-      function hasPermission(role, route) {
-        if (route.meta && route.meta.role) {
-          return route.meta.role.some(v => v === role)
-        } else {
-          return true
-        }
-      }
-      const accessedRouters = asyncRouterMap.filter(v => {
-        console.log(v);
-        if (role.indexOf('ADMIN') >= 0) return true;
-        if (hasPermission(role, v)) {
-          if (v.children && v.children.length > 0) {
-            v.children = v.children.filter(child => {
-              if (hasPermission(role, child)) {
-                return child
-              }
-              return false;
-            });
-            return v
-          } else {
-            return v
-          }
-        }
-        return false;
-      });
-      console.log(accessedRouters);
-      router.addRoutes(accessedRouters);
-      next(to)
+      next()
     }
   }
 });

@@ -83,7 +83,7 @@
         if(transactionId){
           this.$http.get(`http://106.14.47.193/xpay/admin/${JSON.parse(sessionStorage.getItem('access-user')).id}/transactions/${transactionId}`).then(
             res =>  {
-              if(res.data.data.status === "NOTPAY"){
+              if(res.data.data.status === "SUCCESS"){
                 clearInterval(this.intervalId);
                 this.result.title = "支付成功";
                 this.result.status = "success" ;

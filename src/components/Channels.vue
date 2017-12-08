@@ -13,7 +13,7 @@
             element-loading-spinner="el-icon-loading"
             element-loading-background="rgba(0, 0, 0, 0.8)">
       <!-- 查询 -->
-      <el-col :span="24" class="toolbar" style="padding-bottom: 10px;">
+      <el-col :span="24" class="toolbar">
         <el-form :inline="true" class="demo-form-inline">
           <el-input :placeholder="placeholder" v-model="keywords" style="width: 35%">
             <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:130px">
@@ -24,9 +24,7 @@
             </el-select>
             <el-button slot="append" icon="el-icon-search" @click="getChannels">查询</el-button>
           </el-input>
-          <el-form-item>
             <el-button type="primary" icon="el-icon-plus" @click="dialogCreateVisible = true">添加</el-button>
-          </el-form-item>
         </el-form>
       </el-col>
 

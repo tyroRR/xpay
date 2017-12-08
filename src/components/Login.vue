@@ -63,9 +63,8 @@
               }
               sessionStorage.setItem('access-user', JSON.stringify(res.data.data));
               sessionStorage.setItem('role', res.data.data.role);
-              //this.$router.addRoutes(extendsRoutes);
-              //console.log(extendsRoutes);
               this.$router.push({ path: '/' });
+              //this.$router.addRoutes(asyncRouterMap);
             }).catch(()=>{
               this.logining = false;
               this.$message.error("用户名或密码错误！")

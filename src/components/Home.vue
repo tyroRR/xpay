@@ -39,7 +39,7 @@
         </div>
         <!--导航菜单-->
         <el-menu default-active="0" unique-opened	 router :collapse="collapsed">
-          <template v-for="(item,index) in $router.options.routes" v-if="item.menuShow">
+          <template v-for="(item,index) in $router.options.routes" v-if="item.menuShow && rootPermission[index]">
             <el-submenu v-if="!item.leaf" :index="index+''">
               <template slot="title"><i :class="item.iconCls"></i><span slot="title">{{item.name}}</span></template>
               <el-menu-item v-for="term in item.children" :key="term.path" :index="term.path" v-if="term.menuShow"
@@ -79,6 +79,9 @@
       return {
         sysUserName: '',
         collapsed: false,
+        userInfo:{},
+        rootPermission:[],
+        childPermission:[]
       }
     },
     methods: {
@@ -87,6 +90,24 @@
       },
       handleClose() {
         //console.log('handleclose');
+      },
+      permission() {
+        console.log(this.$router.options.routes);
+        const hasRootPermission = (role, route) => {
+          if (route.meta && route.meta.role) {
+            console.log(route.meta.role);
+            console.log(role);
+            return route.meta.role === role;
+          }
+          else {
+            return true
+          }
+        };
+        this.rootPermission = this.$router.options.routes.map(route =>{
+          //console.log(hasRootPermission(this.userInfo.role, route));
+          return hasRootPermission(this.userInfo.role, route);
+        });
+        //console.log(this.rootPermission)
       },
       //折叠导航栏
       collapse: function () {
@@ -110,7 +131,9 @@
       if (userInfo) {
         userInfo = JSON.parse(userInfo);
         this.sysUserName = userInfo.name;
+        this.userInfo = userInfo;
       }
+      this.permission();
     }
   }
 </script>

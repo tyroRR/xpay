@@ -14,16 +14,22 @@
       <!-- 查询 -->
       <el-col :span="24" class="toolbar" style="padding-bottom: 0">
         <el-form :inline="true" class="demo-form-inline">
-          <el-form-item label="商户名称">
-            <el-select v-model="filter.name" filterable placeholder="请选择商户名称">
-              <el-option
-                v-for="item in storesInfo"
-                :key="item[2]"
-                :label="item[1]"
-                :value="item[2]">
-              </el-option>
-            </el-select>
-          </el-form-item>
+          <el-input placeholder="请输入订单号" v-model="keywords" style="width: 30%; margin-right: 15px">
+            <template slot="prepend">订单号</template>
+            <el-button slot="append" icon="el-icon-search" @click="query">查询</el-button>
+          </el-input>
+          <template v-if="userInfo.role !== 'STORE'">
+            <el-form-item label="商户名称">
+              <el-select v-model="filter.name" filterable placeholder="请选择商户名称">
+                <el-option
+                  v-for="item in storesInfo"
+                  :key="item[2]"
+                  :label="item[1]"
+                  :value="item[2]">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </template>
           <el-form-item label="下单时间">
             <el-col :span="11">
               <el-date-picker
@@ -98,7 +104,8 @@
         userInfo:{
           id:'',
           account:'',
-          name:''
+          name:'',
+          role:''
         },
         storesInfo:{
         },
@@ -109,6 +116,7 @@
           currentPage: 1,
           beginIndex: 0,
         },
+        keywords: '',
         totalRows: 0,
         loading: true,
         filename: '',
@@ -122,6 +130,7 @@
         this.userInfo.id = userInfo.id;
         this.userInfo.account = userInfo.account;
         this.userInfo.name = userInfo.name;
+        this.userInfo.role = userInfo.role;
       }
       let start = new Date();
       let end = new Date();
@@ -131,10 +140,26 @@
       this.pickerTime = [];
       this.pickerTime.push(startTime,endTime);
       this.storesInfo = JSON.parse(sessionStorage.getItem('storesInfo'));
-      console.log(this.storesInfo);
+      //console.log(this.storesInfo);
       this.getOrders();
     },
     methods: {
+      query() {
+        //查询
+        let queryData = [];
+        if(this.keywords !==""){
+          for (var i=0,lenI=this.orders.length;i<lenI;i++) {
+            let reg = new RegExp(this.keywords);
+            console.log(this.orders[i].orderNo);
+            if(this.orders[i].orderNo.toString().match(reg)){
+              queryData.push(this.orders[i]);
+            }
+          }
+        }
+        else queryData = this.orders;
+        this.totalRows = queryData.length;
+        this.orders = queryData
+      },
       zeroFill(val){
         if(val >=0 && val<=9){
           return "0"+val;
@@ -190,9 +215,9 @@
                 this.filter.name = info[0]
               }
             });
-            url = `http://106.14.47.193/xpay/admin/${this.userInfo.id}/orders?storeId=${this.filter.name}&startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`
+            url = `http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/orders?storeId=${this.filter.name}&startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`
           }
-          else url = `http://106.14.47.193/xpay/admin/${this.userInfo.id}/orders?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`;
+          else url = `http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/orders?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`;
           this.$http.get(url).then(res => {
             let orders = res.data.data;
             if (orders){
@@ -221,8 +246,8 @@
         this.downloadLoading = true;
         require.ensure([], () => {
           const { export_json_to_excel } = require('@/utils/Export2Excel');
-          const tHeader = ['id', 'appId', 'storeId', 'storeChannelId', 'orderNo', 'orderTime','sellerOrderNo','payChannel','totalFee','ip','createDate','notifyUrl','returnUrl','codeUrl','status','settle','remoteQueralbe','subject','refundable'];
-          const filterVal = ['id', 'appId', 'storeId', 'storeChannelId', 'orderNo', 'orderTime','sellerOrderNo','payChannel','totalFee','ip','createDate','notifyUrl','returnUrl','codeUrl','status','settle','remoteQueralbe','subject','refundable'];
+          const tHeader = ['商户名称', 'storeChannelId', '订单号', '下单时间', '卖家单号', '支付方式','returnUrl','状态','金额'];
+          const filterVal = ['name', 'storeChannelId', 'orderNo', 'orderTime', 'sellerOrderNo', 'payChannel','returnUrl','status','totalFee'];
           const list = this.orders;
           const data = this.formatJson(filterVal, list);
           export_json_to_excel(tHeader, data, this.filename);

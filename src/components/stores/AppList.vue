@@ -144,7 +144,7 @@
       //获取商户列表
       getApps() {
         this.loading = true;
-        this.$http.get(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/apps`).then(res => {
+        this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/apps`).then(res => {
           console.log(res.data.data);
           if(res.data.data){
             this.apps = res.data.data;
@@ -174,7 +174,7 @@
         this.$refs.create.validate((valid) => {
           if (valid) {
             this.createLoading = true;
-            this.$http.put(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/apps`,this.create).then(res => {
+            this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/apps`,this.create).then(res => {
               this.$message.success('创建用户成功！');
               this.dialogCreateVisible = false;
               this.createLoading = false;

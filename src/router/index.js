@@ -14,7 +14,7 @@ import RechargeList from '@/components/Recharge/RechargeList'
 import Stores from '@/components/stores/Stores'
 import StoreChannels from '@/components/stores/StoreChannels'
 import AppList from '@/components/stores/AppList'
-import DomainName from '@/components/stores/DomainName'
+//import DomainName from '@/components/stores/DomainName'
 import Orders from '@/components/Orders'
 import Complain from '@/components/Complain'
 
@@ -45,12 +45,23 @@ let router = new Router({
     {
       path: '/',
       component: Home,
-      name: '在线充值',
+      meta: { role: 'STORE'},
       iconCls: 'iconfont icon-users',
+      leaf: true,
       menuShow: true,
       children: [
-        {path: '/recharge/rechargeOrder', component: Recharge, name: '充值', meta: { role: 'STORE'}, menuShow: true},
-        {path: '/recharge/rechargeList', component: RechargeList, name: '充值记录', meta: { role: ['AGENT','STORE'] }, menuShow: true}
+        {path: '/recharge/rechargeOrder', component: Recharge, name: '交易额度管理', menuShow: true}
+      ]
+    },
+
+    {
+      path: '/',
+      component: Home,
+      iconCls: 'iconfont icon-users',
+      leaf: true,
+      menuShow: true,
+      children: [
+        {path: '/recharge/rechargeList', component: RechargeList, name: '充值记录', menuShow: true}
       ]
     },
     {
@@ -71,11 +82,12 @@ let router = new Router({
       component: Home,
       name: '商户管理',
       iconCls: 'iconfont icon-users1',
+      leaf: true,
       menuShow: true,
       children: [
         {path: '/store/storeList', component: Stores, name: '商户列表', menuShow: true},
         {path: '/store/storeChannels', component: StoreChannels, name: '商户通道'},
-        {path: '/store/domainName', component: DomainName, name: '域名报备', menuShow: true},
+        /*{path: '/store/domainName', component: DomainName, name: '域名报备', menuShow: true},*/
       ]
     },
     {
@@ -92,19 +104,18 @@ let router = new Router({
     {
       path: '/',
       component: Home,
-      meta: { role: 'ADMIN'},
+      meta: { role:['ADMIN','AGENT']},
       iconCls: 'iconfont icon-users',
       leaf: true,
       menuShow: true,
       children: [
-        {path: '/agent/AppList', component: AppList, name: 'App列表', meta: { role:['ADMIN','AGENT']}, menuShow: true}
+        {path: '/agent/AppList', component: AppList, name: 'App列表', menuShow: true}
       ]
     },
     {
       path: '/',
       component: Home,
       name: '通道管理',
-      meta: { role: 'ADMIN'},
       iconCls: 'iconfont icon-users',
       leaf: true,
       menuShow: true,
@@ -125,6 +136,7 @@ let router = new Router({
     {
       path: '/',
       component: Home,
+      meta: { role: 'ADMIN'},
       iconCls: 'iconfont icon-leaf',
       leaf: true,
       menuShow: true,

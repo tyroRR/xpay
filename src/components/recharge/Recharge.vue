@@ -3,11 +3,17 @@
     <el-col :span="24" class="warp-breadcrum">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item :to="{ path: '/' }"><b>首页</b></el-breadcrumb-item>
-        <el-breadcrumb-item>在线充值</el-breadcrumb-item>
+        <el-breadcrumb-item>交易额度管理</el-breadcrumb-item>
       </el-breadcrumb>
     </el-col>
-    <el-col :span="24" class="warp-main">
-      <el-form ref="formRecharge" :model="formRecharge" label-width="80px">
+    <el-col :span="6" class="warp-main">
+      <el-form ref="formRecharge" :model="formRecharge" label-width="100px">
+        <el-form-item>
+          <p>交易额度管理</p>
+        </el-form-item>
+        <el-form-item label="剩余交易额度">
+          <el-input v-model="formRecharge.quota" disabled></el-input>
+        </el-form-item>
         <el-form-item label="充值金额">
           <el-input-number v-model="formRecharge.amount" :min="100" :step="100"></el-input-number>
         </el-form-item>
@@ -21,11 +27,11 @@
           <el-button type="primary" @click="onSubmit">立即充值</el-button>
         </el-form-item>
       </el-form>
-      <el-col :span="8" class="show-result">
+      <el-col :span="12" class="show-result">
         <el-col :span="24">
           <img :src="result.qrcode">
         </el-col>
-        <el-col :span="10">
+        <el-col :span="24">
           <el-alert
             :closable="result.closable"
             :show-icon="result.icon"
@@ -36,6 +42,7 @@
         </el-col>
       </el-col>
     </el-col>
+
   </el-row>
 
 </template>
@@ -46,7 +53,8 @@
       return {
         formRecharge: {
           amount: '',
-          channel: ''
+          channel: '',
+          quota: 0
         },
         result: {
           title: '',
@@ -55,8 +63,13 @@
           icon: false,
           closable: false
         },
+
         intervalId:''
       }
+    },
+    mounted: function () {
+      this.formRecharge.quota = sessionStorage.getItem('quota');
+      console.log(this.formRecharge.quota);
     },
     methods: {
       onSubmit() {
@@ -67,7 +80,7 @@
           this.$message.error('请选择支付方式！');
           return false;
         }
-        this.$http.post(`http://106.14.47.193/xpay/admin/${userInfo.id}/stores/${storeId}/recharge_order`,params).then(
+        this.$http.post(`http://www.wfpay.xyz/xpay/admin/${userInfo.id}/stores/${storeId}/recharge_order`,params).then(
           res => {
             this.result.qrcode = "http://pan.baidu.com/share/qrcode?w=200&h=200&url="+ res.data.data.codeUrl;
             this.result.closable = true;
@@ -87,6 +100,7 @@
                 clearInterval(this.intervalId);
                 this.result.title = "支付成功";
                 this.result.status = "success" ;
+                this.formRecharge.quota = res.data.data.quota;
                 let profile ={quota:res.data.data.quota, bailPercentage:res.data.data.bailPercentage};
                 sessionStorage.setItem('profile',profile)
               }

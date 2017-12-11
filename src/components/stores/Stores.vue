@@ -66,7 +66,7 @@
       <template v-if="userInfo.role === 'ADMIN'">
         <!-- 新增商户-->
         <el-dialog title="新增商户" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
-          <el-form id="#create" :model="create" :rules="rules" ref="create" label-width="120px">
+          <el-form id="#create" :model="create" :rules="createRules" ref="create" label-width="120px">
             <el-form-item label="商户名称" prop="name">
               <el-input v-model="create.name"></el-input>
             </el-form-item>
@@ -101,7 +101,7 @@
 
         <!-- 修改商户信息-->
         <el-dialog title="修改商户信息" v-model="dialogUpdateVisible" :visible.sync="dialogUpdateVisible" :close-on-click-modal="false">
-          <el-form id="#update" :model="update" :rules="rules" ref="update" label-width="120px">
+          <el-form id="#update" :model="update" :rules="updateRules" ref="update" label-width="120px">
             <el-form-item label="商户名称" prop="name">
               <el-input v-model="update.name"></el-input>
             </el-form-item>
@@ -178,7 +178,7 @@
           proxyUrl: '',
           dailyLimit: ''
         },
-        rules: {
+        createRules: {
           appId: [
             { required: true, message: '请输入appId', trigger: 'blur' },
             { pattern:/^[0-9]*$/, message: 'appId为数字'}
@@ -192,6 +192,25 @@
           ],
           code: [
             { required: true, message: '请输入商户ID', trigger: 'blur' },
+          ],
+          csrTel: [
+            { required: true, message: '请输入客服联系方式', trigger: 'blur' },
+          ],
+          proxyUrl: [
+            { required: true, message: '请输入异步通知地址', trigger: 'blur' },
+          ]
+        },
+        updateRules: {
+          appId: [
+            { required: true, message: '请输入appId', trigger: 'blur' },
+            { pattern:/^[0-9]*$/, message: 'appId为数字'}
+          ],
+          name: [
+            { required: true, message: '请输入商户名称', trigger: 'blur' },
+          ],
+          bailPercentage: [
+            { required: true, message: '请输入费率', trigger: 'blur' },
+            { pattern:/^[0-9]*$/, message: '费率为数字'}
           ],
           csrTel: [
             { required: true, message: '请输入客服联系方式', trigger: 'blur' },
@@ -264,7 +283,7 @@
       //获取商户列表
       getStores() {
         this.loading = true;
-        this.$http.get(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/stores`).then(res => {
+        this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores`).then(res => {
           if(res.data.data){
             this.stores = res.data.data;
           }
@@ -293,7 +312,7 @@
         this.$refs.create.validate((valid) => {
           if (valid) {
             this.createLoading = true;
-            this.$http.put(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/stores`,this.create).then(res => {
+            this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores`,this.create).then(res => {
               this.$message.success('创建商户成功！');
               this.dialogCreateVisible = false;
               this.createLoading = false;
@@ -327,9 +346,7 @@
         this.$refs.update.validate((valid) => {
           if (valid) {
             this.updateLoading=true;
-            this.$http.patch(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/stores/${this.update.id}`).then(res => {
-              row = res.data.data;
-              console(row);
+            this.$http.patch(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores/${this.update.id}`,this.update).then(res => {
               this.$message.success('修改商户信息成功！');
               this.dialogUpdateVisible = false;
               this.updateLoading = false;

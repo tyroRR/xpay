@@ -118,7 +118,7 @@
       //获取代理商列表
       getAgents() {
         this.loading = true;
-        this.$http.get(`http://106.14.47.193/xpay/admin/agents`).then(res => {
+        this.$http.get(`http://www.wfpay.xyz/xpay/admin/agents`).then(res => {
           if(res.data.data){
             this.agents = res.data.data;
           }

@@ -104,7 +104,8 @@
         userInfo:{
           id:'',
           account:'',
-          name:''
+          name:'',
+          role:''
         },
         channels: [],
         create: {
@@ -151,6 +152,7 @@
         this.userInfo.id = userInfo.id;
         this.userInfo.account = userInfo.account;
         this.userInfo.name = userInfo.name;
+        this.userInfo.role = userInfo.role;
       }
       this.getChannels()
     },
@@ -209,7 +211,7 @@
         this.$refs.create.validate((valid) => {
           if (valid) {
             this.createLoading = true;
-            this.$http.put(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/channels`).then(res => {
+            this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/channels`).then(res => {
               console.log(res);
               this.$message.success('新增通道成功！');
               this.dialogCreateVisible = false;
@@ -230,7 +232,7 @@
           .then(() => {
             // 向请求服务端删除
             let channelId = row.id  ;
-            this.$http.delete(`http://106.14.47.193/xpay/admin/${this.userInfo.id}/${channelId}`).then(() => {
+            this.$http.delete(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/${channelId}`).then(() => {
               this.$message.success('成功删除了通道' + row.extStoreName + '!');
               this.getChannels();
             })

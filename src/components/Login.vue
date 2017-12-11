@@ -41,25 +41,38 @@
           if (valid) {
             this.logining = true;
             let loginParams = { account: this.userInfo.account, password: this.userInfo.password };
-            this.$http.post('http://106.14.47.193/xpay/admin/login',loginParams).then(res => {
+            this.$http.post('http://www.wfpay.xyz/xpay/admin/login',loginParams).then(res => {
               this.logining = false;
               setToken(res.data.data.token);
               let role = res.data.data.role;
+              let storeId = res.data.data.storeId;
               if(role === "ADMIN"){
-                this.$http.get(`http://106.14.47.193/xpay/admin/agents`).then(res =>{
+                this.$http.get(`http://www.wfpay.xyz/xpay/admin/agents`).then(res =>{
                   let agentsInfo = res.data.data.map(val => [val.id,val.account,val.password,val.name]);
                   sessionStorage.setItem('agentsInfo',JSON.stringify(agentsInfo));
                 })
               }
               if(role === "AGENT"||role === "ADMIN"){
-                this.$http.get(`http://106.14.47.193/xpay/admin/${res.data.data.id}/stores`).then(res => {
+                this.$http.get(`http://www.wfpay.xyz/xpay/admin/${res.data.data.id}/stores`).then(res => {
                   let storesInfo = res.data.data.map(val => [val.id,val.name,val.code,val.agentId]);
                   sessionStorage.setItem('storesInfo',JSON.stringify(storesInfo));
                 })
               }
               if(role === "STORE"){
+                this.$http.get(`http://www.wfpay.xyz/xpay/admin/${res.data.data.id}/stores`).then(res => {
+                  let storesInfo = res.data.data.map(val => [val.id,val.name,val.code,storeId]);
+                  sessionStorage.setItem('storesInfo',JSON.stringify(storesInfo));
+                });
+                this.$http.get(`http://www.wfpay.xyz/xpay/admin/${res.data.data.id}/stores/${res.data.data.storeId}`).then(res => {
+                  sessionStorage.setItem('quota',res.data.data.quota);
+                });
+                this.$http.get(`http://www.wfpay.xyz/xpay/admin/${res.data.data.id}/apps`).then(res => {
+                  if(res.data.data){
+                    sessionStorage.setItem(res.data.data.key,'key');
+                    sessionStorage.setItem(res.data.data.secret,'secret');
+                  }
+                });
                 sessionStorage.setItem('storeId',res.data.data.storeId);
-                console.log(sessionStorage.getItem('storeId'));
               }
               sessionStorage.setItem('access-user', JSON.stringify(res.data.data));
               sessionStorage.setItem('role', res.data.data.role);

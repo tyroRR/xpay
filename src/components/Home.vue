@@ -19,9 +19,6 @@
             <el-dropdown-item>
               <router-link to="/dashboard"><span style="color: #555;font-size: 14px;">首页</span></router-link>
             </el-dropdown-item>
-            <el-dropdown-item>
-              <router-link to="/profile"><span style="color: #555;font-size: 14px;">账户信息</span></router-link>
-            </el-dropdown-item>
             <el-dropdown-item divided @click.native="logout">退出登录</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
@@ -92,12 +89,15 @@
         //console.log('handleclose');
       },
       permission() {
-        console.log(this.$router.options.routes);
+        //console.log(this.$router.options.routes);
         const hasRootPermission = (role, route) => {
           if (route.meta && route.meta.role) {
-            console.log(route.meta.role);
-            console.log(role);
-            return route.meta.role === role;
+            //console.log(route.meta.role);
+            //console.log(role);
+            if(route.meta.role.length === 2){
+              return route.meta.role.some(r => r === role);
+            }
+            else return route.meta.role === role;
           }
           else {
             return true
@@ -122,6 +122,7 @@
           //type: 'warning'
         }).then(() => {
           removeToken();
+          sessionStorage.clear();
           _this.$router.push('/login');
         })
       }

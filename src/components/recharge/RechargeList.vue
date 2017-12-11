@@ -14,16 +14,18 @@
       <!-- 查询 -->
       <el-col :span="24" class="toolbar" style="padding-bottom: 0">
         <el-form :inline="true" class="demo-form-inline">
-          <el-form-item label="商户名称">
-            <el-select v-model="filter.name" filterable placeholder="请选择商户名称">
-              <el-option
-                v-for="item in storesInfo"
-                :key="item[0]"
-                :label="item[1]"
-                :value="item[0]">
-              </el-option>
-            </el-select>
-          </el-form-item>
+          <template v-if="userInfo.role !== 'STORE'">
+            <el-form-item label="商户名称">
+              <el-select v-model="filter.name" filterable placeholder="请选择商户名称">
+                <el-option
+                  v-for="item in storesInfo"
+                  :key="item[0]"
+                  :label="item[1]"
+                  :value="item[0]">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </template>
           <el-form-item label="下单时间">
             <el-col :span="11">
               <el-date-picker
@@ -97,7 +99,8 @@
         userInfo:{
           id:'',
           account:'',
-          name:''
+          name:'',
+          role:''
         },
         storesInfo:{
           id:'',
@@ -123,6 +126,7 @@
         this.userInfo.id = userInfo.id;
         this.userInfo.account = userInfo.account;
         this.userInfo.name = userInfo.name;
+        this.userInfo.role = userInfo.role;
       }
       let start = new Date();
       let end = new Date();
@@ -132,6 +136,7 @@
       this.pickerTime = [];
       this.pickerTime.push(startTime,endTime);
       this.storesInfo = JSON.parse(sessionStorage.getItem('storesInfo'));
+      console.log(this.storesInfo);
       this.getRecharges();
     },
     methods: {
@@ -190,15 +195,17 @@
                 this.filter.name = info[0]
               }
             });
-            url = `http://106.14.47.193/xpay/admin/${this.userInfo.id}/transactions?storeId=${this.filter.name}&startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`
+            url = `http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/transactions?storeId=${this.filter.name}&startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`
           }
-          else url = `http://106.14.47.193/xpay/admin/${this.userInfo.id}/transactions?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`;
+          else url = `http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/transactions?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`;
           this.$http.get(url).then(res => {
             let orders = res.data.data;
             if (orders){
               orders.forEach((order) =>{
+                console.log(order);
                 let _order = order;
                 this.storesInfo.forEach(info =>{
+                  console.log(111);
                   if(_order.storeId === info[0]){
                     _order.name = info[1];
                   }
@@ -206,7 +213,7 @@
               });
               //分页
               this.filter.beginIndex = (this.filter.currentPage-1)*10;
-              this.recharges = res.data.data.splice(this.filter.beginIndex,this.filter.pageSize);
+              this.recharges = orders.splice(this.filter.beginIndex,this.filter.pageSize);
             }
             else this.recharges = [];
             this.loading = false;

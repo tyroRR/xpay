@@ -56,7 +56,7 @@
     methods: {
       onSubmit() {
         let id = JSON.parse(sessionStorage.getItem('access-user')).id;
-        this.$http.post(`http://106.14.47.193/xpay/admin/${id}/stores/${this.formIncrease.name}/quota`,this.formIncrease).then(() => {
+        this.$http.post(`http://www.wfpay.xyz/xpay/admin/${id}/stores/${this.formIncrease.name}/quota`,this.formIncrease).then(() => {
           this.$message.success('增加额度成功！');
         }).catch(() => {
           this.$message.error('增加额度失败！');

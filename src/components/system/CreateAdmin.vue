@@ -89,7 +89,7 @@
     methods: {
       onSubmit() {
         let id = JSON.parse(sessionStorage.getItem('access-user')).id;
-        this.$http.put(`http://106.14.47.193/xpay/admin/${id}/`,this.formCreate).then(() => {
+        this.$http.put(`http://www.wfpay.xyz/xpay/admin/${id}/`,this.formCreate).then(() => {
           this.$message.success('创建成功！');
           this.$refs.formCreate.resetFields();
         }).catch(() => {

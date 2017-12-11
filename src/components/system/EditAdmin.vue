@@ -27,7 +27,6 @@
         </el-form-item>
         <el-form-item prop="role" label="权限">
           <el-select v-model="formEdit.role" placeholder="请选择用户权限">
-            <el-option label="系统管理员" value="ADMIN"></el-option>
             <el-option label="代理商" value="AGENT"></el-option>
             <el-option label="商户管理员" value="STORE"></el-option>
           </el-select>
@@ -60,7 +59,7 @@
     methods: {
       onSubmit() {
         let id = JSON.parse(sessionStorage.getItem('access-user')).id;
-        this.$http.patch(`http://106.14.47.193/xpay/admin/${id}/`,this.formEdit).then(() => {
+        this.$http.patch(`http://www.wfpay.xyz/xpay/admin/${id}/`,this.formEdit).then(() => {
           this.$message.success('修改成功！');
           this.$refs.formEdit.resetFields();
         }).catch(() => {
@@ -69,7 +68,16 @@
         })
       },
       onChange() {
-        this.formEdit.account = JSON.parse(sessionStorage.getItem('access-user')).account;
+        console.log(JSON.parse(sessionStorage.getItem('agentsInfo')));
+        let agentsInfo = JSON.parse(sessionStorage.getItem('agentsInfo'));
+        agentsInfo.forEach(info => {
+          console.log(this.storesInfo[1]);
+          this.storesInfo.forEach(val =>{
+            if(info[3] === val[1]){
+              this.formEdit.account = val[1];
+            }
+          })
+        });
       }
     }
   }

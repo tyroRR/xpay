@@ -136,7 +136,7 @@
       this.pickerTime = [];
       this.pickerTime.push(startTime,endTime);
       this.storesInfo = JSON.parse(sessionStorage.getItem('storesInfo'));
-      console.log(this.storesInfo);
+      //console.log(this.storesInfo);
       this.getRecharges();
     },
     methods: {
@@ -202,10 +202,8 @@
             let orders = res.data.data;
             if (orders){
               orders.forEach((order) =>{
-                console.log(order);
                 let _order = order;
                 this.storesInfo.forEach(info =>{
-                  console.log(111);
                   if(_order.storeId === info[0]){
                     _order.name = info[1];
                   }

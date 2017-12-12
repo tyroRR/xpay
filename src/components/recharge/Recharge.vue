@@ -69,7 +69,9 @@
     },
     mounted: function () {
       this.formRecharge.quota = sessionStorage.getItem('quota');
-      console.log(this.formRecharge.quota);
+    },
+    destroyed: function () {
+      clearInterval(this.intervalId);
     },
     methods: {
       onSubmit() {
@@ -94,7 +96,7 @@
       validate() {
         let transactionId = sessionStorage.getItem("transactionId");
         if(transactionId){
-          this.$http.get(`http://106.14.47.193/xpay/admin/${JSON.parse(sessionStorage.getItem('access-user')).id}/transactions/${transactionId}`).then(
+          this.$http.get(`http://www.wfpay.xyz/xpay/admin/${JSON.parse(sessionStorage.getItem('access-user')).id}/transactions/${transactionId}`).then(
             res =>  {
               if(res.data.data.status === "SUCCESS"){
                 clearInterval(this.intervalId);

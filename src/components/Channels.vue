@@ -129,7 +129,8 @@
         userInfo:{
           id:'',
           account:'',
-          name:''
+          name:'',
+          role:''
         },
         agentsInfo:{},
         channels: [],
@@ -204,6 +205,7 @@
         this.userInfo.id = userInfo.id;
         this.userInfo.account = userInfo.account;
         this.userInfo.name = userInfo.name;
+        this.userInfo.role = userInfo.role;
       }
       this.getChannels()
     },

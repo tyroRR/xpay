@@ -14,8 +14,8 @@
       <!-- 查询 -->
       <el-col :span="24" class="toolbar" style="padding-bottom: 10px;">
         <el-form :inline="true" class="demo-form-inline">
-          <el-input :placeholder="placeholder" v-model="keywords" style="width: 35%">
-            <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:130px">
+          <el-input :placeholder="placeholder" v-model="keywords" style="width: 28%">
+            <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:100px">
               <el-option label="id" value="id"></el-option>
               <el-option label="账号" value="account"></el-option>
               <el-option label="用户名" value="name"></el-option>
@@ -34,6 +34,19 @@
         <el-table-column sortable prop="id" label="id"></el-table-column>
         <el-table-column prop="account" label="账号"></el-table-column>
         <el-table-column prop="name" label="用户名"></el-table-column>
+        <el-table-column
+          prop="role"
+          label="权限"
+          width="100"
+          :filters="[{ text: '商户管理员', value: 'STORE' }, { text: '代理商', value: 'AGENT' }]"
+          :filter-method="filterRole"
+          filter-placement="bottom-end">
+          <template slot-scope="scope">
+            <el-tag
+              :type="scope.row.role === 'STORE' ? 'primary' : 'success'"
+              close-transition>{{scope.row.role}}</el-tag>
+          </template>
+        </el-table-column>
       </el-table>
 
       <el-pagination class="paging"
@@ -61,7 +74,6 @@
 
   export default {
     data: function() {
-
       return {
         userInfo:{
           id:'',
@@ -96,6 +108,9 @@
       this.getAgents()
     },
     methods: {
+      filterRole(val,row){
+        return row.role === val;
+      },
       tableSelectionChange(val) {
         this.selected = val;
       },

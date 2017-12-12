@@ -18,10 +18,10 @@
         <el-form-item label="用户名">
           <el-select v-model="formEdit.name" @change="onChange" placeholder="请选择用户名">
             <el-option
-              v-for="item in storesInfo"
+              v-for="item in adminsInfo"
               :key="item[0]"
-              :label="item[1]"
-              :value="item[0]">
+              :label="item[3]"
+              :value="item[3]">
             </el-option>
           </el-select>
         </el-form-item>
@@ -49,12 +49,12 @@
           name: '',
           role: ''
         },
-        storesInfo:{}
+        adminsInfo:{}
       }
     },
     mounted: function(){
-      this.storesInfo = JSON.parse(sessionStorage.getItem('storesInfo'));
-      console.log(this.storesInfo);
+      this.adminsInfo = JSON.parse(sessionStorage.getItem('adminsInfo'));
+      //console.log(this.adminsInfo);
     },
     methods: {
       onSubmit() {
@@ -68,15 +68,10 @@
         })
       },
       onChange() {
-        console.log(JSON.parse(sessionStorage.getItem('agentsInfo')));
-        let agentsInfo = JSON.parse(sessionStorage.getItem('agentsInfo'));
-        agentsInfo.forEach(info => {
-          console.log(this.storesInfo[1]);
-          this.storesInfo.forEach(val =>{
-            if(info[3] === val[1]){
-              this.formEdit.account = val[1];
-            }
-          })
+        this.adminsInfo.forEach(info => {
+          if(this.formEdit.name === info[3]){
+            this.formEdit.account = info[1];
+          }
         });
       }
     }

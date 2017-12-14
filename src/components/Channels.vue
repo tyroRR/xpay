@@ -78,6 +78,9 @@
               <el-form-item label="消息源" prop="msgSrc">
                 <el-input v-model="create.chinaUmsProps.msgSrc"></el-input>
               </el-form-item>
+              <el-form-item label="签名秘钥" prop="signKey">
+                <el-input v-model="create.chinaUmsProps.signKey"></el-input>
+              </el-form-item>
             </template>
             <el-form-item label="代理商" prop="agent">
               <el-select v-model="create.agent" placeholder="请选择代理商">
@@ -141,7 +144,8 @@
           chinaUmsProps:{
             tid: "",
             msgSrcId: "",
-            msgSrc: ""
+            msgSrc: "",
+            signKey: ""
           },
           agent: ""
         },
@@ -155,7 +159,6 @@
         rules: {
           extStoreId: [
             { required: true, message: '请输入通道ID', trigger: 'blur' },
-            { pattern:/^[0-9]*$/, message: 'ID为数字'}
           ],
           extStoreName: [
             { required: true, message: '请输入用户名', trigger: 'blur' },
@@ -170,6 +173,9 @@
             { required: true, message: '请输入消息源ID', trigger: 'blur' },
           ],
           msgSrc: [
+            { required: true, message: '请输入消息源', trigger: 'blur' },
+          ],
+          signKey: [
             { required: true, message: '请输入消息源', trigger: 'blur' },
           ],
           agent: [
@@ -295,7 +301,7 @@
                 .then(() => {
                   // 向请求服务端删除
                   let channelId = row.id  ;
-                  this.$http.delete(`http://www.wfpay.xyz/xpay/admin/10/${this.userInfo.id}/${channelId}`).then(() => {
+                  this.$http.delete(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/channels/${channelId}`).then(() => {
                       this.$message.success('成功删除了通道' + row.extStoreName + '!');
                       this.getChannels();
                     })

@@ -70,8 +70,15 @@
             <el-form-item label="商户名称" prop="name">
               <el-input v-model="create.name"></el-input>
             </el-form-item>
-            <el-form-item label="appId" prop="appId">
-              <el-input v-model="create.appId"></el-input>
+            <el-form-item label="key" prop="appId">
+              <el-select v-model="create.appId" placeholder="请选择key">
+                <el-option
+                  v-for="item in appsInfo"
+                  :key="item.id"
+                  :label="item.key"
+                  :value="item.id">
+                </el-option>
+              </el-select>
             </el-form-item>
             <el-form-item label="费率" prop="bailPercentage">
               <el-input v-model="create.bailPercentage"></el-input>
@@ -105,8 +112,15 @@
             <el-form-item label="商户名称" prop="name">
               <el-input v-model="update.name"></el-input>
             </el-form-item>
-            <el-form-item label="appId" prop="appId">
-              <el-input v-model="update.appId"></el-input>
+            <el-form-item label="key" prop="appId">
+              <el-select v-model="update.appId" placeholder="请选择key">
+                <el-option
+                  v-for="item in appsInfo"
+                  :key="item.id"
+                  :label="item.key"
+                  :value="item.id">
+                </el-option>
+              </el-select>
             </el-form-item>
             <el-form-item label="费率" prop="bailPercentage">
               <el-input v-model="update.bailPercentage"></el-input>
@@ -163,6 +177,7 @@
         stores: [],
         create: {
           name: '',
+          appId: '',
           bailPercentage: '',
           code: '',
           csrTel: '',
@@ -170,25 +185,24 @@
           agentId: ''
         },
         update:{
-          id: '',
           name: '',
+          appId: '',
           bailPercentage: '',
           code: '',
           csrTel: '',
           proxyUrl: '',
           dailyLimit: ''
         },
+        appsInfo:{},
         createRules: {
           appId: [
-            { required: true, message: '请输入appId', trigger: 'blur' },
-            { pattern:/^[0-9]*$/, message: 'appId为数字'}
+            { required: true, message: '请选择key'},
           ],
           name: [
             { required: true, message: '请输入商户名称', trigger: 'blur' },
           ],
           bailPercentage: [
             { required: true, message: '请输入费率', trigger: 'blur' },
-            { pattern:/^[0-9]*$/, message: '费率为数字'}
           ],
           code: [
             { required: true, message: '请输入商户ID', trigger: 'blur' },
@@ -202,15 +216,13 @@
         },
         updateRules: {
           appId: [
-            { required: true, message: '请输入appId', trigger: 'blur' },
-            { pattern:/^[0-9]*$/, message: 'appId为数字'}
+            { required: true, message: '请选择key'},
           ],
           name: [
             { required: true, message: '请输入商户名称', trigger: 'blur' },
           ],
           bailPercentage: [
             { required: true, message: '请输入费率', trigger: 'blur' },
-            { pattern:/^[0-9]*$/, message: '费率为数字'}
           ],
           csrTel: [
             { required: true, message: '请输入客服联系方式', trigger: 'blur' },
@@ -255,6 +267,8 @@
         this.userInfo.name = userInfo.name;
         this.userInfo.role = userInfo.role;
       }
+      this.appsInfo = JSON.parse(sessionStorage.getItem('appsInfo'));
+      console.log(this.appsInfo);
       this.getStores()
     },
     methods: {

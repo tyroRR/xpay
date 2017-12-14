@@ -13,7 +13,7 @@
           <el-input v-model="formCreate.account"></el-input>
         </el-form-item>
         <el-form-item prop="password" label="密码">
-          <el-input type="password" v-model="formCreate.password"></el-input>
+          <el-input type="password" v-model="formCreate.password" placeholder="默认密码为123456"></el-input>
         </el-form-item>
         <el-form-item prop="name" label="用户名">
           <el-input v-model="formCreate.name"></el-input>
@@ -58,7 +58,7 @@
       return {
         formCreate: {
           account: '',
-          password: '',
+          password: '123456',
           name: '',
           agentId: '',
           storeId: '',
@@ -85,16 +85,24 @@
     mounted: function(){
       this.agentsInfo = JSON.parse(sessionStorage.getItem('agentsInfo'));
       console.log(this.agentsInfo);
+      if(this.formCreate.agentId === ''){
+        this.tempStoresInfo = JSON.parse(sessionStorage.getItem('storesInfo'));
+        console.log(this.tempStoresInfo);
+      }
     },
     methods: {
       onSubmit() {
-        let id = JSON.parse(sessionStorage.getItem('access-user')).id;
-        this.$http.put(`http://www.wfpay.xyz/xpay/admin/${id}/`,this.formCreate).then(() => {
-          this.$message.success('创建成功！');
-          this.$refs.formCreate.resetFields();
-        }).catch(() => {
-          this.$message.error('创建失败！');
-          this.$refs.formCreate.resetFields();
+        this.$refs.formCreate.validate((valid) => {
+          if (valid) {
+            let id = JSON.parse(sessionStorage.getItem('access-user')).id;
+            this.$http.put(`http://www.wfpay.xyz/xpay/admin/${id}/`,this.formCreate).then(() => {
+              this.$message.success('创建成功！');
+              this.$refs.formCreate.resetFields();
+            }).catch(() => {
+              this.$message.error('创建失败！');
+              this.$refs.formCreate.resetFields();
+            })
+          }
         })
       },
       onChange() {

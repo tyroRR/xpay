@@ -253,8 +253,4 @@
     text-align: center;
     margin:12px 0;
   }
-  .btn-edit{
-    float: right;
-  }
-
 </style>

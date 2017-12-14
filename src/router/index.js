@@ -98,7 +98,7 @@ let router = new Router({
       leaf: true,
       menuShow: true,
       children: [
-        {path: '/agent/agentList', component: AgentList, name: '代理商列表', menuShow: true}
+        {path: '/agent/agentList', component: AgentList, name: '账号列表', menuShow: true}
       ]
     },
     {
@@ -154,7 +154,8 @@ router.beforeEach((to, from, next) => {
     next()
   } else {
     let token = getToken();
-    if (!token) {
+    let accessUser = sessionStorage.getItem('access-user');
+    if (!token||!accessUser) {
       next({path: '/login'})
     } else {
       next()

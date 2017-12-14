@@ -31,9 +31,18 @@
                 height="680"
                 :default-sort = "{prop: 'id', order: 'ascending'}"
                 @selection-change="tableSelectionChange">
+        <el-table-column type="expand">
+          <template slot-scope="props">
+            <el-form label-position="left" inline class="demo-table-expand">
+              <el-form-item label="密码：">
+                <span>{{ props.row.password }}</span>
+              </el-form-item>
+            </el-form>
+          </template>
+        </el-table-column>
         <el-table-column sortable prop="id" label="id"></el-table-column>
-        <el-table-column prop="account" label="账号"></el-table-column>
         <el-table-column prop="name" label="用户名"></el-table-column>
+        <el-table-column prop="account" label="账号"></el-table-column>
         <el-table-column
           prop="role"
           label="权限"
@@ -108,6 +117,9 @@
       this.getAgents()
     },
     methods: {
+      viewPassword(){
+
+      },
       filterRole(val,row){
         return row.role === val;
       },
@@ -167,8 +179,4 @@
     text-align: center;
     margin:12px 0;
   }
-  .btn-edit{
-    float: right;
-  }
-
 </style>

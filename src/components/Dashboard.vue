@@ -5,7 +5,7 @@
         <el-breadcrumb-item :to="{ path: '/' }"><b>首页</b></el-breadcrumb-item>
       </el-breadcrumb>
     </el-col>
-    <template v-if="role === 'STORE'">
+    <template v-if=" userInfo.role === 'STORE'">
       <el-col :span="24" class="warp-main">
         <el-table :data="rechargeInfo"
                   style="width: 100%"
@@ -26,19 +26,20 @@
               </el-form>
             </template>
           </el-table-column>
-          <el-table-column prop="type" label="方式"></el-table-column>
-          <el-table-column prop="quota" label="剩余额度"></el-table-column>
-          <el-table-column prop="bailPercentage" sortable  label="费率"></el-table-column>
-          <el-table-column label="对接参数">
+          <el-table-column prop="name" label="商户名"></el-table-column>
+          <el-table-column prop="channelType" label="通道类型"></el-table-column>
+          <el-table-column prop="bailPercentage" sortable label="费率 %"></el-table-column>
+          <el-table-column prop="quota" sortable label="剩余交易额度"></el-table-column>
+          <el-table-column prop="todayTradeAmount" sortable label="今日交易额度"></el-table-column>
+          <el-table-column prop="quota" sortable label="昨日交易额度"></el-table-column>
+          <el-table-column prop="quota" sortable label="最近一笔充值"></el-table-column>
+          <el-table-column prop="dailyLimit" sortable label="日交易额上限"></el-table-column>
+          <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button
                 size="mini" type="primary"
-                @click="view(scope.row)">查看
+                @click="view(scope.row)">查看参数
               </el-button>
-            </template>
-          </el-table-column>
-          <el-table-column label="充值">
-            <template slot-scope="scope">
               <el-button
                 size="mini" type="primary"
                 @click="recharge(scope.row)">充值
@@ -75,32 +76,37 @@
   export default {
     data() {
       return {
+        userInfo:{
+          id:'',
+          account:'',
+          name:'',
+          role:''
+        },
         formRecharge: {
           amount: '',
           channel: '',
           quota: 0
         },
-        rechargeInfo: [{
-          type: '支付宝',
-          quota: '10000',
-          bailPercentage: '2',
-          code: 'code',
-          key: 'key',
-          secret: 'secret'
-        }, {
-          type: '微信',
-          quota: '10000',
-          bailPercentage: '2',
-          code: 'code',
-          key: 'key',
-          secret: 'secret'
-        }],
-        role:'',
+        rechargeInfo: [],
         DialogVisible: false
       }
     },
     created: function () {
-      this.role = sessionStorage.getItem('role');
+      let userInfo = sessionStorage.getItem('access-user');
+      if (userInfo) {
+        userInfo = JSON.parse(userInfo);
+        this.userInfo.id = userInfo.id;
+        this.userInfo.account = userInfo.account;
+        this.userInfo.name = userInfo.name;
+        this.userInfo.role = userInfo.role;
+      }
+    },
+    mounted: function () {
+      this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores`).then(res => {
+        if (res.data.data) {
+          this.rechargeInfo = res.data.data;
+        }
+      })
     },
     methods: {
       view(row){
@@ -109,11 +115,6 @@
       recharge(row){
         this.DialogVisible = true
       },
-      getInfo() {
-        this.form.storeId = sessionStorage.getItem('code');
-        this.form.appId = sessionStorage.getItem('key');
-        this.form.secret = sessionStorage.getItem('secret');
-      }
     }
   }
 </script>

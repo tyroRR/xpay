@@ -42,29 +42,7 @@ let router = new Router({
         {path: '/dashboard', component: Dashboard, name: '首页', menuShow: true}
       ]
     },
-    {
-      path: '/',
-      component: Home,
-      meta: { role: 'STORE'},
-      iconCls: 'iconfont icon-users',
-      leaf: true,
-      menuShow: true,
-      children: [
-        {path: '/recharge/rechargeOrder', component: Recharge, name: '交易额度管理', menuShow: true}
-      ]
-    },
-
-    {
-      path: '/',
-      component: Home,
-      iconCls: 'iconfont icon-users',
-      leaf: true,
-      menuShow: true,
-      children: [
-        {path: '/recharge/rechargeList', component: RechargeList, name: '充值记录', menuShow: true}
-      ]
-    },
-    {
+    /*{
       path: '/',
       component: Home,
       name: '系统管理',
@@ -76,16 +54,17 @@ let router = new Router({
         {path: '/system/editAdmin', component: EditAdmin, name: '修改管理员密码', menuShow: true},
         {path: '/system/increaseQuota', component: IncreaseQuota, name: '增加商户额度', menuShow: true}
       ]
-    },
+    },*/
     {
       path: '/',
       component: Home,
-      name: '商户管理',
+      //name: '商户管理',
+      meta: { role: 'ADMIN'},
       iconCls: 'iconfont icon-users1',
       leaf: true,
       menuShow: true,
       children: [
-        {path: '/store/storeList', component: Stores, name: '商户列表', menuShow: true},
+        {path: '/store/storeList', component: Stores, name: '商户管理', menuShow: true},
         {path: '/store/storeChannels', component: StoreChannels, name: '商户通道'},
         /*{path: '/store/domainName', component: DomainName, name: '域名报备', menuShow: true},*/
       ]
@@ -98,10 +77,10 @@ let router = new Router({
       leaf: true,
       menuShow: true,
       children: [
-        {path: '/agent/agentList', component: AgentList, name: '账号列表', menuShow: true}
+        {path: '/agent/agentList', component: AgentList, name: '代理商管理', menuShow: true}
       ]
     },
-    {
+    /*{
       path: '/',
       component: Home,
       meta: { role:['ADMIN','AGENT']},
@@ -126,6 +105,17 @@ let router = new Router({
     {
       path: '/',
       component: Home,
+      meta: { role: 'STORE'},
+      iconCls: 'iconfont icon-users',
+      leaf: true,
+      menuShow: true,
+      children: [
+        {path: '/recharge/rechargeOrder', component: Recharge, name: '交易额度管理', menuShow: true}
+      ]
+    },*/
+    {
+      path: '/',
+      component: Home,
       iconCls: 'iconfont icon-home1',
       leaf: true,
       menuShow: true,
@@ -136,12 +126,22 @@ let router = new Router({
     {
       path: '/',
       component: Home,
+      iconCls: 'iconfont icon-users',
+      leaf: true,
+      menuShow: true,
+      children: [
+        {path: '/recharge/rechargeList', component: RechargeList, name: '充值查询', menuShow: true}
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
       meta: { role: 'ADMIN'},
       iconCls: 'iconfont icon-leaf',
       leaf: true,
       menuShow: true,
       children: [
-        {path: '/complain', component: Complain, name: '投诉管理', menuShow: true},
+        {path: '/complain', component: Complain, name: '投诉查询', menuShow: true},
       ]
     }
   ]

@@ -23,9 +23,9 @@
             </el-select>
             <el-button slot="append" icon="el-icon-search" @click="getApps">查询</el-button>
           </el-input>
-          <template v-if="userInfo.role === 'ADMIN'">
+
             <el-button type="primary" icon="el-icon-plus" @click="dialogCreateVisible = true">添加</el-button>
-          </template>
+
         </el-form>
       </el-col>
 
@@ -39,7 +39,7 @@
         <el-table-column prop="secret" label="secret"></el-table-column>
       </el-table>
 
-      <template v-if="userInfo.role === 'ADMIN'">
+
         <el-dialog title="新增App" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
           <el-form id="#create" :model="create" :rules="rules" ref="create" label-width="120px">
             <el-form-item label="App名称" prop="name">
@@ -51,7 +51,7 @@
             <el-button type="primary" :loading="createLoading" @click="createApp">确 定</el-button>
           </div>
         </el-dialog>
-      </template>
+
 
       <el-pagination class="paging"
                      :current-page="filter.currentPage"

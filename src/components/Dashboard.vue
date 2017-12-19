@@ -28,7 +28,7 @@
           </el-table-column>
           <el-table-column prop="name" label="商户名"></el-table-column>
           <el-table-column prop="channelType" label="通道类型"></el-table-column>
-          <el-table-column prop="bailPercentage" sortable label="费率 %"></el-table-column>
+          <el-table-column prop="bailPercentage" sortable label="费率"></el-table-column>
           <el-table-column prop="quota" sortable label="剩余交易额度"></el-table-column>
           <el-table-column prop="todayTradeAmount" sortable label="今日交易额度"></el-table-column>
           <el-table-column prop="quota" sortable label="昨日交易额度"></el-table-column>
@@ -104,6 +104,21 @@
     mounted: function () {
       this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores`).then(res => {
         if (res.data.data) {
+          res.data.data.forEach(val =>{
+            if(val.channelType === 'WECHAT'){
+              val.channelType = '微信公众号'
+            }
+            if(val.channelType === 'ALIPAY'){
+              val.channelType = '支付宝'
+            }
+            if(val.channelType === 'BANK'){
+              val.channelType = '银联快捷'
+            }
+            val.bailPercentage += '%';
+            val.quota += '元';
+            val.todayTradeAmount += '元';
+            val.dailyLimit += '元';
+          });
           this.rechargeInfo = res.data.data;
         }
       })

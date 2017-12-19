@@ -55,7 +55,7 @@
       <template v-if="userInfo.role === 'ADMIN'">
         <!-- 新增通道-->
         <el-dialog title="新增通道" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
-          <el-form id="#create" :model="create" :rules="rules" ref="create" label-width="100px">
+          <el-form id="#create" :model="create"  ref="create" label-width="100px">
             <el-form-item label="通道ID" prop="extStoreId">
               <el-input v-model="create.extStoreId"></el-input>
             </el-form-item>
@@ -81,8 +81,14 @@
               <el-form-item label="签名秘钥" prop="signKey">
                 <el-input v-model="create.chinaUmsProps.signKey"></el-input>
               </el-form-item>
+              <el-form-item label="机构号" prop="instMid">
+                <el-input v-model="create.chinaUmsProps.instMid"></el-input>
+              </el-form-item>
             </template>
-            <el-form-item label="代理商" prop="agent">
+            <el-form-item label="代理商" prop="agentId">
+              <el-input v-model="agentId"></el-input>
+            </el-form-item>
+            <!--<el-form-item label="代理商" prop="agent">
               <el-select v-model="create.agent" placeholder="请选择代理商">
                 <el-option
                   v-for="item in agentsInfo"
@@ -91,7 +97,7 @@
                   :value="item[0]">
                 </el-option>
               </el-select>
-            </el-form-item>
+            </el-form-item>-->
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogCreateVisible = false">取 消</el-button>
@@ -145,9 +151,10 @@
             tid: "",
             msgSrcId: "",
             msgSrc: "",
-            signKey: ""
+            signKey: "",
+            instMid: ""
           },
-          agent: ""
+          agentId: 12
         },
         currentId:'',
         update:{
@@ -156,7 +163,7 @@
           paymentGateway: "",
           updateDate: ""
         },
-        rules: {
+        /*rules: {
           extStoreId: [
             { required: true, message: '请输入通道ID', trigger: 'blur' },
           ],
@@ -181,7 +188,9 @@
           agent: [
             { required: true, message: '请输入代理商', trigger: 'blur' },
           ]
-        },
+        },*/
+
+
         filter: {
           pageSize: 10,
           currentPage: 1,
@@ -272,26 +281,23 @@
 
       // 新增通道
       createChannel(){
-        this.$refs.create.validate((valid) => {
-          if (valid) {
+
             this.createLoading = true;
-            this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/channels`).then(res => {
+            this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/channels`,this.create).then(res => {
               console.log(res);
               this.$message.success('创建通道成功！');
               this.dialogCreateVisible = false;
               this.createLoading = false;
+              this.$http.patch(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores/267/channels`,)
               this.reset();
+
               this.getChannels();
             }).catch(() =>{
               this.$message.error('创建通道失败！');
               this.reset();
               this.createLoading = false;
             })
-          }
-          else {
-            return false;
-          }
-        });
+
       },
 
       // 删除单个通道

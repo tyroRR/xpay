@@ -63,7 +63,6 @@
           icon: false,
           closable: false
         },
-
         intervalId:''
       }
     },

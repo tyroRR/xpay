@@ -11,7 +11,8 @@ import Channels from '@/components/Channels'
 import AgentList from '@/components/AgentList'
 import Recharge from '@/components/Recharge/Recharge'
 import RechargeList from '@/components/Recharge/RechargeList'
-import Stores from '@/components/stores/Stores'
+import StoreAdmins from '@/components/stores/StoreAdmins'
+import StoreDetails from '@/components/stores/StoreDetails'
 import StoreChannels from '@/components/stores/StoreChannels'
 import AppList from '@/components/stores/AppList'
 //import DomainName from '@/components/stores/DomainName'
@@ -59,12 +60,13 @@ let router = new Router({
       path: '/',
       component: Home,
       //name: '商户管理',
-      meta: { role: 'ADMIN'},
+      meta: { role:['ADMIN','AGENT'] },
       iconCls: 'iconfont icon-users1',
       leaf: true,
       menuShow: true,
       children: [
-        {path: '/store/storeList', component: Stores, name: '商户管理', menuShow: true},
+        {path: '/store/storeAdmins', component: StoreAdmins, name: '商户管理', menuShow: true},
+        {path: '/store/storeDetails', component: StoreDetails, name: '商户详情'},
         {path: '/store/storeChannels', component: StoreChannels, name: '商户通道'},
         /*{path: '/store/domainName', component: DomainName, name: '域名报备', menuShow: true},*/
       ]
@@ -80,39 +82,40 @@ let router = new Router({
         {path: '/agent/agentList', component: AgentList, name: '代理商管理', menuShow: true}
       ]
     },
-    /*{
-      path: '/',
-      component: Home,
-      meta: { role:['ADMIN','AGENT']},
-      iconCls: 'iconfont icon-users',
-      leaf: true,
-      menuShow: true,
-      children: [
-        {path: '/agent/AppList', component: AppList, name: 'App列表', menuShow: true}
-      ]
-    },
-    {
-      path: '/',
-      component: Home,
-      name: '通道管理',
-      iconCls: 'iconfont icon-users',
-      leaf: true,
-      menuShow: true,
-      children: [
-        {path: '/channel/channelList', component: Channels, name: '通道列表', menuShow: true}
-      ]
-    },
-    {
-      path: '/',
-      component: Home,
-      meta: { role: 'STORE'},
-      iconCls: 'iconfont icon-users',
-      leaf: true,
-      menuShow: true,
-      children: [
-        {path: '/recharge/rechargeOrder', component: Recharge, name: '交易额度管理', menuShow: true}
-      ]
-    },*/
+
+/*{
+  path: '/',
+  component: Home,
+  meta: { role:['ADMIN','AGENT']},
+  iconCls: 'iconfont icon-users',
+  leaf: true,
+  menuShow: true,
+  children: [
+    {path: '/agent/AppList', component: AppList, name: 'App列表', menuShow: true}
+  ]
+},
+{
+  path: '/',
+  component: Home,
+  name: '通道管理',
+  iconCls: 'iconfont icon-users',
+  leaf: true,
+  menuShow: true,
+  children: [
+    {path: '/channel/channelList', component: Channels, name: '通道列表', menuShow: true}
+  ]
+},
+{
+ path: '/',
+ component: Home,
+ meta: { role: 'STORE'},
+ iconCls: 'iconfont icon-users',
+ leaf: true,
+ menuShow: true,
+ children: [
+   {path: '/recharge/rechargeOrder', component: Recharge, name: '交易额度管理', menuShow: true}
+ ]
+},*/
     {
       path: '/',
       component: Home,

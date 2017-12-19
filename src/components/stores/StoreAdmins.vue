@@ -17,11 +17,9 @@
         <el-form :inline="true" class="demo-form-inline" >
             <el-input :placeholder="placeholder" v-model="keywords" style="width: 30%;">
               <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:130px">
-                <el-option label="商户ID" value="code"></el-option>
                 <el-option label="商户名称" value="name"></el-option>
-                <el-option label="费率" value="bailPercentage"></el-option>
-                <el-option label="客服联系方式" value="csrTel"></el-option>
-                <el-option label="同步异步地址" value="proxyUrl"></el-option>
+                <el-option label="管理员ID" value="adminId"></el-option>
+                <el-option label="管理员姓名" value="adminName"></el-option>
               </el-select>
               <el-button slot="append" icon="el-icon-search" @click="getStores">查询</el-button>
             </el-input>
@@ -35,14 +33,34 @@
       <el-table :data="stores"
                 style="width: 100%"
                 height="680"
+                ref="table"
                 :default-sort = "{prop: 'bailPercentage', order: 'descending'}"
                 @selection-change="tableSelectionChange">
-        <el-table-column prop="name" label="商户名称"></el-table-column>
-        <el-table-column prop="name" label="管理员ID"></el-table-column>
-        <el-table-column prop="name" label="管理员姓名"></el-table-column>
-        <el-table-column prop="name" label="管理员密码"></el-table-column>
-        <el-table-column prop="name" label="通道类型"></el-table-column>
-        <el-table-column label="商户通道">
+        <el-table-column type="expand">
+          <template slot-scope="props">
+            <el-form label-position="left" inline class="demo-table-expand">
+              <el-form-item label="密码：">
+                <span>{{ props.row.adminPwd }}</span>
+              </el-form-item>
+            </el-form>
+          </template>
+        </el-table-column>
+        <el-table-column prop="name" label="商户名称" align="center">
+          <template slot-scope="scope">
+            <el-button @click="viewDetail(scope.row)" type="text" size="small">{{scope.row.name}}</el-button>
+          </template>
+        </el-table-column>
+        <el-table-column prop="adminId" label="管理员ID" align="center"></el-table-column>
+        <el-table-column prop="adminName" label="管理员姓名" align="center"></el-table-column>
+        <el-table-column prop="adminPwd" label="管理员密码" align="center">
+          <template slot-scope="scope">
+            <el-button
+              size="mini" type="info" plain
+              @click="viewPwd(scope.row)">查看密码
+            </el-button>
+          </template>
+        </el-table-column>
+        <el-table-column label="商户通道" align="center">
           <template slot-scope="scope">
             <el-button
               size="mini" type="info" plain
@@ -50,20 +68,15 @@
             </el-button>
           </template>
         </el-table-column>
-        <template v-if="userInfo.role === 'ADMIN'">
-          <el-table-column label="操作">
-            <template slot-scope="scope">
-              <el-button
-                size="mini" type="primary" plain
-                @click="setCurrent(scope.row)">编辑
-              </el-button>
-              <el-button
-                size="mini" type="danger" plain
-                @click="handleChangePwd(scope.row)">修改密码
-              </el-button>
-            </template>
-          </el-table-column>
-        </template>
+        <el-table-column prop="channelType" label="通道类型" align="center"></el-table-column>
+        <el-table-column label="操作" align="center">
+          <template slot-scope="scope">
+            <el-button
+              size="mini" type="danger" plain
+              @click="handleChangePwd(scope.row)">修改密码
+            </el-button>
+          </template>
+        </el-table-column>
       </el-table>
 
       <template v-if="userInfo.role === 'ADMIN'">
@@ -202,45 +215,16 @@
           </div>
         </el-dialog>
 
-        <!-- 修改商户信息-->
-        <el-dialog title="修改商户信息" v-model="dialogUpdateVisible" :visible.sync="dialogUpdateVisible" :close-on-click-modal="false">
-          <el-form id="#update" :model="update" :rules="updateRules" ref="update" label-width="120px">
-            <el-form-item label="商户名称" prop="name">
-              <el-input v-model="update.name"></el-input>
-            </el-form-item>
-            <el-form-item label="key" prop="appId">
-
-            </el-form-item>
-            <el-form-item label="费率" prop="bailPercentage">
-              <el-input v-model="update.bailPercentage"></el-input>
-            </el-form-item>
-            <el-form-item label="日限额" prop="dailyLimit">
-              <el-input v-model="update.dailyLimit"></el-input>
-            </el-form-item>
-            <el-form-item label="客服联系方式" prop="csrTel">
-              <el-input v-model="update.csrTel"></el-input>
-            </el-form-item>
-            <el-form-item label="异步通知地址" prop="proxyUrl">
-              <el-input v-model="update.proxyUrl"></el-input>
-            </el-form-item>
-          </el-form>
-          <div slot="footer" class="dialog-footer">
-            <el-button @click="dialogUpdateVisible = false">取 消</el-button>
-            <el-button type="primary" :loading="updateLoading" @click="updateStore">确 定</el-button>
-          </div>
-        </el-dialog>
-
-        <el-dialog title="修改商户管理员信息" v-model="dialogChangePwdVisible" :visible.sync="dialogChangePwdVisible" :close-on-click-modal="false">
+        <el-dialog title="修改密码" v-model="dialogChangePwdVisible" :visible.sync="dialogChangePwdVisible" :close-on-click-modal="false">
           <el-form ref="formEdit" :model="formEdit" label-width="100px">
+            <el-form-item label="用户名">
+              <el-input v-model="formEdit.name" disabled></el-input>
+            </el-form-item>
             <el-form-item prop="account" label="账号">
               <el-input v-model="formEdit.account" disabled></el-input>
             </el-form-item>
             <el-form-item prop="password" label="密码">
               <el-input v-model="formEdit.password"></el-input>
-            </el-form-item>
-            <el-form-item label="用户名">
-              <el-select v-model="formEdit.name" placeholder="请选择用户名">
-              </el-select>
             </el-form-item>
             <el-form-item prop="role" label="权限">
               <el-select v-model="formEdit.role" placeholder="请选择用户权限">
@@ -249,7 +233,7 @@
               </el-select>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary">修改信息</el-button>
+              <el-button type="primary">确认修改</el-button>
             </el-form-item>
           </el-form>
         </el-dialog>
@@ -394,27 +378,6 @@
             { required: true, message: '请输入代理商', trigger: 'blur' },
           ]
         },
-        updateRules: {
-          appId: [
-            { required: true, message: '请选择key'},
-          ],
-          name: [
-            { required: true, message: '请输入商户名称', trigger: 'blur' },
-          ],
-          bailPercentage: [
-            { required: true, message: '请输入费率', trigger: 'blur' },
-          ],
-          csrTel: [
-            { required: true, message: '请输入客服联系方式', trigger: 'blur' },
-          ],
-          proxyUrl: [
-            { required: true, message: '请输入异步通知地址', trigger: 'blur' },
-          ],
-          dailyLimit: [
-            { required: true, message: '请输入日限额', trigger: 'blur' },
-            { pattern:/^[0-9]*$/, message: '日限额为数字'}
-          ],
-        },
         filter: {
           pageSize: 10,
           currentPage: 1,
@@ -484,7 +447,18 @@
       getStores() {
         this.loading = true;
         this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores`).then(res => {
-          if(res.data.data){
+          if (res.data.data) {
+            res.data.data.forEach(val =>{
+              if(val.channelType === 'WECHAT'){
+                val.channelType = '微信公众号'
+              }
+              if(val.channelType === 'ALIPAY'){
+                val.channelType = '支付宝'
+              }
+              if(val.channelType === 'BANK'){
+                val.channelType = '银联快捷'
+              }
+            });
             this.stores = res.data.data;
           }
           //查询
@@ -506,7 +480,21 @@
           this.selected.splice(0,this.selected.length);
         })
       },
-
+      viewPwd(row){
+        this.$refs.table.toggleRowExpansion(row);
+      },
+      viewDetail(row){
+        this.$router.push({ path: '/store/storeDetails' });
+      },
+      viewChannel(row){
+        if(row.channels){
+          sessionStorage.setItem('channelData', JSON.stringify(row.channels));
+          this.$router.push({ path: '/store/storeChannels' });
+        }
+        else {
+          this.$message.error('尚未对该商户分配通道！')
+        }
+      },
       // 新增商户
       /*onChange() {
         let storesInfo = JSON.parse(sessionStorage.getItem('storesInfo'));
@@ -583,52 +571,12 @@
         this.reset();
         this.dialogCreateVisible = false
       },
-      setCurrent(row){
-        console.log(row);
-        this.update.id=row.id;
-        this.update.name=row.name;
-        this.update.bailPercentage=row.bailPercentage;
-        this.update.code=row.code;
-        this.update.csrTel=row.csrTel;
-        this.update.proxyUrl=row.proxyUrl;
-        this.update.dailyLimit=row.dailyLimit;
-        this.dialogUpdateVisible=true;
-      },
-      //修改商户信息
-      updateStore(){
-        this.$refs.update.validate((valid) => {
-          if (valid) {
-            this.updateLoading=true;
-            this.$http.patch(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores/${this.update.id}`,this.update).then(res => {
-              this.$message.success('修改商户信息成功！');
-              this.dialogUpdateVisible = false;
-              this.updateLoading = false;
-              this.getStores();
-            }).catch(() =>{
-              this.$message.error('修改商户信息失败！');
-              this.dialogUpdateVisible = false;
-              this.updateLoading = false;
-            })
-          }
-          else {
-            return false;
-          }
-        });
+      handleChangePwd(row) {
+        this.dialogChangePwdVisible = true;
+        this.formEdit.name = row.name;
+        this.formEdit.account = row.account;
       },
 
-      handleChangePwd() {
-        this.dialogChangePwdVisible=true;
-      },
-      //查看商户通道列表
-      viewChannel(row){
-        if(row.channels){
-          sessionStorage.setItem('channelData', JSON.stringify(row.channels));
-          this.$router.push({ path: '/store/storeChannels' });
-        }
-        else {
-          this.$message.error('尚未对该商户分配通道！')
-        }
-     }
     }
   }
 </script>

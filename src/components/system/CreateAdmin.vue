@@ -18,25 +18,27 @@
         <el-form-item prop="name" label="用户名">
           <el-input v-model="formCreate.name"></el-input>
         </el-form-item>
-        <el-form-item prop="agent" label="代理商">
-          <el-select v-model="formCreate.agentId" @change="onChange" placeholder="请选择代理商">
+        <el-form-item prop="agentId" label="代理商">
+          <el-input v-model="formCreate.agentId"></el-input>
+          <!--<el-select v-model="formCreate.agentId" @change="onChange" placeholder="请选择代理商">
             <el-option
               v-for="item in agentsInfo"
               :key="item[0]"
               :label="item[3]"
               :value="item[0]">
             </el-option>
-          </el-select>
+          </el-select>-->
         </el-form-item>
-        <el-form-item prop="store" label="商户">
-          <el-select v-model="formCreate.storeId" placeholder="请选择商户">
+        <el-form-item prop="storeId" label="商户">
+          <el-input v-model="formCreate.storeId"></el-input>
+          <!--<el-select v-model="formCreate.storeId" placeholder="请选择商户">
             <el-option
               v-for="item in tempStoresInfo"
               :key="item[0]"
               :label="item[1]"
               :value="item[0]">
             </el-option>
-          </el-select>
+          </el-select>-->
         </el-form-item>
         <el-form-item prop="role" label="权限">
           <el-select v-model="formCreate.role" placeholder="请选择用户权限">
@@ -60,8 +62,8 @@
           account: '',
           password: '123456',
           name: '',
-          agentId: '',
-          storeId: '',
+          agentId: 15,
+          storeId: 268,
           role: ''
         },
         agentsInfo:{},

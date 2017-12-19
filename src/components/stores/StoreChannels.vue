@@ -51,29 +51,44 @@
         </el-table-column>
       </el-table>
 
-      <template v-if="userInfo.role === 'ADMIN'">
-        <!-- 新增通道-->
-        <el-dialog title="新增通道" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
-          <el-form id="#create" :model="create" :rules="rules" ref="create" label-width="100px">
-            <el-form-item label="通道ID" prop="extStoreId">
-              <el-input v-model="create.extStoreId"></el-input>
+      <!-- 新增通道-->
+      <el-dialog title="新增通道" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
+        <el-form id="#create" :model="create"  ref="create" label-width="100px">
+          <el-form-item label="通道ID" prop="extStoreId">
+            <el-input v-model="create.extStoreId"></el-input>
+          </el-form-item>
+          <el-form-item label="通道名称" prop="extStoreName">
+            <el-input v-model="create.extStoreName"></el-input>
+          </el-form-item>
+          <el-form-item label="通道类型" prop="paymentGateway">
+            <el-select v-model="create.paymentGateway" placeholder="请选择通道类型">
+              <el-option label="银商H5" value="CHINAUMSH5"></el-option>
+              <el-option label="银商APP" value="CHINAUMSAPP"></el-option>
+            </el-select>
+          </el-form-item>
+          <template v-if="create.paymentGateway === 'CHINAUMSH5'||create.paymentGateway === 'CHINAUMSAPP'">
+            <el-form-item label="终端号" prop="tid">
+              <el-input v-model="create.chinaUmsProps.tid"></el-input>
             </el-form-item>
-            <el-form-item label="通道名称" prop="extStoreName">
-              <el-input v-model="create.extStoreName"></el-input>
+            <el-form-item label="消息源ID" prop="msgSrcId">
+              <el-input v-model="create.chinaUmsProps.msgSrcId"></el-input>
             </el-form-item>
-            <el-form-item label="通道类型" prop="paymentGateway">
-              <el-select v-model="create.paymentGateway" placeholder="请选择">
-                <el-option label="UPAY" value="UPAY"></el-option>
-                <el-option label="CHINAUMSH5" value="CHINAUMSH5"></el-option>
-              </el-select>
+            <el-form-item label="消息源" prop="msgSrc">
+              <el-input v-model="create.chinaUmsProps.msgSrc"></el-input>
             </el-form-item>
-          </el-form>
-          <div slot="footer" class="dialog-footer">
-            <el-button @click="dialogCreateVisible = false">取 消</el-button>
-            <el-button type="primary" :loading="createLoading" @click="createChannel">确 定</el-button>
-          </div>
-        </el-dialog>
-      </template>
+            <el-form-item label="签名秘钥" prop="signKey">
+              <el-input v-model="create.chinaUmsProps.signKey"></el-input>
+            </el-form-item>
+            <el-form-item label="机构号" prop="instMid">
+              <el-input v-model="create.chinaUmsProps.instMid"></el-input>
+            </el-form-item>
+          </template>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogCreateVisible = false">取 消</el-button>
+          <el-button type="primary" :loading="createLoading" @click="createChannel">确 定</el-button>
+        </div>
+      </el-dialog>
 
       <el-pagination class="paging"
                      :current-page="filter.currentPage"
@@ -112,19 +127,36 @@
           extStoreId: "",
           extStoreName: "",
           paymentGateway: "",
-          updateDate: ""
+          chinaUmsProps: {
+            tid: "",
+            msgSrcId: "",
+            msgSrc: "",
+            signKey: "",
+            instMid: ""
+          }
         },
         rules: {
           extStoreId: [
             { required: true, message: '请输入通道ID', trigger: 'blur' },
-            { pattern:/^[0-9]*/, message: 'ID为数字'}
           ],
           extStoreName: [
             { required: true, message: '请输入用户名', trigger: 'blur' },
           ],
           paymentGateway: [
             { required: true, message: '请输入通道类型', trigger: 'blur' },
-          ]
+          ],
+          tid: [
+            { required: true, message: '请输入终端号', trigger: 'blur' },
+          ],
+          msgSrcId: [
+            { required: true, message: '请输入消息源ID', trigger: 'blur' },
+          ],
+          msgSrc: [
+            { required: true, message: '请输入消息源', trigger: 'blur' },
+          ],
+          signKey: [
+            { required: true, message: '请输入消息源', trigger: 'blur' },
+          ],
         },
         filter: {
           pageSize: 10,
@@ -211,7 +243,7 @@
         this.$refs.create.validate((valid) => {
           if (valid) {
             this.createLoading = true;
-            this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/channels`).then(res => {
+            this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/channels`,this.create).then(res => {
               console.log(res);
               this.$message.success('新增通道成功！');
               this.dialogCreateVisible = false;

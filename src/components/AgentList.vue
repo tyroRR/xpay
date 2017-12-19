@@ -29,6 +29,7 @@
       <el-table :data="agents"
                 style="width: 100%"
                 height="680"
+                ref="table"
                 :default-sort = "{prop: 'id', order: 'ascending'}"
                 @selection-change="tableSelectionChange">
         <el-table-column type="expand">
@@ -43,17 +44,12 @@
         <el-table-column sortable prop="id" label="id"></el-table-column>
         <el-table-column prop="name" label="用户名"></el-table-column>
         <el-table-column prop="account" label="账号"></el-table-column>
-        <el-table-column
-          prop="role"
-          label="权限"
-          width="100"
-          :filters="[{ text: '商户管理员', value: 'STORE' }, { text: '代理商', value: 'AGENT' }]"
-          :filter-method="filterRole"
-          filter-placement="bottom-end">
+        <el-table-column prop="password" label="密码" align="center">
           <template slot-scope="scope">
-            <el-tag
-              :type="scope.row.role === 'STORE' ? 'primary' : 'success'"
-              close-transition>{{scope.row.role}}</el-tag>
+            <el-button
+              size="mini" type="info" plain
+              @click="viewPwd(scope.row)">查看密码
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -117,8 +113,8 @@
       this.getAgents()
     },
     methods: {
-      viewPassword(){
-
+      viewPwd(row){
+        this.$refs.table.toggleRowExpansion(row);
       },
       filterRole(val,row){
         return row.role === val;

@@ -69,19 +69,21 @@
           </template>
         </el-table-column>
         <el-table-column prop="channelType" label="通道类型" align="center"></el-table-column>
-        <el-table-column label="操作" align="center">
-          <template slot-scope="scope">
-            <el-button
-              size="mini" type="danger" plain
-              @click="handleChangePwd(scope.row)">修改密码
-            </el-button>
-          </template>
-        </el-table-column>
+        <template v-if="this.userInfo.role === 'ADMIN'">
+          <el-table-column label="操作" align="center">
+            <template slot-scope="scope">
+              <el-button
+                size="mini" type="danger" plain
+                @click="handleChangePwd(scope.row)">修改密码
+              </el-button>
+            </template>
+          </el-table-column>
+        </template>
       </el-table>
 
       <template v-if="userInfo.role === 'ADMIN'">
         <!-- 新增商户-->
-        <el-dialog title="新增商户" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
+        <el-dialog title="新增商户" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="init" >
           <el-steps :active="steps.active" :finish-status="steps.finishStatus" align-center>
             <el-step title="步骤1" description="创建商户"></el-step>
             <el-step title="步骤2" description="创建商户管理员"></el-step>
@@ -104,7 +106,9 @@
                 </el-select>
               </el-form-item>
               <el-form-item label="费率" prop="bailPercentage">
-                <el-input v-model="createStore.bailPercentage"></el-input>
+                <el-input v-model="createStore.bailPercentage">
+                  <template slot="append">%</template>
+                </el-input>
               </el-form-item>
               <el-form-item label="管理员姓名" prop="adminName">
                 <el-input v-model="createStore.adminName"></el-input>
@@ -112,7 +116,7 @@
               <el-form-item label="管理员电话" prop="csrTel">
                 <el-input v-model="createStore.csrTel"></el-input>
               </el-form-item>
-              <el-form-item label="代理商" prop="agent">
+              <el-form-item label="代理商" prop="agentId">
                 <el-select v-model="createStore.agentId" placeholder="请选择代理商">
                   <el-option
                     v-for="item in agentsInfo"
@@ -126,7 +130,7 @@
           </template>
           <template v-if="steps.active === 1">
             <!-- step 2-->
-            <el-form ref="createAdmin" :model="createAdmin" :rules="createAdminRules"  label-width="100px">
+            <el-form id="#createAdmin" ref="createAdmin" :model="createAdmin" :rules="createAdminRules"  label-width="100px">
               <el-form-item prop="account" label="账号">
                 <el-input v-model="createAdmin.account"></el-input>
               </el-form-item>
@@ -166,7 +170,7 @@
           </template>
           <template v-if="steps.active === 2">
             <!-- step 3-->
-            <el-form id="#create" :model="createChannel" :rules="createChannelRules" ref="createChannel" label-width="120px">
+            <el-form id="#createChannel" :model="createChannel" :rules="createChannelRules" ref="createChannel" label-width="120px">
               <el-form-item label="通道ID" prop="extStoreId">
                 <el-input v-model="createChannel.extStoreId"></el-input>
               </el-form-item>
@@ -193,10 +197,10 @@
                 <el-form-item label="签名秘钥" prop="signKey">
                   <el-input v-model="createChannel.chinaUmsProps.signKey"></el-input>
                 </el-form-item>
+                <el-form-item label="机构号" prop="InstMid">
+                  <el-input v-model="createChannel.InstMid"></el-input>
+                </el-form-item>
               </template>
-              <el-form-item label="机构号" prop="InstMid">
-                <el-input v-model="createChannel.InstMid"></el-input>
-              </el-form-item>
               <!--<el-form-item label="代理商" prop="agent">
                 <el-select v-model="createChannel.agent" placeholder="请选择代理商">
                   <el-option
@@ -255,10 +259,8 @@
 <script>
   let placeholders = {
     "name":"请输入商户名称",
-    "bailPercentage":"请输入费率",
-    "code":"请输入商户ID",
-    "csrTel":"请输入客服联系方式",
-    "proxyUrl":"请输入异步通知地址",
+    "adminId":"管理员ID",
+    "adminName":"管理员姓名",
   };
 
   export default {
@@ -440,8 +442,13 @@
         this.getStores();
       },
       // 重置
-      reset() {
+      init() {
         this.steps.active = 0;
+      },
+      reset() {
+        this.$refs.createAdmin.resetFields();
+        this.$refs.createStore.resetFields();
+        this.$refs.createChannel.resetFields();
       },
       //获取商户列表
       getStores() {
@@ -496,7 +503,7 @@
         }
       },
       // 新增商户
-      /*onChange() {
+      onChange() {
         let storesInfo = JSON.parse(sessionStorage.getItem('storesInfo'));
         this.tempStoresInfo = storesInfo.filter(info => {
           if(this.formCreate.agentId === info[3]){
@@ -504,71 +511,66 @@
           }
         });
         console.log(this.tempStoresInfo);
-      },*/
+      },
       next(){
         if(this.steps.active === 0){
           this.handleCreateStore();
-          return true
+          return false
         }
         if(this.steps.active === 1){
           this.handleCreateAdmin();
-          return true
+          return false
         }
         if(this.steps.active === 2){
           this.handleCreateChannel()
         }
       },
       handleCreateStore(){
-        this.steps.active ++;
-        /*this.$refs.createStore.validate((valid) => {
+        this.$refs.createStore.validate((valid) => {
           if (valid) {
             this.createLoading = true;
             this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores`,this.createStore).then(res => {
               this.$message.success('创建商户成功！');
               this.createLoading = false;
-              this.$refs.createStore.resetFields();
               this.steps.active ++;
             }).catch(() =>{
               this.$message.error('创建商户失败！');
-              this.$refs.createStore.resetFields();
               this.createLoading = false;
             })
           }
           else {
             return false;
           }
-        });*/
+        });
       },
       handleCreateAdmin(){
-        this.steps.active ++;
-        /*this.$refs.createAdmin.validate((valid) => {
+        this.$refs.createAdmin.validate((valid) => {
           if (valid) {
             let id = JSON.parse(sessionStorage.getItem('access-user')).id;
             this.$http.put(`http://www.wfpay.xyz/xpay/admin/${id}/`,this.createAdmin).then(() => {
               this.$message.success('创建商户管理员成功！');
-              this.$refs.createAdmin.resetFields();
+              //this.$refs.createAdmin.resetFields();
               this.steps.active ++
             }).catch(() => {
               this.$message.error('创建商户管理员失败！');
-              this.$refs.createAdmin.resetFields();
+              //this.$refs.createAdmin.resetFields();
             })
           }
           else {
             return false;
           }
-        })*/
+        })
       },
       handleCreateChannel(){
-        /*this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/channels`).then(() => {
+        this.steps.active ++;
+        this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/channels`).then(() => {
           this.$message.success('创建成功！');
-          this.$refs.CreateChannel.resetFields();
-          this.reset();
+          //this.$refs.createChannel.resetFields();
           this.dialogCreateVisible = false
         }).catch(() => {
           this.$message.error('创建失败！');
-          this.$refs.CreateChannel.resetFields();
-        });*/
-        this.reset();
+          //this.$refs.createChannel.resetFields();
+        });
         this.dialogCreateVisible = false
       },
       handleChangePwd(row) {

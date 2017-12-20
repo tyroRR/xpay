@@ -41,14 +41,16 @@
         <el-table-column prop="extStoreName" label="通道名称"></el-table-column>
         <el-table-column prop="paymentGateway" label="通道类型"></el-table-column>
         <el-table-column sortable prop="updateDate" label="末次使用时间"></el-table-column>
-        <el-table-column label="操作">
-          <template slot-scope="scope">
-            <el-button
-              size="mini"
-              type="danger"
-              @click="removeChannel(scope.$index, scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
+        <template v-if="userInfo.role === 'ADMIN'">
+          <el-table-column label="操作">
+            <template slot-scope="scope">
+              <el-button
+                size="mini"
+                type="danger"
+                @click="removeChannel(scope.$index, scope.row)">删除</el-button>
+            </template>
+          </el-table-column>
+        </template>
       </el-table>
 
       <!-- 新增通道-->

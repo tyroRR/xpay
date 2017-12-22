@@ -23,9 +23,9 @@
               </el-select>
               <el-button slot="append" icon="el-icon-search" @click="getStores">查询</el-button>
             </el-input>
-            <!--<template v-if="userInfo.role === 'ADMIN'">
-              <el-button type="info" plain icon="el-icon-plus" @click="dialogCreateAppVisible = true">添加</el-button>
-            </template>-->
+            <template v-if="userInfo.role === 'ADMIN'">
+              <el-button type="info" plain icon="el-icon-plus" @click="dialogCreateStoreVisible = true">添加</el-button>
+            </template>
         </el-form>
       </el-col>
 
@@ -34,33 +34,31 @@
                 style="width: 100%"
                 height="680"
                 ref="table"
-                :default-sort = "{prop: 'bailPercentage', order: 'descending'}"
                 @selection-change="tableSelectionChange">
         <el-table-column type="expand">
           <template slot-scope="props">
             <el-form label-position="left" inline class="demo-table-expand">
-              <el-form-item label="code">
+              <el-form-item label="商户号">
                 <span>{{ props.row.code }}</span>
               </el-form-item>
               <el-form-item label="key">
-                <span>{{ props.row.key }}</span>
+                <span>{{ props.row.app.key }}</span>
               </el-form-item>
               <el-form-item label="secret">
-                <span>{{ props.row.secret }}</span>
+                <span>{{ props.row.app.secret }}</span>
               </el-form-item>
             </el-form>
           </template>
         </el-table-column>
+        <el-table-column prop="channels[0].paymentGateway" label="网关类型" align="center"></el-table-column>
         <el-table-column prop="channelType" label="通道类型" align="center"></el-table-column>
+        <el-table-column prop="name" label="商户名" align="center"></el-table-column>
         <el-table-column prop="bailPercentage" sortable label="费率" align="center"></el-table-column>
         <el-table-column prop="quota" sortable label="剩余交易额度" align="center"></el-table-column>
         <el-table-column prop="todayTradeAmount" sortable label="今日交易额度" align="center"></el-table-column>
         <el-table-column prop="dailyLimit" sortable label="日交易额上限" align="center"></el-table-column>
         <el-table-column label="对接参数" align="center">
           <template slot-scope="scope">
-            <template v-if="userInfo.role === 'ADMIN'">
-              <el-button @click="dialogCreateAppVisible = true" type="text" size="small">添加</el-button>
-            </template>
             <el-button @click="view(scope.row)" type="text" size="small">查看</el-button>
           </template>
         </el-table-column>
@@ -72,31 +70,86 @@
                          @click="setCurrent(scope.row)">编辑
               </el-button>
               <el-button class="handle"
-                         size="mini" type="danger" plain
+                         size="mini" type="primary" plain
                          @click="increaseQuota(scope.row)">增加额度
+              </el-button>
+              <el-button class="handle"
+                         size="mini" type="danger" plain
+                         @click="dialogCreateChannelVisible = true">添加通道ID
               </el-button>
             </template>
           </el-table-column>
         </template>
       </el-table>
 
-      <!-- 新增App-->
-      <el-dialog title="新增App" center v-model="dialogCreateAppVisible" :visible.sync="dialogCreateAppVisible" @close="resetApp" >
-        <el-form id="#createApp" :model="createApp" :rules="createAppRules" ref="createApp" label-width="120px">
-          <el-form-item label="App名称" prop="name">
-            <el-input v-model="createApp.name"></el-input>
+      <el-dialog title="新增商户" center v-model="dialogCreateStoreVisible" :visible.sync="dialogCreateStoreVisible" @close="resetCreateStore">
+        <el-form id="#createStore" :model="createStore" :rules="createStoreRules" ref="createStore" label-width="120px">
+          <el-form-item label="商户名" prop="name">
+            <el-input v-model="createStore.name"></el-input>
+          </el-form-item>
+
+            <el-form-item label="通道ID" prop="extStoreId">
+              <el-input v-model="createChannel.extStoreId"></el-input>
+            </el-form-item>
+            <el-form-item label="通道名称" prop="extStoreName">
+              <el-input v-model="createChannel.extStoreName"></el-input>
+            </el-form-item>
+            <!--<el-form-item label="支付网关类型" prop="paymentGateway">
+              <el-select v-model="createChannel.paymentGateway" placeholder="请选择支付网关类型">
+                <el-option label="银商H5" value="CHINAUMSH5"></el-option>
+                <el-option label="银商APP" value="CHINAUMSAPP"></el-option>
+                <el-option label="环迅" value="IPS"></el-option>
+              </el-select>
+            </el-form-item>-->
+          <el-form-item label="支付网关类型" prop="paymentGateway">
+            <el-select v-model="createChannel.paymentGateway" placeholder="请选择支付网关类型">
+              <el-option label="银商H5" value="CHINAUMSH5"></el-option>
+              <el-option label="银商APP" value="CHINAUMSAPP"></el-option>
+              <el-option label="环迅" value="IPS"></el-option>
+            </el-select>
+          </el-form-item>
+          <template v-if="createChannel.paymentGateway === 'CHINAUMSH5'||createChannel.paymentGateway === 'CHINAUMSAPP'">
+            <el-form-item label="终端号" prop="tid">
+              <el-input v-model="createChannel.chinaUmsProps.tid"></el-input>
+            </el-form-item>
+            <el-form-item label="消息源ID" prop="msgSrcId">
+              <el-input v-model="createChannel.chinaUmsProps.msgSrcId"></el-input>
+            </el-form-item>
+            <el-form-item label="消息源" prop="msgSrc">
+              <el-input v-model="createChannel.chinaUmsProps.msgSrc"></el-input>
+            </el-form-item>
+            <el-form-item label="签名秘钥" prop="signKey">
+              <el-input v-model="createChannel.chinaUmsProps.signKey"></el-input>
+            </el-form-item>
+            <el-form-item label="机构号" prop="InstMid">
+              <el-input v-model="createChannel.InstMid"></el-input>
+            </el-form-item>
+          </template>
+          <el-form-item label="通道类型" prop="channelType">
+            <el-select v-model="createStore.channelType" placeholder="请选择通道类型">
+              <el-option label="微信公众号" value="WECHAT"></el-option>
+              <el-option label="支付宝" value="ALIPAY"></el-option>
+              <el-option label="H5" value="H5"></el-option>
+              <el-option label="APP" value="APP"></el-option>
+              <el-option label="银联快捷" value="BANK"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="费率" prop="bailPercentage">
+            <el-input v-model="createStore.bailPercentage">
+              <template slot="append">%</template>
+            </el-input>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogCreateAppVisible = false">取 消</el-button>
-          <el-button type="primary" @click="handleCreateApp">确 定</el-button>
+          <el-button plain @click="dialogCreateStoreVisible = false">取 消</el-button>
+          <el-button type="primary" plain :loading="createLoading" @click="createStore">提交</el-button>
         </div>
       </el-dialog>
 
       <!-- 更新商户信息-->
-      <el-dialog title="修改商户信息" center v-model="dialogUpdateVisible" :visible.sync="dialogUpdateVisible">
+      <el-dialog title="修改账户信息" center v-model="dialogUpdateVisible" :visible.sync="dialogUpdateVisible">
         <el-form id="#update" :model="update" :rules="updateRules" ref="update" label-width="120px">
-          <el-form-item label="商户名称" prop="name">
+          <el-form-item label="商户名" prop="name">
             <el-input v-model="update.name"></el-input>
           </el-form-item>
           <el-form-item label="费率" prop="bailPercentage">
@@ -128,15 +181,60 @@
           <el-form-item label="增加额度">
             <el-input-number v-model="formIncrease.amount" :min="100" :step="100"></el-input-number>
           </el-form-item>
-          <el-form-item label="交易类型">
-            <el-select v-model="formIncrease.transaction_type" placeholder="请选择交易类型">
-              <el-option label="OFFLINE" value="OFFLINE"></el-option>
-              <el-option label="FREE" value="FREE"></el-option>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogIncreaseVisible = false">取 消</el-button>
+          <el-button type="primary" @click="handleIncreaseQuota">增加额度</el-button>
+        </div>
+      </el-dialog>
+
+      <!-- 添加通道ID-->
+      <el-dialog title="添加通道ID" center v-model="dialogCreateChannelVisible" :visible.sync="dialogCreateChannelVisible" width="30%">
+        <el-form id="#createChannel" :model="createChannel" :rules="createChannelRules" ref="createChannel" label-width="120px">
+          <el-form-item label="通道ID" prop="extStoreId">
+            <el-input v-model="createChannel.extStoreId"></el-input>
+          </el-form-item>
+          <el-form-item label="通道名称" prop="extStoreName">
+            <el-input v-model="createChannel.extStoreName"></el-input>
+          </el-form-item>
+          <el-form-item label="支付网关类型" prop="paymentGateway">
+            <el-select v-model="createChannel.paymentGateway" placeholder="请选择支付网关类型">
+              <el-option label="银商H5" value="CHINAUMSH5"></el-option>
+              <el-option label="银商APP" value="CHINAUMSAPP"></el-option>
+              <el-option label="环迅" value="IPS"></el-option>
+            </el-select>
+          </el-form-item>
+          <template v-if="createChannel.paymentGateway === 'CHINAUMSH5'||createChannel.paymentGateway === 'CHINAUMSAPP'">
+            <el-form-item label="终端号" prop="tid">
+              <el-input v-model="createChannel.chinaUmsProps.tid"></el-input>
+            </el-form-item>
+            <el-form-item label="消息源ID" prop="msgSrcId">
+              <el-input v-model="createChannel.chinaUmsProps.msgSrcId"></el-input>
+            </el-form-item>
+            <el-form-item label="消息源" prop="msgSrc">
+              <el-input v-model="createChannel.chinaUmsProps.msgSrc"></el-input>
+            </el-form-item>
+            <el-form-item label="签名秘钥" prop="signKey">
+              <el-input v-model="createChannel.chinaUmsProps.signKey"></el-input>
+            </el-form-item>
+            <el-form-item label="机构号" prop="InstMid">
+              <el-input v-model="createChannel.InstMid"></el-input>
+            </el-form-item>
+          </template>
+          <el-form-item label="代理商" prop="agent">
+            <el-select v-model="createChannel.agent" placeholder="请选择代理商">
+              <el-option
+                v-for="item in agentsInfo"
+                :key="item[0]"
+                :label="item[3]"
+                :value="item[0]">
+              </el-option>
             </el-select>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button type="primary" @click="handleIncreaseQuota">增加额度</el-button>
+          <el-button @click="dialogCreateChannelVisible = false">取 消</el-button>
+          <el-button type="primary" @click="handleCreateChannel">提交</el-button>
         </div>
       </el-dialog>
 
@@ -179,13 +277,6 @@
           proxyUrl: '',
           dailyLimit: ''
         },
-        steps: {
-          active: 0,
-          finishStatus: 'success'
-        },
-        createApp: {
-          name: ''
-        },
         createStore: {
           name: '',
           channelType: '',
@@ -224,14 +315,10 @@
         },
         formIncrease: {
           amount: '',
-          transaction_type: ''
+          transaction_type: 'FREE'
         },
         storeId: '',
-        createAppRules: {
-          name: [
-            { required: true, message: '请输入App名称', trigger: 'blur' },
-          ]
-        },
+
         createAdminRules: {
           account: [
             { required: true, message: '请输入账号', trigger: 'blur' },
@@ -321,9 +408,9 @@
         select: 'channelType', //搜索框的搜索字段
         loading: true,
         selected: [], //已选择项
-        dialogCreateAppVisible: false,
+        dialogCreateStoreVisible: false,
+        dialogCreateChannelVisible: false,
         dialogIncreaseVisible: false,
-        dialogCreateVisible: false,
         dialogUpdateVisible: false,
         createLoading: false,
         updateLoading: false,
@@ -337,7 +424,6 @@
         this.tempStoresInfo = JSON.parse(sessionStorage.getItem('storesInfo'));
         console.log(this.tempStoresInfo);
       }
-
       let userInfo = sessionStorage.getItem('access-user');
       if (userInfo) {
         userInfo = JSON.parse(userInfo);
@@ -368,9 +454,9 @@
         this.filter.currentPage = val;
         this.getStores();
       },
-      // 重置
-      resetApp() {
-        this.$refs.createApp.resetFields();
+      // 重置表单
+      resetCreateStore() {
+        this.$refs.createStore.resetFields();
       },
       resetUpdate() {
         this.$refs.update.resetFields();
@@ -378,9 +464,13 @@
       //获取商户列表
       getStores() {
         this.loading = true;
-        this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores`).then(res => {
-          if(res.data.data){
-            res.data.data.forEach(val =>{
+        let storeId = sessionStorage.getItem('currentId');
+        this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores/${storeId}`).then(res => {
+            if(res.data.data.constructor !== Array){
+              this.stores.push(res.data.data);
+              console.log(this.stores)
+            }
+            this.stores.forEach(val =>{
               if(val.channelType === 'WECHAT'){
                 val.channelType = '微信公众号'
               }
@@ -395,8 +485,6 @@
               val.todayTradeAmount += '元';
               val.dailyLimit += '元';
             });
-            this.stores = res.data.data;
-          }
           //查询
           let queryData = [];
           if(this.keywords !==""){
@@ -418,28 +506,6 @@
       },
       view(row){
         this.$refs.table.toggleRowExpansion(row);
-      },
-      // 新增App
-      handleCreateApp(){
-        this.$refs.create.validate((valid) => {
-          if (valid) {
-            this.createLoading = true;
-            this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/apps`,this.create).then(res => {
-              this.$message.success('创建用户成功！');
-              this.dialogCreateVisible = false;
-              this.createLoading = false;
-              this.resetApp();
-              this.getApps();
-            }).catch(() =>{
-              this.$message.error('创建用户失败！');
-              this.resetApp();
-              this.createLoading = false;
-            })
-          }
-          else {
-            return false;
-          }
-        });
       },
       setCurrent(row){
         console.log(row);
@@ -486,6 +552,24 @@
         }).catch(() => {
           this.$message.error('增加额度失败！');
         })
+      },
+      handleCreateChannel(){
+        this.$refs.create.validate((valid) => {
+          if (valid) {
+            this.createLoading = true;
+            this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/channels`,this.create).then(res => {
+              console.log(res);
+              this.$message.success('新增通道成功！');
+              this.dialogCreateVisible = false;
+              this.createLoading = false;
+              this.reset();
+              this.getChannels();
+            })
+          }
+          else {
+            return false;
+          }
+        });
       },
       //查看商户通道列表
       viewChannel(row){

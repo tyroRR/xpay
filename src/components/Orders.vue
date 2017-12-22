@@ -61,9 +61,9 @@
                 :default-sort = "{prop: 'orderNo', order: 'descending'}">
         <el-table-column prop="name" label="商户名称"></el-table-column>
         <el-table-column sortable prop="storeChannelId" label="storeChannelId"></el-table-column>
-        <el-table-column prop="orderNo" sortable  label="订单号"></el-table-column>
-        <el-table-column prop="orderTime" sortable  label="下单时间"></el-table-column>
-        <el-table-column prop="sellerOrderNo" sortable  label="卖家单号"></el-table-column>
+        <el-table-column prop="orderNo" sortable label="订单号"></el-table-column>
+        <el-table-column prop="orderTime" sortable label="下单时间"></el-table-column>
+        <el-table-column prop="sellerOrderNo" sortable label="卖家单号"></el-table-column>
         <el-table-column prop="payChannel" label="支付方式"></el-table-column>
         <el-table-column prop="returnUrl" label="returnUrl"></el-table-column>
         <el-table-column prop="status" label="状态"></el-table-column>
@@ -89,6 +89,8 @@
   export default {
     data: function() {
       return {
+        originalData:[],
+        successVal: 0,
         pickerOptions: {
           shortcuts: [{
             text: '最近两天',
@@ -167,14 +169,21 @@
         else return val;
       },
       getSummaries(param) {
-        const { columns, data } = param;
+        const { columns,data } = param;
+        let originalData = this.originalData;
+        let successSum = 0;
+        originalData.map(item =>{
+          if(item.status === 'SUCCESS'){
+            successSum += item.totalFee;
+          }
+        });
         const sums = [];
         columns.forEach((column, index) => {
           if (index === 0) {
             sums[index] = '总计';
           }
           if (index === 7) {
-            const counts = data.map(item => item[column.property]);
+            const counts = originalData.map(item => item[column.property]);
             let count = 0;
             counts.forEach(status => {
                 if(status === "SUCCESS"){
@@ -183,13 +192,11 @@
               });
               sums[index] = `成功 ${count} 笔`;
           }
-          const values = data.map(item => Number(item[column.property]));
           if (index === 8) {
-            sums[index] = values.reduce( (prev, curr) => prev+curr, 0 );
+            sums[index] = successSum;
             sums[index] += ' 元';
           }
         });
-
         return sums;
       },
       selected(data) {
@@ -219,6 +226,7 @@
           }
           else url = `http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/orders?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`;
           this.$http.get(url).then(res => {
+            this.originalData = res.data.data;
             let orders = res.data.data;
             if (orders){
               orders.forEach((order) =>{
@@ -229,10 +237,12 @@
                   }
                 })
               });
+              this.totalRows = orders.length;
               //分页
               this.filter.beginIndex = (this.filter.currentPage-1)*10;
               this.orders = orders.splice(this.filter.beginIndex,this.filter.pageSize);
-              console.log(orders);
+              //console.log(this.totalRows);
+              //console.log(orders);
             }
             else this.orders = [];
             this.loading = false;
@@ -248,7 +258,7 @@
           const { export_json_to_excel } = require('@/utils/Export2Excel');
           const tHeader = ['商户名称', 'storeChannelId', '订单号', '下单时间', '卖家单号', '支付方式','returnUrl','状态','金额'];
           const filterVal = ['name', 'storeChannelId', 'orderNo', 'orderTime', 'sellerOrderNo', 'payChannel','returnUrl','status','totalFee'];
-          const list = this.orders;
+          const list = this.originalData;
           const data = this.formatJson(filterVal, list);
           export_json_to_excel(tHeader, data, this.filename);
           this.downloadLoading = false;

@@ -84,6 +84,8 @@
   export default {
     data: function() {
       return {
+        originalData:[],
+        successVal: 0,
         pickerOptions: {
           shortcuts: [{
             text: '最近两天',
@@ -148,13 +150,20 @@
       },
       getSummaries(param) {
         const { columns, data } = param;
+        let originalData = this.originalData;
+        let successSum = 0;
+        originalData.map(item =>{
+          if(item.status === 'SUCCESS'){
+            successSum += item.amount;
+          }
+        });
         const sums = [];
         columns.forEach((column, index) => {
           if (index === 0) {
             sums[index] = '总计';
           }
           if (index === 6) {
-            const counts = data.map(item => item[column.property]);
+            const counts = originalData.map(item => item[column.property]);
             let count = 0;
             counts.forEach(status => {
               if(status === "SUCCESS"){
@@ -163,9 +172,8 @@
             });
             sums[index] = `成功 ${count} 笔`;
           }
-          const values = data.map(item => Number(item[column.property]));
           if (index === 7) {
-            sums[index] = values.reduce( (prev, curr) => prev+curr, 0 );
+            sums[index] = successSum;
             sums[index] += ' 元';
           }
         });
@@ -199,6 +207,7 @@
           }
           else url = `http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/transactions?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`;
           this.$http.get(url).then(res => {
+            this.originalData = res.data.data;
             let orders = res.data.data;
             if (orders){
               orders.forEach((order) =>{
@@ -209,6 +218,7 @@
                   }
                 })
               });
+              this.totalRows = orders.length;
               //分页
               this.filter.beginIndex = (this.filter.currentPage-1)*10;
               this.recharges = orders.splice(this.filter.beginIndex,this.filter.pageSize);
@@ -227,7 +237,7 @@
           const { export_json_to_excel } = require('@/utils/Export2Excel');
           const tHeader = ['商户名称', '订单号', '交易额度', '费率', '交易时间', '操作类型','状态','金额'];
           const filterVal = ['name', 'orderNo', 'quota', 'bailPercentage', 'createDate', 'operation','status','amount'];
-          const list = this.recharges;
+          const list = this.originalData;
           const data = this.formatJson(filterVal, list);
           export_json_to_excel(tHeader, data, this.filename);
           this.downloadLoading = false;

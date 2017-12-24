@@ -170,7 +170,7 @@
       },
       getSummaries(param) {
         const { columns,data } = param;
-        let originalData = this.originalData;
+        const originalData = data.concat(this.originalData);
         let successSum = 0;
         originalData.map(item =>{
           if(item.status === 'SUCCESS'){
@@ -199,9 +199,6 @@
         });
         return sums;
       },
-      selected(data) {
-        this.orders = data
-      },
       pageSizeChange(val) {
         console.log(`每页 ${val} 条`);
         this.filter.pageSize = val;
@@ -226,6 +223,7 @@
           }
           else url = `http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/orders?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`;
           this.$http.get(url).then(res => {
+            console.log(res.data.data);
             this.originalData = res.data.data;
             let orders = res.data.data;
             if (orders){
@@ -239,7 +237,7 @@
               });
               this.totalRows = orders.length;
               //分页
-              this.filter.beginIndex = (this.filter.currentPage-1)*10;
+              this.filter.beginIndex = (this.filter.currentPage-1)*this.filter.pageSize;
               this.orders = orders.splice(this.filter.beginIndex,this.filter.pageSize);
               //console.log(this.totalRows);
               //console.log(orders);
@@ -258,6 +256,7 @@
           const { export_json_to_excel } = require('@/utils/Export2Excel');
           const tHeader = ['商户名称', 'storeChannelId', '订单号', '下单时间', '卖家单号', '支付方式','returnUrl','状态','金额'];
           const filterVal = ['name', 'storeChannelId', 'orderNo', 'orderTime', 'sellerOrderNo', 'payChannel','returnUrl','status','totalFee'];
+          console.log(this.originalData);
           const list = this.originalData;
           const data = this.formatJson(filterVal, list);
           export_json_to_excel(tHeader, data, this.filename);

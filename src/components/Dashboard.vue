@@ -248,7 +248,7 @@
           else queryData = this.stores;
           this.totalRows = queryData.length;
           //分页
-          this.filter.beginIndex = (this.filter.currentPage-1)*10;
+          this.filter.beginIndex = (this.filter.currentPage-1)*this.filter.pageSize;
           this.stores = queryData.splice(this.filter.beginIndex,this.filter.pageSize);
           this.loading = false;
           this.selected.splice(0,this.selected.length);

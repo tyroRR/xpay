@@ -220,7 +220,7 @@
               });
               this.totalRows = orders.length;
               //分页
-              this.filter.beginIndex = (this.filter.currentPage-1)*10;
+              this.filter.beginIndex = (this.filter.currentPage-1)*this.filter.pageSize;
               this.recharges = orders.splice(this.filter.beginIndex,this.filter.pageSize);
             }
             else this.recharges = [];

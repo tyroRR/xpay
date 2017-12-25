@@ -78,10 +78,6 @@
                   let storesInfo = res.data.data.map(val => [val.id,val.name,val.code,storeId]);
                   sessionStorage.setItem('storesInfo',JSON.stringify(storesInfo));
                 });
-                this.$http.get(`http://www.wfpay.xyz/xpay/admin/${res.data.data.id}/stores/${res.data.data.storeId}`).then(res => {
-                  sessionStorage.setItem('code',res.data.data.code);
-                  sessionStorage.setItem('quota',res.data.data.quota);
-                });
                 this.$http.get(`http://www.wfpay.xyz/xpay/admin/${res.data.data.id}/apps`).then(res => {
                   if(res.data.data){
                     sessionStorage.setItem('key',res.data.data[0].key);

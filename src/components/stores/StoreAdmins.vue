@@ -17,13 +17,13 @@
         <el-form :inline="true" class="demo-form-inline" >
             <el-input :placeholder="placeholder" v-model="keywords" style="width: 30%;">
               <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:130px">
-                <el-option label="商户名称" value="name"></el-option>
+                <el-option label="用户名" value="name"></el-option>
                 <el-option label="管理员账号" value="account"></el-option>
               </el-select>
               <el-button slot="append" icon="el-icon-search" @click="getStores">查询</el-button>
             </el-input>
           <template v-if="userInfo.role === 'ADMIN'">
-            <el-button type="info" plain icon="el-icon-plus" @click="dialogCreateVisible = true">添加</el-button>
+            <el-button type="info" plain icon="el-icon-plus" @click="dialogCreateVisible = true">创建商户</el-button>
           </template>
         </el-form>
       </el-col>
@@ -44,7 +44,7 @@
             </el-form>
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="商户名称" align="center">
+        <el-table-column prop="name" label="用户名" align="center">
           <template slot-scope="scope">
             <el-button @click="viewDetail(scope.row)" type="text" size="small">{{scope.row.name}}</el-button>
           </template>
@@ -80,23 +80,16 @@
       </el-table>
 
       <template v-if="userInfo.role === 'ADMIN'">
-        <!-- 新增商户-->
-        <el-dialog title="新增商户" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
-          <el-form id="#createAdmin" ref="createAdmin" :model="createAdmin" :rules="createAdminRules"  label-width="100px">
+        <!-- 创建商户-->
+        <el-dialog title="创建商户" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
+          <el-form id="#createAdmin" ref="createAdmin" :model="createAdmin" :rules="createAdminRules"  label-width="120px">
             <el-form-item prop="name" label="用户名">
               <el-input v-model="createAdmin.name"></el-input>
             </el-form-item>
-            <el-form-item prop="account" label="账号">
-              <el-input v-model="createAdmin.account"></el-input>
-            </el-form-item>
-            <el-form-item prop="password" label="密码">
-              <el-input type="password" v-model="createAdmin.password" placeholder="默认密码为123456"></el-input>
-            </el-form-item>
-            <el-form-item prop="role" label="权限">
-              <el-select v-model="createAdmin.role" placeholder="请选择用户权限">
-                <el-option label="代理商" value="AGENT"></el-option>
-                <el-option label="商户管理员" value="STORE"></el-option>
-              </el-select>
+            <el-form-item label="费率" prop="bailPercentage">
+              <el-input v-model="createAdmin.bailPercentage">
+                <template slot="append">%</template>
+              </el-input>
             </el-form-item>
             <el-form-item label="代理商" prop="agentId">
               <el-select v-model="createAdmin.agentId" placeholder="请选择代理商(没有可不选)">
@@ -108,6 +101,37 @@
                 </el-option>
               </el-select>
             </el-form-item>
+
+            <el-form-item label="通道ID" prop="extStoreId">
+              <el-input v-model="createAdmin.extStoreId"></el-input>
+            </el-form-item>
+            <el-form-item label="通道名称" prop="extStoreName">
+              <el-input v-model="createAdmin.extStoreName"></el-input>
+            </el-form-item>
+            <el-form-item label="支付网关类型" prop="paymentGateway">
+              <el-select v-model="createAdmin.paymentGateway" placeholder="请选择支付网关类型">
+                <el-option label="银商H5" value="CHINAUMSH5"></el-option>
+                <el-option label="银商APP" value="CHINAUMSAPP"></el-option>
+                <el-option label="环迅" value="IPS"></el-option>
+              </el-select>
+            </el-form-item>
+            <template v-if="createAdmin.paymentGateway === 'CHINAUMSH5'||createAdmin.paymentGateway === 'CHINAUMSAPP'">
+              <el-form-item label="终端号" prop="tid">
+                <el-input v-model="createAdmin.chinaUmsProps.tid"></el-input>
+              </el-form-item>
+              <el-form-item label="消息源ID" prop="msgSrcId">
+                <el-input v-model="createAdmin.chinaUmsProps.msgSrcId"></el-input>
+              </el-form-item>
+              <el-form-item label="消息源" prop="msgSrc">
+                <el-input v-model="createAdmin.chinaUmsProps.msgSrc"></el-input>
+              </el-form-item>
+              <el-form-item label="签名秘钥" prop="signKey">
+                <el-input v-model="createAdmin.chinaUmsProps.signKey"></el-input>
+              </el-form-item>
+              <el-form-item label="机构号" prop="InstMid">
+                <el-input v-model="createAdmin.chinaUmsProps.InstMid"></el-input>
+              </el-form-item>
+            </template>
           </el-form>
 
           <div slot="footer" class="dialog-footer">
@@ -157,7 +181,7 @@
 
 <script>
   let placeholders = {
-    "name":"请输入商户名称",
+    "name":"请输入用户名",
     "adminId":"管理员ID",
     "adminName":"管理员姓名",
   };
@@ -182,26 +206,10 @@
           proxyUrl: '',
           dailyLimit: ''
         },
-        appParam: {
-          name: ''
-        },
-        createStore: {
+        createAdmin: {
           name: '',
           bailPercentage: '',
-          appId: '',
-          csrTel: '',
-          channelType: '',
-          adminName: '',
-          agentId: ''
-        },
-        createAdmin: {
-          account: '',
-          password: '123456',
-          name: '',
-          role: '',
-          storeId: ''
-        },
-        createChannel: {
+          agentId: "",
           extStoreId: "",
           extStoreName: "",
           paymentGateway: "",
@@ -209,9 +217,10 @@
             tid: "",
             msgSrcId: "",
             msgSrc: "",
-            signKey: ""
+            signKey: "",
+            InstMid: ""
           },
-          InstMid: ""
+
         },
         tempStoresInfo:{},
         formEdit: {
@@ -221,17 +230,20 @@
           role: ''
         },
         createAdminRules: {
-          account: [
-            { required: true, message: '请输入账号', trigger: 'blur' },
-          ],
-          password: [
-            { required: true, message: '请输入密码', trigger: 'blur' },
-          ],
           name: [
             { required: true, message: '请输入用户名', trigger: 'blur' },
           ],
-          role: [
-            { required: true, message: '请选择权限', trigger: 'blur' },
+          bailPercentage: [
+            { required: true, message: '请输入费率', trigger: 'blur' },
+          ],
+          extStoreId: [
+            { required: true, message: '请输入通道ID', trigger: 'blur' },
+          ],
+          extStoreName: [
+            { required: true, message: '请输入通道名称', trigger: 'blur' },
+          ],
+          paymentGateway: [
+            { required: true, message: '请选择支付网关类型', trigger: 'blur' },
           ]
         },
         /*createStoreRules: {
@@ -317,7 +329,7 @@
         this.userInfo.role = userInfo.role;
       }
 
-      this.getStores()
+      this.getStores();
     },
     methods: {
       tableSelectionChange(val) {
@@ -386,7 +398,18 @@
         this.$refs.table.toggleRowExpansion(row);
       },
       viewDetail(row){
-        sessionStorage.setItem('currentId',row.id);
+        if(row.id){
+          sessionStorage.setItem('currentId',row.id);
+        }
+        if(row.app){
+          sessionStorage.setItem('currentAppId',row.app.id);
+        }
+        if(row.agent){
+          sessionStorage.setItem('currentAgentId',row.agent.id);
+        }
+        if(row.admin){
+          sessionStorage.setItem('currentAdminId',row.admin.id);
+        }
         sessionStorage.setItem('details',JSON.stringify(row));
         this.$router.push({ path: '/store/storeDetails' });
       },
@@ -401,29 +424,18 @@
         })
       },
       handleCreateAdmin(){
-        this.$http.get(`http://www.wfpay.xyz/xpay/admin/agents`).then(res => {
-          let hasStoreId = res.data.data.some(storeId => storeId === this.createAdmin.storeId);
-          console.log(hasStoreId);
-          if(hasStoreId){
-            this.$message.success('该商户已拥有商户管理员！');
-            this.steps.active ++
-          }
-          else{
-            this.$refs.createAdmin.validate((valid) => {
-              if (valid) {
-                this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/`,this.createAdmin).then(() => {
-                  this.$message.success('创建商户管理员成功！');
-                  this.reset();
-                  this.steps.active ++
-                }).catch(() => {
-                  this.$message.error('创建商户管理员失败！');
-                  this.reset();
-                })
-              }
-              else {
-                return false;
-              }
+        this.$refs.createAdmin.validate((valid) => {
+          if (valid) {
+            this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores/quick`,this.createAdmin).then(() => {
+              this.$message.success('创建成功！');
+              this.reset();
+            }).catch(() => {
+              this.$message.error('创建失败！');
+              this.reset();
             })
+          }
+          else {
+            return false;
           }
         })
       },

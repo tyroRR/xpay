@@ -29,13 +29,13 @@
           <el-table-column type="expand">
             <template slot-scope="props">
               <el-form label-position="left" inline class="demo-table-expand">
-                <el-form-item label="商户号">
+                <el-form-item label="storeId">
                   <span>{{ props.row.code }}</span>
                 </el-form-item>
-                <el-form-item label="key">
+                <el-form-item label="appId">
                   <span>{{ props.row.app.key }}</span>
                 </el-form-item>
-                <el-form-item label="secret">
+                <el-form-item label="appSecret">
                   <span>{{ props.row.app.secret }}</span>
                 </el-form-item>
               </el-form>
@@ -46,8 +46,8 @@
           <el-table-column prop="name" label="商户名" align="center"></el-table-column>
           <el-table-column prop="bailPercentage" sortable label="费率" align="center"></el-table-column>
           <el-table-column prop="quota" sortable label="剩余交易额度" align="center"></el-table-column>
-          <el-table-column prop="todayTradeAmount" sortable label="今日交易额度" align="center"></el-table-column>
-          <el-table-column prop="lastTradeAmount" sortable label="昨日交易额度" align="center"></el-table-column>
+          <el-table-column prop="todayTradeAmount" sortable label="今日交易额" align="center"></el-table-column>
+          <el-table-column prop="lastTradeAmount" sortable label="昨日交易额" align="center"></el-table-column>
           <el-table-column prop="lastRechargeAmount" sortable label="最近一笔充值" align="center"></el-table-column>
           <el-table-column prop="dailyLimit" sortable label="日交易额上限" align="center"></el-table-column>
           <el-table-column label="操作" align="center">
@@ -316,7 +316,7 @@
     font-size: 0;
   }
   .demo-table-expand label {
-    width: 90px;
+    width: 5%;
     color: #99a9bf;
   }
   .demo-table-expand .el-form-item {

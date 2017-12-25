@@ -58,7 +58,7 @@
                 height="680"
                 :summary-method="getSummaries"
                 show-summary
-                :default-sort = "{prop: 'orderNo', order: 'descending'}">
+                :default-sort = "{prop: 'orderTime', order: 'descending'}">
         <el-table-column prop="name" label="商户名称"></el-table-column>
         <el-table-column sortable prop="storeChannelId" label="storeChannelId"></el-table-column>
         <el-table-column prop="orderNo" sortable label="订单号"></el-table-column>
@@ -67,7 +67,7 @@
         <el-table-column prop="payChannel" label="支付方式"></el-table-column>
         <el-table-column prop="returnUrl" label="returnUrl"></el-table-column>
         <el-table-column prop="status" label="状态"></el-table-column>
-        <el-table-column prop="totalFee" sortable  label="金额"></el-table-column>
+        <el-table-column prop="totalFee" sortable  label="金额 （元）"></el-table-column>
       </el-table>
 
       <el-pagination class="paging"
@@ -143,6 +143,7 @@
       this.pickerTime.push(startTime,endTime);
       this.storesInfo = JSON.parse(sessionStorage.getItem('storesInfo'));
       //console.log(this.storesInfo);
+
       this.getOrders();
     },
     methods: {
@@ -170,7 +171,7 @@
       },
       getSummaries(param) {
         const { columns,data } = param;
-        const originalData = data.concat(this.originalData);
+        const originalData = this.originalData;
         let successSum = 0;
         originalData.map(item =>{
           if(item.status === 'SUCCESS'){
@@ -223,8 +224,13 @@
           }
           else url = `http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/orders?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`;
           this.$http.get(url).then(res => {
-            console.log(res.data.data);
-            this.originalData = res.data.data;
+            if(this.originalData.length === 0){
+              this.originalData = this.originalData.concat(res.data.data);
+            }
+            else {
+              this.originalData = [];
+              this.originalData = this.originalData.concat(res.data.data);
+            }
             let orders = res.data.data;
             if (orders){
               orders.forEach((order) =>{
@@ -237,7 +243,7 @@
               });
               this.totalRows = orders.length;
               //分页
-              this.filter.beginIndex = (this.filter.currentPage-1)*this.filter.pageSize;
+              this.filter.beginIndex = (this.filter.currentPage-1)*10;
               this.orders = orders.splice(this.filter.beginIndex,this.filter.pageSize);
               //console.log(this.totalRows);
               //console.log(orders);

@@ -54,7 +54,7 @@
                 height="680"
                 :summary-method="getSummaries"
                 show-summary
-                :default-sort = "{prop: 'orderNo', order: 'descending'}">
+                :default-sort = "{prop: 'orderTime', order: 'descending'}">
         <el-table-column prop="name" label="商户名称"></el-table-column>
         <el-table-column prop="orderNo" sortable  label="订单号"></el-table-column>
         <el-table-column prop="quota" sortable label="交易额度"></el-table-column>
@@ -62,7 +62,7 @@
         <el-table-column prop="createDate" sortable label="交易时间"></el-table-column>
         <el-table-column prop="operation" label="操作类型"></el-table-column>
         <el-table-column prop="status" label="状态"></el-table-column>
-        <el-table-column prop="amount" sortable label="金额"></el-table-column>
+        <el-table-column prop="amount" sortable label="金额 （元）"></el-table-column>
       </el-table>
 
       <el-pagination class="paging"
@@ -150,7 +150,7 @@
       },
       getSummaries(param) {
         const { columns, data } = param;
-        let originalData = this.originalData;
+        const originalData = this.originalData;
         let successSum = 0;
         originalData.map(item =>{
           if(item.status === 'SUCCESS'){
@@ -180,9 +180,6 @@
 
         return sums;
       },
-      selected(data) {
-        this.recharges = data
-      },
       pageSizeChange(val) {
         console.log(`每页 ${val} 条`);
         this.filter.pageSize = val;
@@ -207,7 +204,17 @@
           }
           else url = `http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/transactions?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`;
           this.$http.get(url).then(res => {
-            this.originalData = res.data.data;
+            if(this.originalData.length === 0){
+              this.originalData = this.originalData.concat(res.data.data);
+            }
+            else {
+              this.originalData = [];
+              this.originalData = this.originalData.concat(res.data.data);
+            }
+            res.data.data.forEach(val =>{
+              val.bailPercentage += '%';
+              val.quota += '元';
+            });
             let orders = res.data.data;
             if (orders){
               orders.forEach((order) =>{

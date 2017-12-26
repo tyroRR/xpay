@@ -44,7 +44,7 @@
             </el-form>
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="用户名" align="center">
+        <el-table-column prop="name" label="商户名" align="center">
           <template slot-scope="scope">
             <el-button @click="viewDetail(scope.row)" type="text" size="small">{{scope.row.name}}</el-button>
           </template>
@@ -83,7 +83,7 @@
         <!-- 创建商户-->
         <el-dialog title="创建商户" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
           <el-form id="#createAdmin" ref="createAdmin" :model="createAdmin" :rules="createAdminRules"  label-width="120px">
-            <el-form-item prop="name" label="用户名">
+            <el-form-item prop="name" label="商户名">
               <el-input v-model="createAdmin.name"></el-input>
             </el-form-item>
             <el-form-item label="费率" prop="bailPercentage">
@@ -142,7 +142,7 @@
 
         <el-dialog title="修改密码" v-model="dialogChangePwdVisible" :visible.sync="dialogChangePwdVisible" :close-on-click-modal="false">
           <el-form ref="formEdit" :model="formEdit" label-width="100px">
-            <el-form-item label="用户名">
+            <el-form-item label="商户名">
               <el-input v-model="formEdit.name" disabled></el-input>
             </el-form-item>
             <el-form-item prop="account" label="账号">

@@ -14,7 +14,7 @@
       <!-- 查询 -->
       <el-col :span="24" class="toolbar" style="padding-bottom: 0">
         <el-form :inline="true" class="demo-form-inline">
-          <el-input placeholder="请输入订单号" v-model="keywords" style="width: 30%; margin-right: 15px">
+          <el-input placeholder="请输入订单号" v-model="orderNo" style="width: 25%; margin-right: 15px">
             <template slot="prepend">订单号</template>
             <el-button slot="append" icon="el-icon-search" @click="query">查询</el-button>
           </el-input>
@@ -118,7 +118,7 @@
           currentPage: 1,
           beginIndex: 0,
         },
-        keywords: '',
+        orderNo: '',
         totalRows: 0,
         loading: true,
         filename: '',
@@ -148,8 +148,8 @@
     },
     methods: {
       query() {
-        //查询
-        let queryData = [];
+        //订单号查询
+        /*let queryData = [];
         if(this.keywords !==""){
           for (var i=0,lenI=this.orders.length;i<lenI;i++) {
             let reg = new RegExp(this.keywords);
@@ -161,7 +161,10 @@
         }
         else queryData = this.orders;
         this.totalRows = queryData.length;
-        this.orders = queryData
+        this.orders = queryData*/
+        this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/orders/${this.orderNo}`).then(res =>{
+          this.orders.push(res.data.data);
+        })
       },
       zeroFill(val){
         if(val >=0 && val<=9){

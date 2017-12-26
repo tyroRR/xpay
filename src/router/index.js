@@ -4,17 +4,12 @@ import { getToken, setToken, removeToken } from '@/utils/auth'
 import Home from '@/components/Home'
 import Dashboard from '@/components/Dashboard'
 
-import CreateAdmin from '@/components/system/CreateAdmin'
-import EditAdmin from '@/components/system/EditAdmin'
-import IncreaseQuota from '@/components/system/IncreaseQuota'
 import Channels from '@/components/Channels'
 import AgentList from '@/components/AgentList'
-import Recharge from '@/components/Recharge/Recharge'
 import RechargeList from '@/components/Recharge/RechargeList'
 import StoreAdmins from '@/components/stores/StoreAdmins'
 import StoreDetails from '@/components/stores/StoreDetails'
 import StoreChannels from '@/components/stores/StoreChannels'
-import AppList from '@/components/stores/AppList'
 import DomainName from '@/components/stores/DomainName'
 import Orders from '@/components/Orders'
 import Complain from '@/components/Complain'
@@ -74,7 +69,7 @@ let router = new Router({
       path: '/',
       component: Home,
       meta: { role: 'ADMIN'},
-      iconCls: 'iconfont icon-users',
+      iconCls: 'iconfont icon-users1',
       leaf: true,
       menuShow: true,
       children: [
@@ -139,7 +134,7 @@ let router = new Router({
     {
       path: '/',
       component: Home,
-      iconCls: 'iconfont icon-users',
+      iconCls: 'iconfont icon-home1',
       leaf: true,
       menuShow: true,
       children: [

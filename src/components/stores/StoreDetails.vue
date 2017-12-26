@@ -262,7 +262,6 @@
           transaction_type: 'FREE'
         },
         storeId: '',
-
         createAdminRules: {
           account: [
             { required: true, message: '请输入账号', trigger: 'blur' },

@@ -14,7 +14,7 @@
       <!-- 查询 -->
       <el-col :span="24" class="toolbar" style="padding-bottom: 10px;">
         <el-form :inline="true" class="demo-form-inline">
-          <el-input :placeholder="placeholder" v-model="keywords" style="width: 28%">
+          <el-input :placeholder="placeholder" v-model="keywords" style="width: 25%" @keyup.enter.native="getAgents">
             <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:100px">
               <el-option label="id" value="id"></el-option>
               <el-option label="账号" value="account"></el-option>

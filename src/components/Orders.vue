@@ -14,7 +14,7 @@
       <!-- 查询 -->
       <el-col :span="24" class="toolbar" style="padding-bottom: 0">
         <el-form :inline="true" class="demo-form-inline">
-          <el-input placeholder="请输入订单号" v-model="orderNo" style="width: 25%; margin-right: 15px">
+          <el-input placeholder="请输入订单号" v-model="orderNo" style="width: 25%; margin-right: 15px" @keyup.enter.native="query">
             <template slot="prepend">订单号</template>
             <el-button slot="append" icon="el-icon-search" @click="query">查询</el-button>
           </el-input>
@@ -198,7 +198,7 @@
           }
           if (index === 8) {
             sums[index] = successSum;
-            sums[index] += ' 元';
+            sums[index] = Math.floor(sums[index]) + ' 元';
           }
         });
         return sums;

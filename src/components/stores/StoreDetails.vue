@@ -16,8 +16,8 @@
       <!-- 查询 -->
       <el-col :span="24" class="toolbar">
         <el-form :inline="true" class="demo-form-inline" >
-            <el-input :placeholder="placeholder" v-model="keywords" style="width: 30%;">
-              <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:130px">
+            <el-input :placeholder="placeholder" v-model="keywords" style="width: 25%;" @keyup.enter.native="getStores">
+              <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:110px">
                 <el-option label="商户名" value="name"></el-option>
                 <el-option label="通道类型" value="channelType"></el-option>
                 <el-option label="费率" value="bailPercentage"></el-option>
@@ -43,10 +43,14 @@
                 <span>{{ props.row.code }}</span>
               </el-form-item>
               <el-form-item label="appKey">
-                <span>{{ props.row.app.key }}</span>
+                <template v-if="props.row.app">
+                  <span>{{ props.row.app.key }}</span>
+                </template>
               </el-form-item>
               <el-form-item label="appSecret">
-                <span>{{ props.row.app.secret }}</span>
+                <template v-if="props.row.app">
+                  <span>{{ props.row.app.secret }}</span>
+                </template>
               </el-form-item>
             </el-form>
           </template>

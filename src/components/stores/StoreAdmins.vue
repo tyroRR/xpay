@@ -15,9 +15,9 @@
       <!-- 查询 -->
       <el-col :span="24" class="toolbar">
         <el-form :inline="true" class="demo-form-inline" >
-            <el-input :placeholder="placeholder" v-model="keywords" style="width: 30%;">
-              <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:130px">
-                <el-option label="用户名" value="name"></el-option>
+            <el-input :placeholder="placeholder" v-model="keywords" style="width: 25%;" @keyup.enter.native="getStores">
+              <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:118px">
+                <el-option label="商户名" value="name"></el-option>
                 <el-option label="管理员账号" value="account"></el-option>
               </el-select>
               <el-button slot="append" icon="el-icon-search" @click="getStores">查询</el-button>
@@ -181,7 +181,7 @@
 
 <script>
   let placeholders = {
-    "name":"请输入用户名",
+    "name":"请输入商户名",
     "adminId":"管理员ID",
     "adminName":"管理员姓名",
   };

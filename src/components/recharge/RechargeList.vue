@@ -19,9 +19,9 @@
               <el-select v-model="filter.name" filterable placeholder="请选择商户名称">
                 <el-option
                   v-for="item in storesInfo"
-                  :key="item[0]"
-                  :label="item[1]"
-                  :value="item[0]">
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id">
                 </el-option>
               </el-select>
             </el-form-item>
@@ -104,10 +104,7 @@
           name:'',
           role:''
         },
-        storesInfo:{
-          id:'',
-          name:''
-        },
+        storesInfo:{},
         recharges: [],
         filter: {
           name:'',
@@ -137,9 +134,12 @@
       let endTime = end.getFullYear()+'-'+this.zeroFill(end.getMonth()+1)+'-'+this.zeroFill(end.getDate());
       this.pickerTime = [];
       this.pickerTime.push(startTime,endTime);
-      this.storesInfo = JSON.parse(sessionStorage.getItem('storesInfo'));
-      //console.log(this.storesInfo);
-      this.getRecharges();
+      this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores`).then(res => {
+        if(res.data.data){
+          this.storesInfo = res.data.data;
+          this.getRecharges();
+        }
+      });
     },
     methods: {
       zeroFill(val){
@@ -174,7 +174,7 @@
           }
           if (index === 7) {
             sums[index] = successSum;
-            sums[index] += ' 元';
+            sums[index] = Math.floor(sums[index]) + ' 元';
           }
         });
 
@@ -196,8 +196,8 @@
           let url;
           if(this.filter.name){
             this.storesInfo.forEach(info =>{
-              if(this.filter.name === info[1]){
-                this.filter.name = info[0]
+              if(this.filter.name === info.name){
+                this.filter.name = info.id
               }
             });
             url = `http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/transactions?storeId=${this.filter.name}&startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`
@@ -220,8 +220,8 @@
               orders.forEach((order) =>{
                 let _order = order;
                 this.storesInfo.forEach(info =>{
-                  if(_order.storeId === info[0]){
-                    _order.name = info[1];
+                  if(_order.storeId === info.id){
+                    _order.name = info.name;
                   }
                 })
               });

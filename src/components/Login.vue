@@ -57,12 +57,12 @@
                       return agent
                     }
                   });
-                  this.$http.get(`http://www.wfpay.xyz/xpay/admin/${id}/apps`).then(res =>{
-                    let appsInfo = res.data.data;
-                    sessionStorage.setItem('appsInfo',JSON.stringify(appsInfo));
-                  });
                   sessionStorage.setItem('adminsInfo',JSON.stringify(adminsInfo));
                   sessionStorage.setItem('agentsInfo',JSON.stringify(agentsInfo));
+                  /*this.$http.get(`http://www.wfpay.xyz/xpay/admin/${id}/apps`).then(res =>{
+                    let appsInfo = res.data.data;
+                    sessionStorage.setItem('appsInfo',JSON.stringify(appsInfo));
+                  });*/
                 })
               }
               if(role === "AGENT"||role === "ADMIN"){
@@ -78,13 +78,13 @@
                   let storesInfo = res.data.data.map(val => [val.id,val.name,val.code,storeId]);
                   sessionStorage.setItem('storesInfo',JSON.stringify(storesInfo));
                 });
-                this.$http.get(`http://www.wfpay.xyz/xpay/admin/${res.data.data.id}/apps`).then(res => {
+                sessionStorage.setItem('storeId',res.data.data.storeId);
+                /*this.$http.get(`http://www.wfpay.xyz/xpay/admin/${res.data.data.id}/apps`).then(res => {
                   if(res.data.data){
                     sessionStorage.setItem('key',res.data.data[0].key);
                     sessionStorage.setItem('secret',res.data.data[0].secret);
                   }
-                });
-                sessionStorage.setItem('storeId',res.data.data.storeId);
+                });*/
               }
               this.$router.push({ path: '/' });
               //this.$router.addRoutes(asyncRouterMap);

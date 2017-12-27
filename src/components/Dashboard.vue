@@ -10,7 +10,7 @@
         <!-- 查询 -->
         <el-col :span="24" class="toolbar">
           <el-form :inline="true" class="demo-form-inline" >
-            <el-input :placeholder="placeholder" v-model="keywords" style="width: 25%;">
+            <el-input :placeholder="placeholder" v-model="keywords" style="width: 450px;">
               <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:130px">
                 <el-option label="商户名" value="name"></el-option>
                 <el-option label="通道类型" value="channelType"></el-option>

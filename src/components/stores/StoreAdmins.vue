@@ -15,7 +15,7 @@
       <!-- 查询 -->
       <el-col :span="24" class="toolbar">
         <el-form :inline="true" class="demo-form-inline" >
-            <el-input :placeholder="placeholder" v-model="keywords" style="width: 25%;" @keyup.enter.native="getStores">
+            <el-input :placeholder="placeholder" v-model="keywords" style="width: 400px;" @keyup.enter.native="getStores">
               <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:118px">
                 <el-option label="商户名" value="name"></el-option>
                 <el-option label="管理员账号" value="account"></el-option>
@@ -246,49 +246,6 @@
             { required: true, message: '请选择支付网关类型', trigger: 'blur' },
           ]
         },
-        /*createStoreRules: {
-          name: [
-            { required: true, message: '请输入商户名称', trigger: 'blur' },
-          ],
-          channelType: [
-            { required: true, message: '请输入通道类型', trigger: 'blur' },
-          ],
-          bailPercentage: [
-            { required: true, message: '请输入费率', trigger: 'blur' },
-          ],
-          csrTel: [
-            { required: true, message: '请输入客服联系方式', trigger: 'blur' },
-          ],
-          adminName: [
-            { required: true, message: '请输入管理员姓名', trigger: 'blur' },
-          ]
-        },
-        createChannelRules: {
-          extStoreId: [
-            { required: true, message: '请输入通道ID', trigger: 'blur' },
-          ],
-          extStoreName: [
-            { required: true, message: '请输入用户名', trigger: 'blur' },
-          ],
-          paymentGateway: [
-            { required: true, message: '请输入通道类型', trigger: 'blur' },
-          ],
-          tid: [
-            { required: true, message: '请输入终端号', trigger: 'blur' },
-          ],
-          msgSrcId: [
-            { required: true, message: '请输入消息源ID', trigger: 'blur' },
-          ],
-          msgSrc: [
-            { required: true, message: '请输入消息源', trigger: 'blur' },
-          ],
-          signKey: [
-            { required: true, message: '请输入消息源', trigger: 'blur' },
-          ],
-          agent: [
-            { required: true, message: '请输入代理商', trigger: 'blur' },
-          ]
-        },*/
         filter: {
           pageSize: 10,
           currentPage: 1,
@@ -457,5 +414,4 @@
   .btn-edit{
     float: right;
   }
-
 </style>

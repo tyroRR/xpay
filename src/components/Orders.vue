@@ -14,7 +14,7 @@
       <!-- 查询 -->
       <el-col :span="24" class="toolbar" style="padding-bottom: 0">
         <el-form :inline="true" class="demo-form-inline">
-          <el-input placeholder="请输入订单号" v-model="orderNo" style="width: 25%; margin-right: 15px" @keyup.enter.native="query">
+          <el-input placeholder="请输入订单号" v-model="orderNo" style="width: 450px; margin-right: 15px" @keyup.enter.native="query">
             <template slot="prepend">订单号</template>
             <el-button slot="append" icon="el-icon-search" @click="query">查询</el-button>
           </el-input>
@@ -68,6 +68,14 @@
         <el-table-column prop="returnUrl" label="returnUrl"></el-table-column>
         <el-table-column prop="status" label="状态"></el-table-column>
         <el-table-column prop="totalFee" sortable  label="金额 （元）"></el-table-column>
+        <el-table-column label="操作" align="center">
+          <template slot-scope="scope">
+            <el-button
+              size="mini" type="danger" plain
+              @click="refund(scope.row)">退款
+            </el-button>
+          </template>
+        </el-table-column>
       </el-table>
 
       <el-pagination class="paging"
@@ -150,28 +158,10 @@
     methods: {
       query() {
         //订单号查询
-        /*let queryData = [];
-        if(this.keywords !==""){
-          for (var i=0,lenI=this.orders.length;i<lenI;i++) {
-            let reg = new RegExp(this.keywords);
-            console.log(this.orders[i].orderNo);
-            if(this.orders[i].orderNo.toString().match(reg)){
-              queryData.push(this.orders[i]);
-            }
-          }
-        }
-        else queryData = this.orders;
-        this.totalRows = queryData.length;
-        this.orders = queryData*/
         this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/orders/${this.orderNo}`).then(res =>{
           this.orders = [];
           this.orders.push(res.data.data);
-          this.storesInfo.forEach(info =>{
-            console.log(this.orders[0]);
-            if(this.orders[0].storeId === info[0]){
-              this.orders[0].name = info[1];
-            }
-          });
+          this.orders[0].name = res.data.data.store.name;
           this.showSummary = false
         })
       },
@@ -270,6 +260,21 @@
             this.loading = false
           })
         }else this.$message.error("请选择查询日期")
+      },
+      refund(row){
+        this.$confirm('此操作将对 ' + row.orderNo + ' 订单进行退款, 是否继续?', '提示', { type: 'warning' })
+          .then(() => {
+            this.$http.delete(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/orders/${row.orderNo}`).then(() => {
+              this.$message.success("退款成功!");
+              this.getStores();
+            })
+              .catch(() => {
+                this.$message.error('退款失败!');
+              });
+          })
+          .catch(() => {
+            this.$message.info('已取消操作!');
+          });
       },
       handleDownload() {
         this.downloadLoading = true;

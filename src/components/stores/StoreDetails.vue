@@ -16,7 +16,7 @@
       <!-- 查询 -->
       <el-col :span="24" class="toolbar">
         <el-form :inline="true" class="demo-form-inline" >
-            <el-input :placeholder="placeholder" v-model="keywords" style="width: 25%;" @keyup.enter.native="getStores">
+            <el-input :placeholder="placeholder" v-model="keywords" style="width: 400px;" @keyup.enter.native="getStores">
               <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:110px">
                 <el-option label="商户名" value="name"></el-option>
                 <el-option label="通道类型" value="channelType"></el-option>
@@ -536,7 +536,7 @@
     font-size: 0;
   }
   .demo-table-expand label {
-    width: 5%;
+    width: 110px;
     color: #99a9bf;
   }
   .demo-table-expand .el-form-item {

@@ -57,7 +57,7 @@
                 style="width: 100%"
                 height="680"
                 :summary-method="getSummaries"
-                show-summary
+                :show-summary="showSummary"
                 :default-sort = "{prop: 'orderTime', order: 'descending'}">
         <el-table-column prop="name" label="商户名称"></el-table-column>
         <el-table-column sortable prop="storeChannelId" label="storeChannelId"></el-table-column>
@@ -91,6 +91,7 @@
       return {
         originalData:[],
         successVal: 0,
+        showSummary: true,
         pickerOptions: {
           shortcuts: [{
             text: '最近两天',
@@ -163,7 +164,15 @@
         this.totalRows = queryData.length;
         this.orders = queryData*/
         this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/orders/${this.orderNo}`).then(res =>{
+          this.orders = [];
           this.orders.push(res.data.data);
+          this.storesInfo.forEach(info =>{
+            console.log(this.orders[0]);
+            if(this.orders[0].storeId === info[0]){
+              this.orders[0].name = info[1];
+            }
+          });
+          this.showSummary = false
         })
       },
       zeroFill(val){
@@ -251,7 +260,10 @@
               //console.log(this.totalRows);
               //console.log(orders);
             }
-            else this.orders = [];
+            else {
+              this.orders = [];
+              this.showSummary = false
+            }
             this.loading = false;
           }).catch(() => {
             this.$message.error("未查询到有效订单 或 查询订单超过两天！");

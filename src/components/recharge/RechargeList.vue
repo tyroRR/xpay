@@ -53,7 +53,7 @@
                 style="width: 100%"
                 height="680"
                 :summary-method="getSummaries"
-                show-summary
+                :show-summary="showSummary"
                 :default-sort = "{prop: 'orderTime', order: 'descending'}">
         <el-table-column prop="name" label="商户名称"></el-table-column>
         <el-table-column prop="orderNo" sortable  label="订单号"></el-table-column>
@@ -86,6 +86,7 @@
       return {
         originalData:[],
         successVal: 0,
+        showSummary: true,
         pickerOptions: {
           shortcuts: [{
             text: '最近两天',
@@ -211,12 +212,12 @@
               this.originalData = [];
               this.originalData = this.originalData.concat(res.data.data);
             }
-            res.data.data.forEach(val =>{
-              val.bailPercentage += '%';
-              val.quota += '元';
-            });
             let orders = res.data.data;
             if (orders){
+              orders.forEach(val =>{
+                val.bailPercentage += '%';
+                val.quota += '元';
+              });
               orders.forEach((order) =>{
                 let _order = order;
                 this.storesInfo.forEach(info =>{
@@ -230,10 +231,13 @@
               this.filter.beginIndex = (this.filter.currentPage-1)*this.filter.pageSize;
               this.recharges = orders.splice(this.filter.beginIndex,this.filter.pageSize);
             }
-            else this.recharges = [];
+            else {
+              this.recharges = [];
+              this.showSummary = false
+            }
             this.loading = false;
           }).catch(() => {
-            this.$message.error("未查询到有效订单 或 查询订单超过两天！");
+            this.$message.error("未查询到有效订单！");
             this.loading = false
           })
         }else this.$message.error("请选择查询日期")

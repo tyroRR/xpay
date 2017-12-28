@@ -68,14 +68,16 @@
         <el-table-column prop="returnUrl" label="returnUrl"></el-table-column>
         <el-table-column prop="status" label="状态"></el-table-column>
         <el-table-column prop="totalFee" sortable  label="金额 （元）"></el-table-column>
-        <el-table-column label="操作" align="center">
-          <template slot-scope="scope">
-            <el-button
-              size="mini" type="danger" plain
-              @click="refund(scope.row)">退款
-            </el-button>
-          </template>
-        </el-table-column>
+        <template v-if="this.userInfo.role === 'ADMIN'">
+          <el-table-column label="操作" align="center">
+            <template slot-scope="scope">
+              <el-button
+                size="mini" type="danger" plain
+                @click="refund(scope.row)">退款
+              </el-button>
+            </template>
+          </el-table-column>
+        </template>
       </el-table>
 
       <el-pagination class="paging"

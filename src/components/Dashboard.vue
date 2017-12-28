@@ -56,10 +56,12 @@
                 size="mini" type="info" plain
                 @click="view(scope.row)">查看参数
               </el-button>
-              <el-button class="handle"
-                size="mini" type="primary" plain
-                @click="handleRecharge(scope.row)">充值
-              </el-button>
+              <template v-if="scope.row.channels[0].paymentGateway === 'CHINAUMSH5'||scope.row.channels[0].paymentGateway === 'CHINAUMSAPP'">
+                <el-button class="handle"
+                           size="mini" type="primary" plain
+                           @click="handleRecharge(scope.row)">充值
+                </el-button>
+              </template>
             </template>
           </el-table-column>
         </el-table>
@@ -190,6 +192,12 @@
             val.lastTradeAmount += '元';
             val.lastRechargeAmount += '元';
             val.dailyLimit += '元';
+            if(val.channels){
+              if(val.channels[0].paymentGateway === 'IPSQUICK'){
+                val.dailyLimit = '不限';
+                val.quota = '不限';
+              }
+            }
           });
           this.rechargeInfo = res.data.data;
         }

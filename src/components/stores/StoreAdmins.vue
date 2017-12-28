@@ -101,21 +101,20 @@
                 </el-option>
               </el-select>
             </el-form-item>
-
-            <el-form-item label="通道ID" prop="extStoreId">
-              <el-input v-model="createAdmin.extStoreId"></el-input>
-            </el-form-item>
             <el-form-item label="通道名称" prop="extStoreName">
               <el-input v-model="createAdmin.extStoreName"></el-input>
             </el-form-item>
             <el-form-item label="支付网关类型" prop="paymentGateway">
-              <el-select v-model="createAdmin.paymentGateway" placeholder="请选择支付网关类型">
+              <el-select v-model="createAdmin.paymentGateway" placeholder="请选择支付网关类型" @change="onChange">
                 <el-option label="银商H5" value="CHINAUMSH5"></el-option>
                 <el-option label="银商APP" value="CHINAUMSAPP"></el-option>
-                <el-option label="环迅" value="IPS"></el-option>
+                <el-option label="环迅" value="IPSQUICK"></el-option>
               </el-select>
             </el-form-item>
             <template v-if="createAdmin.paymentGateway === 'CHINAUMSH5'||createAdmin.paymentGateway === 'CHINAUMSAPP'">
+              <el-form-item label="通道ID" prop="extStoreId">
+                <el-input v-model="createAdmin.extStoreId"></el-input>
+              </el-form-item>
               <el-form-item label="终端号" prop="tid">
                 <el-input v-model="createAdmin.chinaUmsProps.tid"></el-input>
               </el-form-item>
@@ -209,6 +208,8 @@
         createAdmin: {
           name: '',
           bailPercentage: '',
+          dailyLimit: '',
+          quota: '',
           agentId: "",
           extStoreId: "",
           extStoreName: "",
@@ -227,7 +228,7 @@
           account: '',
           password: '',
           name: '',
-          role: ''
+          role: 'STORE'
         },
         createAdminRules: {
           name: [
@@ -237,7 +238,7 @@
             { required: true, message: '请输入费率', trigger: 'blur' },
           ],
           extStoreId: [
-            { required: true, message: '请输入通道ID', trigger: 'blur' },
+            { required: true, message: '请输入通道ID'},
           ],
           extStoreName: [
             { required: true, message: '请输入通道名称', trigger: 'blur' },
@@ -262,7 +263,6 @@
         loading: true,
         selected: [], //已选择项
         dialogCreateVisible: false, //创建对话框的显示状态
-        dialogUpdateVisible: false, //修改对话框的显示状态
         dialogChangePwdVisible: false,
         createLoading: false,
         updateLoading: false,
@@ -313,6 +313,11 @@
       },
       reset() {
         this.$refs.createAdmin.resetFields();
+      },
+      onChange(){
+        this.createAdmin.channelId = 2253;
+        this.createAdmin.dailyLimit = 10000000;
+        this.createAdmin.quota = 10000000
       },
       //获取商户列表
       getStores() {
@@ -370,22 +375,14 @@
         sessionStorage.setItem('details',JSON.stringify(row));
         this.$router.push({ path: '/store/storeDetails' });
       },
-      changePwd() {
-        this.$http.patch(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/`,this.formEdit).then(() => {
-          this.getStores();
-          this.$message.success('修改成功！');
-          this.$refs.formEdit.resetFields();
-        }).catch(() => {
-          this.$message.error('修改失败！');
-          this.$refs.formEdit.resetFields();
-        })
-      },
       handleCreateAdmin(){
         this.$refs.createAdmin.validate((valid) => {
           if (valid) {
             this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores/quick`,this.createAdmin).then(() => {
               this.$message.success('创建成功！');
               this.reset();
+              this.dialogCreateVisible = false;
+              this.getStores();
             }).catch(() => {
               this.$message.error('创建失败！');
               this.reset();
@@ -401,7 +398,17 @@
         this.formEdit.name = row.name;
         this.formEdit.account = row.admin.account;
       },
-
+      changePwd() {
+        this.$http.patch(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/`,this.formEdit).then(() => {
+          this.$message.success('修改成功！');
+          this.$refs.formEdit.resetFields();
+          this.dialogChangePwdVisible = false;
+          this.getStores();
+        }).catch(() => {
+          this.$message.error('修改失败！');
+          this.$refs.formEdit.resetFields();
+        })
+      },
     }
   }
 </script>

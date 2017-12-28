@@ -125,11 +125,13 @@
               <template slot="append">%</template>
             </el-input>
           </el-form-item>
-          <el-form-item label="日限额" prop="dailyLimit">
-            <el-input v-model="update.dailyLimit">
-              <template slot="append">元</template>
-            </el-input>
-          </el-form-item>
+          <template v-if="update.paymentGateway === 'CHINAUMSH5'||update.paymentGateway === 'CHINAUMSAPP'">
+            <el-form-item label="日限额" prop="dailyLimit">
+              <el-input v-model="update.dailyLimit">
+                <template slot="append">元</template>
+              </el-input>
+            </el-form-item>
+          </template>
           <el-form-item label="客服联系方式" prop="csrTel">
             <el-input v-model="update.csrTel"></el-input>
           </el-form-item>
@@ -234,7 +236,8 @@
           code: '',
           csrTel: '（投诉电话:,客服微信:）',
           proxyUrl: '',
-          dailyLimit: ''
+          dailyLimit: '',
+          paymentGateway: ''
         },
         createStore: {
           name: '',
@@ -308,9 +311,6 @@
           ],
           csrTel: [
             { required: true, message: '请输入客服联系方式', trigger: 'blur' },
-          ],
-          proxyUrl: [
-            { required: true, message: '请输入异步通知地址', trigger: 'blur' },
           ]
         },
         filter: {
@@ -402,6 +402,12 @@
               val.quota += '元';
               val.todayTradeAmount += '元';
               val.dailyLimit += '元';
+              if(val.channels){
+                if(val.channels[0].paymentGateway === 'IPSQUICK'){
+                  val.dailyLimit = '不限';
+                  val.quota = '不限';
+                }
+              }
             });
           //查询
           let queryData = [];
@@ -435,6 +441,7 @@
             this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores`,this.createStore).then(() => {
               this.$message.success('创建商户成功！');
               this.resetCreateStore();
+              this.getStores();
               this.dialogCreateStoreVisible = false;
             }).catch(() => {
               this.$message.error('创建商户失败！');
@@ -452,9 +459,12 @@
         if(row.csrTel){
           this.update.csrTel=row.csrTel;
         }
-        this.update.proxyUrl=row.proxyUrl;
-        this.update.bailPercentage = parseInt(row.bailPercentage);
+        this.update.proxyUrl= row.proxyUrl;
+        this.update.bailPercentage = parseFloat(row.bailPercentage);
         this.update.dailyLimit = parseInt(row.bailPercentage);
+        if(row.channels){
+          this.update.paymentGateway = row.channels[0].paymentGateway;
+        }
         this.dialogUpdateVisible=true;
       },
       //修改商户信息

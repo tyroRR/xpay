@@ -34,8 +34,7 @@
       <el-table :data="stores"
                 style="width: 100%"
                 height="680"
-                ref="table"
-                @selection-change="tableSelectionChange">
+                ref="table">
         <el-table-column type="expand">
           <template slot-scope="props">
             <el-form label-position="right" inline class="demo-table-expand">
@@ -57,7 +56,11 @@
         </el-table-column>
         <el-table-column prop="channels[0].paymentGateway" label="网关类型" align="center"></el-table-column>
         <el-table-column prop="channelType" label="通道类型" align="center"></el-table-column>
-        <el-table-column prop="name" label="商户名" align="center"></el-table-column>
+        <el-table-column prop="name" label="商户名" align="center">
+          <template slot-scope="scope">
+            <el-button @click="viewGood(scope.row)" type="text" size="small">{{scope.row.name}}</el-button>
+          </template>
+        </el-table-column>
         <el-table-column prop="bailPercentage" sortable label="费率" align="center"></el-table-column>
         <el-table-column prop="quota" sortable label="剩余交易额度" align="center"></el-table-column>
         <el-table-column prop="todayTradeAmount" sortable label="今日交易额" align="center"></el-table-column>
@@ -327,7 +330,6 @@
         keywords: '', //搜索框的关键字内容
         select: 'name', //搜索框的搜索字段
         loading: true,
-        selected: [], //已选择项
         dialogCreateStoreVisible: false,
         dialogCreateChannelVisible: false,
         dialogIncreaseVisible: false,
@@ -350,9 +352,6 @@
       this.getStores()
     },
     methods: {
-      tableSelectionChange(val) {
-        this.selected = val;
-      },
       searchFieldChange(val) {
         this.select = val;
         this.placeholder=placeholders[val];
@@ -522,6 +521,12 @@
             return false;
           }
         });
+      },
+      viewGood(row){
+        if(row.id){
+          sessionStorage.setItem('currentStoreId',row.id);
+        }
+        this.$router.push({ path: '/store/Goods' });
       },
       //查看商户通道列表
       viewChannel(row){

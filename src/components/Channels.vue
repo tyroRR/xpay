@@ -301,8 +301,8 @@
       },
 
       // 删除单个通道
-      removeChannel(index,row) {
-              console.log(index, row);
+      removeChannel(row) {
+              console.log(row);
               this.$confirm('此操作将删除通道 ' + row.extStoreName + ', 是否继续?', '提示', { type: 'warning' })
                 .then(() => {
                   // 向请求服务端删除

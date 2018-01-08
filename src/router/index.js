@@ -10,6 +10,7 @@ import RechargeList from '@/components/Recharge/RechargeList'
 import StoreAdmins from '@/components/stores/StoreAdmins'
 import StoreDetails from '@/components/stores/StoreDetails'
 import StoreChannels from '@/components/stores/StoreChannels'
+import Goods from '@/components/stores/Goods'
 import DomainName from '@/components/stores/DomainName'
 import Orders from '@/components/Orders'
 import Complain from '@/components/Complain'
@@ -62,7 +63,8 @@ let router = new Router({
       children: [
         {path: '/store/storeAdmins', component: StoreAdmins, name: '商户管理', menuShow: true},
         {path: '/store/storeDetails', component: StoreDetails, name: '商户详情'},
-        {path: '/store/storeChannels', component: StoreChannels, name: '商户通道'}
+        {path: '/store/storeChannels', component: StoreChannels, name: '商户通道'},
+        {path: '/store/Goods', component: Goods, name: '商品列表'}
       ]
     },
     {
@@ -110,7 +112,7 @@ let router = new Router({
    {path: '/recharge/rechargeOrder', component: Recharge, name: '交易额度管理', menuShow: true}
  ]
 },*/
-    {
+/*    {
       path: '/',
       component: Home,
       meta: { role: 'ADMIN'},
@@ -120,7 +122,7 @@ let router = new Router({
       children: [
         {path: '/store/domainName', component: DomainName, name: '域名报备', menuShow: true},
       ]
-    },
+    },*/
     {
       path: '/',
       component: Home,

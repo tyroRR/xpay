@@ -33,8 +33,8 @@
                 style="width: 100%"
                 height="680"
                 ref="table"
-                :default-sort = "{prop: 'bailPercentage', order: 'descending'}"
-                @selection-change="tableSelectionChange">
+                :default-sort = "{prop: 'bailPercentage', order: 'descending'}">
+                <!--@selection-change="tableSelectionChange"-->
         <el-table-column type="expand">
           <template slot-scope="props">
             <el-form label-position="left" inline class="demo-table-expand">
@@ -261,7 +261,7 @@
         keywords: '', //搜索框的关键字内容
         select: 'name', //搜索框的搜索字段
         loading: true,
-        selected: [], //已选择项
+        //selected: [], //已选择项
         dialogCreateVisible: false, //创建对话框的显示状态
         dialogChangePwdVisible: false,
         createLoading: false,
@@ -308,9 +308,6 @@
         this.getStores();
       },
       // 重置
-      init() {
-        this.steps.active = 0;
-      },
       reset() {
         this.$refs.createAdmin.resetFields();
       },
@@ -353,7 +350,7 @@
           this.filter.beginIndex = (this.filter.currentPage-1)*this.filter.pageSize;
           this.stores = queryData.splice(this.filter.beginIndex,this.filter.pageSize);
           this.loading = false;
-          this.selected.splice(0,this.selected.length);
+          //this.selected.splice(0,this.selected.length);
         })
       },
       viewPwd(row){

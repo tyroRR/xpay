@@ -174,7 +174,7 @@
       }
     },
     mounted: function () {
-      this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores`).then(res => {
+      this.$http.get(`/xpay/admin/${this.userInfo.id}/stores`).then(res => {
         if (res.data.data) {
           res.data.data.forEach(val =>{
             if(val.channelType === 'WECHAT'){

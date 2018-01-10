@@ -20,6 +20,7 @@
           <el-input :placeholder="placeholder" v-model="keywords" style="width: 400px;" @keyup.enter.native="getGoods">
             <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:118px">
               <el-option label="商品名" value="name"></el-option>
+              <el-option label="金额" value="amount"></el-option>
             </el-select>
             <el-button slot="append" icon="el-icon-search" @click="getGoods">查询</el-button>
           </el-input>
@@ -34,13 +35,13 @@
                 style="width: 100%"
                 height="680"
                 ref="table"
-                :default-sort = "{prop: 'amount', order: 'ascending'}"
-                @selection-change="tableSelectionChange">
+                :default-sort = "{prop: 'amount', order: 'ascending'}">
         <el-table-column prop="extStoreId" label="小微商户ID" align="center"></el-table-column>
         <el-table-column prop="name" label="商品名" align="center"></el-table-column>
         <el-table-column prop="amount" label="金额" align="center"></el-table-column>
         <el-table-column prop="desc" label="描述" align="center"></el-table-column>
-        <el-table-column prop="extQrCode" label="extQrCode" align="center"></el-table-column>
+        <el-table-column prop="extQrCode" label="小微商品二维码" align="center"></el-table-column>
+        <el-table-column prop="url" label="支付链接" align="center"></el-table-column>
         <template v-if="this.userInfo.role === 'ADMIN'">
           <el-table-column label="操作" align="center">
             <template slot-scope="scope">
@@ -50,7 +51,7 @@
               </el-button>
               <el-button
                 size="mini" type="info" plain
-                @click="handleUpdate(scope.row)">编辑
+                @click="updateRow(scope.row)">编辑
               </el-button>
             </template>
           </el-table-column>
@@ -61,14 +62,22 @@
         <!-- 新增商品-->
         <el-dialog title="新增商品" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
           <el-form id="#create" ref="create" :model="create" :rules="createRules"  label-width="120px">
+            <el-form-item prop="extStoreId" label="小微商户ID">
+              <el-input v-model="create.extStoreId"></el-input>
+            </el-form-item>
             <el-form-item prop="name" label="商品名">
               <el-input v-model="create.name"></el-input>
             </el-form-item>
-            <el-form-item label="价格" prop="amount">
-              <el-input v-model="create.amount"></el-input>
+            <el-form-item prop="amount" label="金额">
+              <el-input v-model="create.amount">
+                <template slot="append">元</template>
+              </el-input>
             </el-form-item>
-            <el-form-item label="描述" prop="desc">
+            <el-form-item prop="desc" label="描述">
               <el-input v-model="create.desc"></el-input>
+            </el-form-item>
+            <el-form-item prop="extQrCode" label="小微商品二维码">
+              <el-input v-model="create.extQrCode"></el-input>
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
@@ -77,16 +86,27 @@
           </div>
         </el-dialog>
 
-        <el-dialog title="修改商品信息" v-model="dialogUpdateVisible" :visible.sync="dialogUpdateVisible" :close-on-click-modal="false">
-          <el-form ref="update" :model="update" :rules="updateRules" label-width="100px">
-            <el-form-item label="商户名">
-              <el-input v-model="update.name" disabled></el-input>
+        <el-dialog title="修改商品信息" center v-model="dialogUpdateVisible" :visible.sync="dialogUpdateVisible" :close-on-click-modal="false">
+          <el-form ref="update" :model="update" :rules="updateRules" label-width="120px">
+            <el-form-item prop="extStoreId" label="小微商户ID">
+              <el-input v-model="update.extStoreId"></el-input>
+            </el-form-item>
+            <el-form-item prop="name" label="商品名">
+              <el-input v-model="update.name"></el-input>
             </el-form-item>
             <el-form-item prop="amount" label="价格">
-              <el-input v-model="update.amount" disabled></el-input>
+              <el-input v-model="update.amount">
+                <template slot="append">元</template>
+              </el-input>
             </el-form-item>
             <el-form-item prop="desc" label="描述">
               <el-input v-model="update.desc"></el-input>
+            </el-form-item>
+            <el-form-item prop="extQrCode" label="小微商品二维码">
+              <el-input v-model="update.extQrCode"></el-input>
+            </el-form-item>
+            <el-form-item prop="url" label="支付链接">
+              <el-input v-model="url" disabled></el-input>
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
@@ -112,8 +132,8 @@
 
 <script>
   let placeholders = {
-    "name":"请输入商户名",
-
+    "name":"请输入商品名",
+    "amount":"金额"
   };
 
   export default {
@@ -134,14 +154,19 @@
           extStoreId: '',
           extQrCode: ''
         },
+        goodsId: '',
         update: {
           name: '',
           desc: '',
           amount: '',
           extStoreId: '',
-          extQrCode: ''
+          extQrCode: '',
         },
+        url: '',
         createRules: {
+          extStoreId: [
+            { required: true, message: '请输入小微商户ID', trigger: 'blur' },
+          ],
           name: [
             { required: true, message: '请输入商品名', trigger: 'blur' },
           ],
@@ -150,6 +175,26 @@
           ],
           desc: [
             { required: true, message: '请输入商品描述', trigger: 'blur' },
+          ],
+          extQrCode: [
+            { required: true, message: '请输入小微商品二维码（多个用，分开）', trigger: 'blur' },
+          ]
+        },
+        updateRules: {
+          extStoreId: [
+            { required: true, message: '请输入小微商户ID', trigger: 'blur' },
+          ],
+          name: [
+            { required: true, message: '请输入商品名', trigger: 'blur' },
+          ],
+          amount: [
+            { required: true, message: '请输入商品金额', trigger: 'blur' },
+          ],
+          desc: [
+            { required: true, message: '请输入商品描述', trigger: 'blur' },
+          ],
+          extQrCode: [
+            { required: true, message: '请输入小微商品二维码（多个用，分开）', trigger: 'blur' },
           ]
         },
         filter: {
@@ -198,18 +243,19 @@
         this.getGoods();
       },
       // 重置
-      init() {
-        this.steps.active = 0;
-      },
       reset() {
         this.$refs.create.resetFields();
       },
       //获取商户列表
       getGoods() {
         this.loading = true;
-        this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/goods`).then(res => {
+        this.$http.get(`/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/goods`).then(res => {
           if (res.data.data) {
-            this.stores = res.data.data;
+            res.data.data.forEach(row => {
+              row.url = `${this.$http.defaults.baseURL}/xpay/qrcode/${row.code}`;
+              row.amount += '元';
+            });
+            this.goods = res.data.data;
           }
           //查询
           let queryData = [];
@@ -233,7 +279,8 @@
       handleCreate(){
         this.$refs.create.validate((valid) => {
           if (valid) {
-            this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/goods`,this.create).then(() => {
+            this.create.storeId = this.storeId;
+            this.$http.put(`/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/goods`,this.create).then(() => {
               this.$message.success('创建成功！');
               this.reset();
               this.dialogCreateVisible = false;
@@ -248,12 +295,21 @@
           }
         })
       },
-
+      updateRow(row) {
+        this.dialogUpdateVisible = true;
+        this.goodsId = row.id;
+        this.update.extStoreId = row.extStoreId;
+        this.update.name = row.name;
+        this.update.desc = row.desc;
+        this.update.amount = parseFloat(row.amount);
+        this.update.extQrCode = row.extQrCode;
+        this.url = row.url
+      },
       handleUpdate() {
-        this.$http.patch(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/`,this.update).then(() => {
+        this.$http.patch(`/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/goods/${this.goodsId}`,this.update).then(() => {
           this.$message.success('修改成功！');
           this.$refs.update.resetFields();
-          this.dialogChangePwdVisible = false;
+          this.dialogUpdateVisible = false;
           this.getGoods();
         }).catch(() => {
           this.$message.error('修改失败！');
@@ -262,11 +318,11 @@
       },
 
       handleDelete(row) {
-        this.$confirm('此操作将删除商品 ' + row.name + ', 是否继续?', '提示', { type: 'warning' })
+        this.$confirm('此操作将删除商品\n' + row.name + ', 是否继续?', '提示', { type: 'warning' })
           .then(() => {
             let goodsId = row.id  ;
-            this.$http.delete(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/goods/${goodsId}`).then(() => {
-              this.$message.success('成功删除了商品' + row.name + '!');
+            this.$http.delete(`/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/goods/${goodsId}`).then(() => {
+              this.$message.success('成功删除了商品\n' + row.name + '!');
               this.getGoods();
             })
               .catch(() => {

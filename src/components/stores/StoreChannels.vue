@@ -245,7 +245,7 @@
         this.$refs.create.validate((valid) => {
           if (valid) {
             this.createLoading = true;
-            this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/channels`,this.create).then(res => {
+            this.$http.put(`/xpay/admin/${this.userInfo.id}/channels`,this.create).then(res => {
               console.log(res);
               this.$message.success('新增通道成功！');
               this.dialogCreateVisible = false;
@@ -266,7 +266,7 @@
           .then(() => {
             // 向请求服务端删除
             let channelId = row.id  ;
-            this.$http.delete(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/${channelId}`).then(() => {
+            this.$http.delete(`/xpay/admin/${this.userInfo.id}/${channelId}`).then(() => {
               this.$message.success('成功删除了通道' + row.extStoreName + '!');
               this.getChannels();
             })

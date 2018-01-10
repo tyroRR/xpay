@@ -4,7 +4,7 @@
       <el-breadcrumb separator="/">
         <el-breadcrumb-item :to="{ path: '/' }"><b>首页</b></el-breadcrumb-item>
         <el-breadcrumb-item>商户管理</el-breadcrumb-item>
-        <el-breadcrumb-item>商户列表</el-breadcrumb-item>
+        <el-breadcrumb-item>商户管理员列表</el-breadcrumb-item>
       </el-breadcrumb>
     </el-col>
     <el-col :span="24" class="warp-main"
@@ -17,7 +17,7 @@
         <el-form :inline="true" class="demo-form-inline" >
             <el-input :placeholder="placeholder" v-model="keywords" style="width: 400px;" @keyup.enter.native="getStores">
               <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:118px">
-                <el-option label="商户名" value="name"></el-option>
+                <el-option label="管理员名称" value="name"></el-option>
                 <el-option label="管理员账号" value="account"></el-option>
               </el-select>
               <el-button slot="append" icon="el-icon-search" @click="getStores">查询</el-button>
@@ -44,9 +44,9 @@
             </el-form>
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="商户名" align="center">
+        <el-table-column prop="admin.name" label="管理员名称" align="center">
           <template slot-scope="scope">
-            <el-button @click="viewDetail(scope.row)" type="text" size="small">{{scope.row.name}}</el-button>
+            <el-button @click="viewDetail(scope.row)" type="text" size="small">{{scope.row.admin.name}}</el-button>
           </template>
         </el-table-column>
         <el-table-column prop="admin.account" label="管理员账号" align="center"></el-table-column>
@@ -83,7 +83,7 @@
         <!-- 创建商户-->
         <el-dialog title="创建商户" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
           <el-form id="#createAdmin" ref="createAdmin" :model="createAdmin" :rules="createAdminRules"  label-width="120px">
-            <el-form-item prop="name" label="商户名">
+            <el-form-item prop="name" label="管理员名称">
               <el-input v-model="createAdmin.name"></el-input>
             </el-form-item>
             <el-form-item label="费率" prop="bailPercentage">
@@ -141,7 +141,7 @@
 
         <el-dialog title="修改密码" v-model="dialogChangePwdVisible" :visible.sync="dialogChangePwdVisible" :close-on-click-modal="false">
           <el-form ref="formEdit" :model="formEdit" label-width="100px">
-            <el-form-item label="商户名">
+            <el-form-item label="管理员名称">
               <el-input v-model="formEdit.name" disabled></el-input>
             </el-form-item>
             <el-form-item prop="account" label="账号">
@@ -180,9 +180,8 @@
 
 <script>
   let placeholders = {
-    "name":"请输入商户名",
-    "adminId":"管理员ID",
-    "adminName":"管理员姓名",
+    "name":"请输入管理员名称",
+    "account":"请输入管理员账号",
   };
 
   export default {
@@ -232,7 +231,7 @@
         },
         createAdminRules: {
           name: [
-            { required: true, message: '请输入用户名', trigger: 'blur' },
+            { required: true, message: '请输入管理员名称', trigger: 'blur' },
           ],
           bailPercentage: [
             { required: true, message: '请输入费率', trigger: 'blur' },
@@ -289,9 +288,9 @@
       this.getStores();
     },
     methods: {
-      tableSelectionChange(val) {
+      /*tableSelectionChange(val) {
         this.selected = val;
-      },
+      },*/
       searchFieldChange(val) {
         this.select = val;
         this.placeholder=placeholders[val];
@@ -316,11 +315,13 @@
         this.createAdmin.dailyLimit = 10000000;
         this.createAdmin.quota = 10000000
       },
-      //获取商户列表
+      //获取管理员列表
       getStores() {
         this.loading = true;
-        this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores`).then(res => {
+        this.$http.get(`/xpay/admin/${this.userInfo.id}/stores`).then(res => {
           if (res.data.data) {
+            let tmpObj = {};
+            let result = [];
             res.data.data.forEach(val =>{
               if(val.channelType === 'WECHAT'){
                 val.channelType = '微信公众号'
@@ -331,15 +332,19 @@
               if(val.channelType === 'BANK'){
                 val.channelType = '银联快捷'
               }
+              if (!tmpObj[val.admin.account]) {
+                tmpObj[val.admin.account] = true;
+                result.push(val);
+              }
             });
-            this.stores = res.data.data;
+            this.stores = result;
           }
           //查询
           let queryData = [];
           if(this.keywords !==""){
             for (var i=0,lenI=this.stores.length;i<lenI;i++) {
               let reg = new RegExp(this.keywords);
-              if(this.stores[i][this.select].toString().match(reg)){
+              if(this.stores[i].admin[this.select].toString().match(reg)){
                 queryData.push(this.stores[i]);
               }
             }
@@ -375,7 +380,7 @@
       handleCreateAdmin(){
         this.$refs.createAdmin.validate((valid) => {
           if (valid) {
-            this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores/quick`,this.createAdmin).then(() => {
+            this.$http.put(`/xpay/admin/${this.userInfo.id}/stores/quick`,this.createAdmin).then(() => {
               this.$message.success('创建成功！');
               this.reset();
               this.dialogCreateVisible = false;
@@ -392,11 +397,11 @@
       },
       handleChangePwd(row) {
         this.dialogChangePwdVisible = true;
-        this.formEdit.name = row.name;
+        this.formEdit.name = row.admin.name;
         this.formEdit.account = row.admin.account;
       },
       changePwd() {
-        this.$http.patch(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/`,this.formEdit).then(() => {
+        this.$http.patch(`/xpay/admin/${this.userInfo.id}/`,this.formEdit).then(() => {
           this.$message.success('修改成功！');
           this.$refs.formEdit.resetFields();
           this.dialogChangePwdVisible = false;

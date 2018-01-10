@@ -41,7 +41,7 @@
           if (valid) {
             this.logining = true;
             let loginParams = { account: this.userInfo.account, password: this.userInfo.password };
-            this.$http.post('http://www.wfpay.xyz/xpay/admin/login',loginParams).then(res => {
+            this.$http.post('/xpay/admin/login',loginParams).then(res => {
               this.logining = false;
               setToken(res.data.data.token);
               let id = res.data.data.id;
@@ -50,7 +50,7 @@
               sessionStorage.setItem('access-user', JSON.stringify(res.data.data));
               sessionStorage.setItem('role', res.data.data.role);
               if(role === "ADMIN"){
-                this.$http.get(`http://www.wfpay.xyz/xpay/admin/agents`).then(res =>{
+                this.$http.get(`/xpay/admin/agents`).then(res =>{
                   let adminsInfo = res.data.data.map(val => [val.id,val.account,val.password,val.name,val.role]);
                   let agentsInfo = adminsInfo.filter(agent => {
                     if(agent[4] === 'AGENT'){
@@ -66,7 +66,7 @@
                 })
               }
               if(role === "AGENT"||role === "ADMIN"){
-                this.$http.get(`http://www.wfpay.xyz/xpay/admin/${res.data.data.id}/stores`).then(res => {
+                this.$http.get(`/xpay/admin/${res.data.data.id}/stores`).then(res => {
                   if(res.data.data){
                     let storesInfo = res.data.data.map(val => [val.id,val.name,val.code,val.agentId]);
                     sessionStorage.setItem('storesInfo',JSON.stringify(storesInfo));
@@ -74,7 +74,7 @@
                 })
               }
               if(role === "STORE"){
-                this.$http.get(`http://www.wfpay.xyz/xpay/admin/${res.data.data.id}/stores`).then(res => {
+                this.$http.get(`/xpay/admin/${res.data.data.id}/stores`).then(res => {
                   let storesInfo = res.data.data.map(val => [val.id,val.name,val.code,storeId]);
                   sessionStorage.setItem('storesInfo',JSON.stringify(storesInfo));
                 });

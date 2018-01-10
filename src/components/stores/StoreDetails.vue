@@ -381,7 +381,7 @@
       getStores() {
         this.loading = true;
         let adminId = sessionStorage.getItem('currentAdminId');
-        this.$http.get(`http://www.wfpay.xyz/xpay/admin/${adminId}/stores/`).then(res => {
+        this.$http.get(`http://www.zmpay.xyz/xpay/admin/${adminId}/stores/`).then(res => {
             if(res.data.data.constructor !== Array){
               this.stores.push(res.data.data);
               console.log(this.stores)
@@ -424,7 +424,6 @@
           this.filter.beginIndex = (this.filter.currentPage-1)*this.filter.pageSize;
           this.stores = queryData.splice(this.filter.beginIndex,this.filter.pageSize);
           this.loading = false;
-          this.selected.splice(0,this.selected.length);
         })
       },
       view(row){
@@ -437,7 +436,7 @@
             this.createStore.appId = sessionStorage.getItem('currentAppId');
             this.createStore.agentId = sessionStorage.getItem('currentAgentId');
             this.createStore.adminId = sessionStorage.getItem('currentAdminId');
-            this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores`,this.createStore).then(() => {
+            this.$http.put(`http://www.zmpay.xyz/xpay/admin/${this.userInfo.id}/stores`,this.createStore).then(() => {
               this.$message.success('创建商户成功！');
               this.resetCreateStore();
               this.getStores();
@@ -471,7 +470,7 @@
         this.$refs.update.validate((valid) => {
           if (valid) {
             this.updateLoading=true;
-            this.$http.patch(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores/${this.update.id}`,this.update).then(res => {
+            this.$http.patch(`/xpay/admin/${this.userInfo.id}/stores/${this.update.id}`,this.update).then(res => {
               this.$message.success('修改商户信息成功！');
               this.dialogUpdateVisible = false;
               this.updateLoading = false;
@@ -496,7 +495,7 @@
       handleIncreaseQuota(){
         let id = this.userInfo.id;
         let storeId = this.storeId;
-        this.$http.post(`http://www.wfpay.xyz/xpay/admin/${id}/stores/${storeId}/quota`,this.formIncrease).then(() => {
+        this.$http.post(`/xpay/admin/${id}/stores/${storeId}/quota`,this.formIncrease).then(() => {
           this.$message.success('增加额度成功！');
           this.dialogIncreaseVisible = false;
           this.getStores();
@@ -508,7 +507,7 @@
         this.$refs.createChannel.validate((valid) => {
           if (valid) {
             this.createLoading = true;
-            this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/channels`,this.create).then(res => {
+            this.$http.put(`/xpay/admin/${this.userInfo.id}/channels`,this.create).then(res => {
               console.log(res);
               this.$message.success('新增通道成功！');
               this.dialogCreateVisible = false;

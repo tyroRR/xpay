@@ -251,7 +251,7 @@
       //获取通道列表
       getChannels() {
         this.loading = true;
-        this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/channels`).then(res => {
+        this.$http.get(`/xpay/admin/${this.userInfo.id}/channels`).then(res => {
           if(res.data.data){
             this.channels = res.data.data;
           }
@@ -288,7 +288,7 @@
               this.$message.success('创建通道成功！');
               this.dialogCreateVisible = false;
               this.createLoading = false;
-              this.$http.patch(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores/267/channels`,)
+              this.$http.patch(`/xpay/admin/${this.userInfo.id}/stores/267/channels`,)
               this.reset();
 
               this.getChannels();
@@ -307,7 +307,7 @@
                 .then(() => {
                   // 向请求服务端删除
                   let channelId = row.id  ;
-                  this.$http.delete(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/channels/${channelId}`).then(() => {
+                  this.$http.delete(`/xpay/admin/${this.userInfo.id}/channels/${channelId}`).then(() => {
                       this.$message.success('成功删除了通道' + row.extStoreName + '!');
                       this.getChannels();
                     })

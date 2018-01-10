@@ -135,7 +135,7 @@
       let endTime = end.getFullYear()+'-'+this.zeroFill(end.getMonth()+1)+'-'+this.zeroFill(end.getDate());
       this.pickerTime = [];
       this.pickerTime.push(startTime,endTime);
-      this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores`).then(res => {
+      this.$http.get(`/xpay/admin/${this.userInfo.id}/stores`).then(res => {
         if(res.data.data){
           this.storesInfo = res.data.data;
           this.getRecharges();
@@ -201,9 +201,9 @@
                 this.filter.name = info.id
               }
             });
-            url = `http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/transactions?storeId=${this.filter.name}&startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`
+            url = `/xpay/admin/${this.userInfo.id}/transactions?storeId=${this.filter.name}&startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`
           }
-          else url = `http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/transactions?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`;
+          else url = `/xpay/admin/${this.userInfo.id}/transactions?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`;
           this.$http.get(url).then(res => {
             if(this.originalData.length === 0){
               this.originalData = this.originalData.concat(res.data.data);

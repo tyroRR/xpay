@@ -160,7 +160,7 @@
     methods: {
       query() {
         //订单号查询
-        this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/orders/${this.orderNo}`).then(res =>{
+        this.$http.get(`/xpay/admin/${this.userInfo.id}/orders/${this.orderNo}`).then(res =>{
           this.orders = [];
           this.orders.push(res.data.data);
           this.orders[0].name = res.data.data.store.name;
@@ -224,9 +224,9 @@
                 this.filter.name = info[0]
               }
             });
-            url = `http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/orders?storeId=${this.filter.name}&startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`
+            url = `/xpay/admin/${this.userInfo.id}/orders?storeId=${this.filter.name}&startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`
           }
-          else url = `http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/orders?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`;
+          else url = `/xpay/admin/${this.userInfo.id}/orders?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`;
           this.$http.get(url).then(res => {
             if(this.originalData.length === 0){
               this.originalData = this.originalData.concat(res.data.data);
@@ -266,7 +266,7 @@
       refund(row){
         this.$confirm('此操作将对 ' + row.orderNo + ' 订单进行退款, 是否继续?', '提示', { type: 'warning' })
           .then(() => {
-            this.$http.delete(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/orders/${row.orderNo}`).then(() => {
+            this.$http.delete(`/xpay/admin/${this.userInfo.id}/orders/${row.orderNo}`).then(() => {
               this.$message.success("退款成功!");
               this.getStores();
             })

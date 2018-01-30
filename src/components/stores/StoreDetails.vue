@@ -445,6 +445,7 @@
               this.$message.success('创建商户成功！');
               this.resetCreateStore();
               this.getStores();
+              this.createLoading=false;
               this.dialogCreateStoreVisible = false;
             }).catch(() => {
               this.$message.error('创建商户失败！');

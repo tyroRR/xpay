@@ -130,9 +130,8 @@
               :prop="'extGoodsList.' + index + '.extQrCode'"
               :key="code.key"
               :rules="{required: true, message: '商品二维码&&备注不能为空', trigger: 'blur' }">
-              <el-input v-model="code.extQrCode" class="qrCode mb"></el-input>
-              <el-button type="primary" size="small" icon="el-icon-document" plain class="copy-btn right-float mb" data-clipboard-target=".qrCode">复制</el-button>
-
+              <el-input v-model="code.extQrCode" class="mb"></el-input>
+              <el-button type="primary" size="small" icon="el-icon-document" plain class="copy-btn right-float mb">复制</el-button>
               <el-input v-model="code.note" class="mb"></el-input>
               <el-button type="danger" @click.prevent="removeUpdateCode(code)" size="small"  icon="el-icon-delete" plain class="right-float">删除</el-button>
             </el-form-item>
@@ -262,11 +261,15 @@
       };
     },
     mounted: function() {
-      const clipboard = new Clipboard('.copy-btn');
+      const clipboard = new Clipboard('.copy-btn',{
+        target: function(trigger) {
+          return trigger.previousElementSibling;
+        }
+      });
       clipboard.on('success', function(e) {
         console.info('Action:', e.action);
         console.info('Text:', e.text);
-        console.info('Trigger:', e.trigger);
+        console.info('Trigger:', e.trigger.nextElementSibling);
       });
 
       clipboard.on('error', function(e) {

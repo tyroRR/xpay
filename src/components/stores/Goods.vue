@@ -319,7 +319,6 @@
             note:''
           }]
       },
-
       getGoods() {
         this.loading = true;
         this.$http.get(`/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/goods`).then(res => {
@@ -350,6 +349,9 @@
           this.filter.beginIndex = (this.filter.currentPage-1)*this.filter.pageSize;
           this.goods = queryData.splice(this.filter.beginIndex,this.filter.pageSize);
           this.loading = false;
+          if(this.goods[0]){
+            this.create.extStoreId = this.goods[0].extStoreId
+          }
         })
       },
       addCreateCode() {

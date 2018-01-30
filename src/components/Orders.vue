@@ -58,26 +58,45 @@
                 height="680"
                 :summary-method="getSummaries"
                 :show-summary="showSummary"
-                :default-sort = "{prop: 'orderTime', order: 'descending'}">
-        <el-table-column prop="name" label="商户名称"></el-table-column>
-        <el-table-column sortable prop="storeChannelId" label="storeChannelId"></el-table-column>
-        <el-table-column prop="orderNo" sortable label="订单号"></el-table-column>
-        <el-table-column prop="orderTime" sortable label="下单时间"></el-table-column>
-        <el-table-column prop="sellerOrderNo" sortable label="卖家单号"></el-table-column>
-        <el-table-column prop="payChannel" label="支付方式"></el-table-column>
-        <el-table-column prop="returnUrl" label="returnUrl"></el-table-column>
-        <el-table-column prop="status" label="状态"></el-table-column>
-        <el-table-column prop="totalFee" sortable  label="金额 （元）"></el-table-column>
-        <template v-if="this.userInfo.role === 'ADMIN'">
-          <el-table-column label="操作" align="center">
-            <template slot-scope="scope">
+                :default-sort = "{prop: 'createDate', order: 'descending'}"
+                @filter-change="filterTag">
+        <el-table-column prop="name" label="商户名称" align="center"></el-table-column>
+        <el-table-column prop="subject" label="商品名" align="center"></el-table-column>
+        <el-table-column prop="orderNo" label="订单号" align="center"></el-table-column>
+        <el-table-column prop="createDate" sortable label="下单时间" align="center"></el-table-column>
+        <el-table-column prop="sellerOrderNo" label="卖家单号" align="center"></el-table-column>
+        <el-table-column
+          prop="status"
+          label="状态"
+          align="center"
+          :filters="[{ text: 'SUCCESS', value: 'SUCCESS' }, { text: 'NOTPAY', value: 'NOTPAY' }]"
+          :filter-multiple="false"
+          filter-placement="bottom-end"
+          :column-key="'a'">
+          <template slot-scope="scope">
+            <el-tag
+              :type="scope.row.status === 'SUCCESS' ? 'success' : 'danger'"
+              close-transition>{{scope.row.status}}</el-tag>
+          </template>
+        </el-table-column>
+        <!--<el-table-column prop="status" label="状态" align="center"></el-table-column>-->
+        <el-table-column prop="totalFee" sortable  label="金额 （元）" align="center"></el-table-column>
+        <el-table-column label="操作" align="center">
+          <template slot-scope="scope">
+            <template v-if="userInfo.role === 'ADMIN' && scope.row.status === 'SUCCESS'">
               <el-button
                 size="mini" type="danger" plain
                 @click="refund(scope.row)">退款
               </el-button>
             </template>
-          </el-table-column>
-        </template>
+            <template v-if="scope.row.status === 'NOTPAY'">
+              <el-button
+                size="mini" type="primary" plain
+                @click="replenishment(scope.row)">补单
+              </el-button>
+            </template>
+          </template>
+        </el-table-column>
       </el-table>
 
       <el-pagination class="paging"
@@ -125,10 +144,12 @@
         orders: [],
         filter: {
           name:'',
-          pageSize: 10,
+          pageSize: 50,
           currentPage: 1,
           beginIndex: 0,
         },
+        filterData: [],
+        flag: false,
         orderNo: '',
         totalRows: 0,
         loading: true,
@@ -159,13 +180,65 @@
     },
     methods: {
       query() {
+        let url = `/xpay/admin/${this.userInfo.id}/orders/${this.orderNo}`;
         //订单号查询
-        this.$http.get(`/xpay/admin/${this.userInfo.id}/orders/${this.orderNo}`).then(res =>{
-          this.orders = [];
-          this.orders.push(res.data.data);
-          this.orders[0].name = res.data.data.store.name;
-          this.showSummary = false
+        this.$http.get(url).then(res =>{
+          if(this.orderNo){
+            this.orders = [];
+            this.orders.push(res.data.data);
+            this.orders[0].name = res.data.data.store.name;
+            this.showSummary = false
+          }
+          else {
+            this.$message.error("未找到该订单！")
+          }
+        }).catch(()=>{
+          this.$message.error("未找到该订单！")
         })
+      },
+      filterTag(val) {
+        //return row.status === value;
+        this.flag = true;
+        this.$http.get(sessionStorage.getItem('url')).then(res => {
+          if(res.data.data){
+            let orders = res.data.data.reverse();
+            if (orders){
+              orders.forEach((order) =>{
+                let _order = order;
+                this.storesInfo.forEach(info =>{
+                  if(_order.storeId === info[0]){
+                    _order.name = info[1];
+                  }
+                })
+              });
+              let filterData = [];
+              if(val.a !==""){
+                for (var i=0,lenI=orders.length;i<lenI;i++) {
+                  let reg = new RegExp(val.a[0]);
+                  if(orders[i].status.match(reg)){
+                    filterData.push(orders[i]);
+                  }
+                }
+              }
+              else filterData = orders;
+              console.log(filterData);
+              this.totalRows = filterData.length;
+              this.filterData = filterData;
+              //分页
+              this.filterPag()
+            }
+          }
+          else {
+            this.orders = [];
+          }
+          this.loading = false;
+        })
+      },
+      filterPag(){
+        let filterData =JSON.parse(JSON.stringify(this.filterData));
+        this.filter.beginIndex = (this.filter.currentPage-1)*this.filter.pageSize;
+        console.log(filterData);
+        this.orders = filterData.splice(this.filter.beginIndex,this.filter.pageSize);
       },
       zeroFill(val){
         if(val >=0 && val<=9){
@@ -187,7 +260,7 @@
           if (index === 0) {
             sums[index] = '总计';
           }
-          if (index === 7) {
+          if (index === 5) {
             const counts = originalData.map(item => item[column.property]);
             let count = 0;
             counts.forEach(status => {
@@ -197,7 +270,7 @@
               });
               sums[index] = `成功 ${count} 笔`;
           }
-          if (index === 8) {
+          if (index === 6) {
             sums[index] = successSum;
             sums[index] = Math.floor(sums[index]) + ' 元';
           }
@@ -207,14 +280,21 @@
       pageSizeChange(val) {
         console.log(`每页 ${val} 条`);
         this.filter.pageSize = val;
-        this.getOrders();
+        if(this.flag){
+          this.filterPag()
+        }
+        else this.getOrders();
       },
       pageCurrentChange(val) {
         console.log(`当前页: ${val}`);
         this.filter.currentPage = val;
-        this.getOrders();
+        if(this.flag){
+          this.filterPag()
+        }
+        else this.getOrders();
       },
       getOrders() {
+        this.flag = false;
         if(this.pickerTime){
           this.loading = true;
           let url;
@@ -228,33 +308,38 @@
           }
           else url = `/xpay/admin/${this.userInfo.id}/orders?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`;
           this.$http.get(url).then(res => {
-            if(this.originalData.length === 0){
-              this.originalData = this.originalData.concat(res.data.data);
-            }
-            else {
-              this.originalData = [];
-              this.originalData = this.originalData.concat(res.data.data);
-            }
-            let orders = res.data.data;
-            if (orders){
-              orders.forEach((order) =>{
-                let _order = order;
-                this.storesInfo.forEach(info =>{
-                  if(_order.storeId === info[0]){
-                    _order.name = info[1];
-                  }
-                })
-              });
-              this.totalRows = orders.length;
-              //分页
-              this.filter.beginIndex = (this.filter.currentPage-1)*10;
-              this.orders = orders.splice(this.filter.beginIndex,this.filter.pageSize);
-              //console.log(this.totalRows);
-              //console.log(orders);
+            sessionStorage.setItem('url',url);
+            if(res.data.data){
+              if(this.originalData.length === 0){
+                this.originalData = this.originalData.concat(res.data.data);
+              }
+              else {
+                this.originalData = [];
+                this.originalData = this.originalData.concat(res.data.data);
+              }
+              let orders = res.data.data;
+              if(url === `/xpay/admin/${this.userInfo.id}/orders?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`){
+                orders.reverse();
+              }
+              if (orders){
+                orders.forEach((order) =>{
+                  let _order = order;
+                  this.storesInfo.forEach(info =>{
+                    if(_order.storeId === info[0]){
+                      _order.name = info[1];
+                    }
+                  })
+                });
+                this.totalRows = orders.length;
+                //分页
+                this.filter.beginIndex = (this.filter.currentPage-1)*this.filter.pageSize;
+                this.orders = orders.splice(this.filter.beginIndex,this.filter.pageSize);
+                //console.log(this.totalRows);
+                //console.log(orders);
+              }
             }
             else {
               this.orders = [];
-              this.showSummary = false
             }
             this.loading = false;
           }).catch(() => {
@@ -268,7 +353,7 @@
           .then(() => {
             this.$http.delete(`/xpay/admin/${this.userInfo.id}/orders/${row.orderNo}`).then(() => {
               this.$message.success("退款成功!");
-              this.getStores();
+              this.getOrders();
             })
               .catch(() => {
                 this.$message.error('退款失败!');
@@ -278,12 +363,27 @@
             this.$message.info('已取消操作!');
           });
       },
+      replenishment(row){
+        this.$prompt('请输入银行订单号', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消'
+        }).then(({ value }) => {
+          this.$http.post(`/xpay/admin/${this.userInfo.id}/orders/${row.orderNo}/remedy?extOrderNo=${value}`).then(()=>{
+              this.$message.success('补单成功！');
+              this.getOrders();
+          }).catch(() => {
+            this.$message.error('补单失败!');
+          })
+        }).catch(() => {
+          this.$message.info('取消输入');
+        })
+      },
       handleDownload() {
         this.downloadLoading = true;
         require.ensure([], () => {
           const { export_json_to_excel } = require('@/utils/Export2Excel');
-          const tHeader = ['商户名称', 'storeChannelId', '订单号', '下单时间', '卖家单号', '支付方式','returnUrl','状态','金额'];
-          const filterVal = ['name', 'storeChannelId', 'orderNo', 'orderTime', 'sellerOrderNo', 'payChannel','returnUrl','status','totalFee'];
+          const tHeader = ['商户名称', '订单号', '下单时间', '卖家单号','状态','金额'];
+          const filterVal = ['name','orderNo','createDate','sellerOrderNo','status','totalFee'];
           console.log(this.originalData);
           const list = this.originalData;
           const data = this.formatJson(filterVal, list);
@@ -302,14 +402,5 @@
   .paging{
     text-align: center;
     margin:12px 0;
-  }
-  .demo-table-expand label {
-    width: 150px;
-    color: #99a9bf;
-  }
-  .demo-table-expand .el-form-item {
-    margin-right: 0;
-    margin-bottom: 0;
-    width: 50%;
   }
 </style>

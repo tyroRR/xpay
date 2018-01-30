@@ -23,7 +23,7 @@
               <el-button slot="append" icon="el-icon-search" @click="getStores">查询</el-button>
             </el-input>
           <template v-if="userInfo.role === 'ADMIN'">
-            <el-button type="info" plain icon="el-icon-plus" @click="dialogCreateVisible = true">创建商户</el-button>
+            <el-button type="info" plain icon="el-icon-plus" @click="dialogCreateVisible = true">创建商户管理员</el-button>
           </template>
         </el-form>
       </el-col>
@@ -91,6 +91,9 @@
                 <template slot="append">%</template>
               </el-input>
             </el-form-item>
+            <el-form-item label="通知地址" prop="notifyUrl">
+              <el-input v-model="createAdmin.notifyUrl"></el-input>
+            </el-form-item>
             <el-form-item label="代理商" prop="agentId">
               <el-select v-model="createAdmin.agentId" placeholder="请选择代理商(没有可不选)">
                 <el-option
@@ -101,35 +104,38 @@
                 </el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="通道名称" prop="extStoreName">
-              <el-input v-model="createAdmin.extStoreName"></el-input>
-            </el-form-item>
             <el-form-item label="支付网关类型" prop="paymentGateway">
               <el-select v-model="createAdmin.paymentGateway" placeholder="请选择支付网关类型" @change="onChange">
+                <el-option label="银商小微" value="CHINAUMS"></el-option>
                 <el-option label="银商H5" value="CHINAUMSH5"></el-option>
                 <el-option label="银商APP" value="CHINAUMSAPP"></el-option>
                 <el-option label="环迅" value="IPSQUICK"></el-option>
               </el-select>
             </el-form-item>
-            <template v-if="createAdmin.paymentGateway === 'CHINAUMSH5'||createAdmin.paymentGateway === 'CHINAUMSAPP'">
-              <el-form-item label="通道ID" prop="extStoreId">
-                <el-input v-model="createAdmin.extStoreId"></el-input>
+            <template v-if="createAdmin.paymentGateway === 'CHINAUMSH5'||createAdmin.paymentGateway === 'CHINAUMSAPP'||createAdmin.paymentGateway === 'IPSQUICK'">
+              <el-form-item label="通道名称" prop="extStoreName">
+                <el-input v-model="createAdmin.extStoreName"></el-input>
               </el-form-item>
-              <el-form-item label="终端号" prop="tid">
-                <el-input v-model="createAdmin.chinaUmsProps.tid"></el-input>
-              </el-form-item>
-              <el-form-item label="消息源ID" prop="msgSrcId">
-                <el-input v-model="createAdmin.chinaUmsProps.msgSrcId"></el-input>
-              </el-form-item>
-              <el-form-item label="消息源" prop="msgSrc">
-                <el-input v-model="createAdmin.chinaUmsProps.msgSrc"></el-input>
-              </el-form-item>
-              <el-form-item label="签名秘钥" prop="signKey">
-                <el-input v-model="createAdmin.chinaUmsProps.signKey"></el-input>
-              </el-form-item>
-              <el-form-item label="机构号" prop="InstMid">
-                <el-input v-model="createAdmin.chinaUmsProps.InstMid"></el-input>
-              </el-form-item>
+              <template v-if="createAdmin.paymentGateway === 'CHINAUMSH5'||createAdmin.paymentGateway === 'CHINAUMSAPP'">
+                <el-form-item label="通道ID" prop="extStoreId">
+                  <el-input v-model="createAdmin.extStoreId"></el-input>
+                </el-form-item>
+                <el-form-item label="终端号" prop="tid">
+                  <el-input v-model="createAdmin.chinaUmsProps.tid"></el-input>
+                </el-form-item>
+                <el-form-item label="消息源ID" prop="msgSrcId">
+                  <el-input v-model="createAdmin.chinaUmsProps.msgSrcId"></el-input>
+                </el-form-item>
+                <el-form-item label="消息源" prop="msgSrc">
+                  <el-input v-model="createAdmin.chinaUmsProps.msgSrc"></el-input>
+                </el-form-item>
+                <el-form-item label="签名秘钥" prop="signKey">
+                  <el-input v-model="createAdmin.chinaUmsProps.signKey"></el-input>
+                </el-form-item>
+                <el-form-item label="机构号" prop="InstMid">
+                  <el-input v-model="createAdmin.chinaUmsProps.InstMid"></el-input>
+                </el-form-item>
+              </template>
             </template>
           </el-form>
 
@@ -207,6 +213,7 @@
         createAdmin: {
           name: '',
           bailPercentage: '',
+          notifyUrl: 'http://www.zmpay.top/messages',
           dailyLimit: '',
           quota: '',
           agentId: "",
@@ -220,7 +227,6 @@
             signKey: "",
             InstMid: ""
           },
-
         },
         tempStoresInfo:{},
         formEdit: {
@@ -235,6 +241,9 @@
           ],
           bailPercentage: [
             { required: true, message: '请输入费率', trigger: 'blur' },
+          ],
+          notifyUrl: [
+            { required: true, message: '请输入通知地址', trigger: 'blur' },
           ],
           extStoreId: [
             { required: true, message: '请输入通道ID'},
@@ -311,9 +320,11 @@
         this.$refs.createAdmin.resetFields();
       },
       onChange(){
-        this.createAdmin.channelId = 2253;
-        this.createAdmin.dailyLimit = 10000000;
-        this.createAdmin.quota = 10000000
+        if(this.createAdmin.paymentGateway === 'IPSQUICK'){
+          this.createAdmin.channelId = 2253;
+          this.createAdmin.dailyLimit = 10000000;
+          this.createAdmin.quota = 10000000
+        }
       },
       //获取管理员列表
       getStores() {
@@ -419,8 +430,5 @@
   .paging{
     text-align: center;
     margin:12px 0;
-  }
-  .btn-edit{
-    float: right;
   }
 </style>

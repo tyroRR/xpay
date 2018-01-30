@@ -6,11 +6,13 @@ import Dashboard from '@/components/Dashboard'
 
 import Channels from '@/components/Channels'
 import AgentList from '@/components/AgentList'
+import Replenishment from '@/components/Replenishment'
 import RechargeList from '@/components/Recharge/RechargeList'
 import StoreAdmins from '@/components/stores/StoreAdmins'
 import StoreDetails from '@/components/stores/StoreDetails'
 import StoreChannels from '@/components/stores/StoreChannels'
 import Goods from '@/components/stores/Goods'
+import GoodDetails from '@/components/stores/GoodDetails'
 import DomainName from '@/components/stores/DomainName'
 import Orders from '@/components/Orders'
 import Complain from '@/components/Complain'
@@ -64,7 +66,8 @@ let router = new Router({
         {path: '/store/storeAdmins', component: StoreAdmins, name: '商户管理', menuShow: true},
         {path: '/store/storeDetails', component: StoreDetails, name: '商户详情'},
         {path: '/store/storeChannels', component: StoreChannels, name: '商户通道'},
-        {path: '/store/Goods', component: Goods, name: '商品列表'}
+        {path: '/store/Goods', component: Goods, name: '商品列表'},
+        {path: '/store/GoodDetails', component: GoodDetails, name: '商品详情'}
       ]
     },
     {
@@ -75,10 +78,9 @@ let router = new Router({
       leaf: true,
       menuShow: true,
       children: [
-        {path: '/agent/agentList', component: AgentList, name: '代理商管理', menuShow: true}
+        {path: '/agent', component: AgentList, name: '代理商管理', menuShow: true}
       ]
     },
-
 /*{
   path: '/',
   component: Home,
@@ -140,7 +142,17 @@ let router = new Router({
       leaf: true,
       menuShow: true,
       children: [
-        {path: '/recharge/rechargeList', component: RechargeList, name: '充值查询', menuShow: true}
+        {path: '/replenishment', component: Replenishment, name: '丢单查询', menuShow: true}
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      iconCls: 'iconfont icon-home1',
+      leaf: true,
+      menuShow: true,
+      children: [
+        {path: '/recharge', component: RechargeList, name: '充值查询', menuShow: true}
       ]
     },
     {

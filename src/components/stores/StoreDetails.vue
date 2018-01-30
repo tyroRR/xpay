@@ -4,7 +4,7 @@
       <el-breadcrumb separator="/">
         <el-breadcrumb-item :to="{ path: '/' }"><b>首页</b></el-breadcrumb-item>
         <el-breadcrumb-item>商户管理</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/store/storeAdmins' }">商户列表</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/store/storeAdmins' }">商户管理员列表</el-breadcrumb-item>
         <el-breadcrumb-item>商户详情</el-breadcrumb-item>
       </el-breadcrumb>
     </el-col>
@@ -54,7 +54,7 @@
             </el-form>
           </template>
         </el-table-column>
-        <el-table-column prop="channels[0].paymentGateway" label="网关类型" align="center"></el-table-column>
+        <el-table-column prop="paymentGateway" label="网关类型" align="center"></el-table-column>
         <el-table-column prop="channelType" label="通道类型" align="center"></el-table-column>
         <el-table-column prop="name" label="商户名" align="center">
           <template slot-scope="scope">
@@ -138,8 +138,8 @@
           <el-form-item label="客服联系方式" prop="csrTel">
             <el-input v-model="update.csrTel"></el-input>
           </el-form-item>
-          <el-form-item label="异步通知地址" prop="proxyUrl">
-            <el-input v-model="update.proxyUrl"></el-input>
+          <el-form-item label="通知地址" prop="notifyUrl">
+            <el-input v-model="update.notifyUrl"></el-input>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -238,7 +238,7 @@
           bailPercentage: '',
           code: '',
           csrTel: '（投诉电话:,客服微信:）',
-          proxyUrl: '',
+          notifyUrl: '',
           dailyLimit: '',
           paymentGateway: ''
         },
@@ -324,7 +324,7 @@
           bailPercentage: '',
           code: '',
           csrTel: '',
-          proxyUrl: ''
+          notifyUrl: ''
         },
         totalRows: 0,
         keywords: '', //搜索框的关键字内容
@@ -348,7 +348,6 @@
         this.userInfo.name = userInfo.name;
         this.userInfo.role = userInfo.role;
       }
-
       this.getStores()
     },
     methods: {
@@ -381,10 +380,11 @@
       getStores() {
         this.loading = true;
         let adminId = sessionStorage.getItem('currentAdminId');
-        this.$http.get(`http://www.zmpay.xyz/xpay/admin/${adminId}/stores/`).then(res => {
+        //let id = sessionStorage.getItem('currentId');
+        this.$http.get(`/xpay/admin/${adminId}/stores`).then(res => {
             if(res.data.data.constructor !== Array){
+              this.stores = [];
               this.stores.push(res.data.data);
-              console.log(this.stores)
             }
             else this.stores = res.data.data;
             this.stores.forEach(val =>{
@@ -398,6 +398,7 @@
                 val.channelType = '银联快捷'
               }
               val.bailPercentage += '%';
+              val.quota -= val.todayTradeAmount;
               val.quota += '元';
               val.todayTradeAmount += '元';
               val.dailyLimit += '元';
@@ -406,6 +407,10 @@
                   val.dailyLimit = '不限';
                   val.quota = '不限';
                 }
+                val.paymentGateway = val.channels[0].paymentGateway;
+              }
+              else {
+                val.paymentGateway = 'CHINAUMS'
               }
             });
           //查询
@@ -457,11 +462,11 @@
         if(row.csrTel){
           this.update.csrTel=row.csrTel;
         }
-        this.update.proxyUrl= row.proxyUrl;
+        this.update.notifyUrl= row.notifyUrl;
         this.update.bailPercentage = parseFloat(row.bailPercentage);
-        this.update.dailyLimit = parseInt(row.bailPercentage);
+        this.update.dailyLimit = parseInt(row.dailyLimit);
         if(row.channels){
-          this.update.paymentGateway = row.channels[0].paymentGateway;
+          this.update.paymentGateway = row.paymentGateway;
         }
         this.dialogUpdateVisible=true;
       },
@@ -541,7 +546,7 @@
   }
 </script>
 
-<style>
+<style slot-scoped>
   .paging{
     text-align: center;
     margin:12px 0;
@@ -556,7 +561,7 @@
   .demo-table-expand .el-form-item {
     margin-right: 0;
     margin-bottom: 0;
-    width: 100%;
+    width: 100%!important;
   }
   .el-dialog__body{
     margin: 0 20%;

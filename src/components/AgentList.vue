@@ -143,7 +143,11 @@
         this.loading = true;
         this.$http.get(`/xpay/admin/agents`).then(res => {
           if(res.data.data){
-            this.agents = res.data.data;
+            this.agents = res.data.data.filter(val=>{
+              if(val.role === 'AGENT'){
+                return val
+              }
+            });
           }
           //查询
           let queryData = [];

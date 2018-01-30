@@ -24,8 +24,7 @@
         <el-table :data="rechargeInfo"
                   style="width: 100%"
                   height="680"
-                  ref="table"
-                  @selection-change="tableSelectionChange">
+                  ref="table">
           <el-table-column type="expand">
             <template slot-scope="props">
               <el-form label-position="left" inline class="demo-table-expand">
@@ -41,27 +40,31 @@
               </el-form>
             </template>
           </el-table-column>
-          <el-table-column prop="channels[0].paymentGateway" label="网关类型" align="center"></el-table-column>
+          <el-table-column prop="paymentGateway" label="网关类型" align="center"></el-table-column>
           <el-table-column prop="channelType" label="通道类型" align="center"></el-table-column>
-          <el-table-column prop="name" label="商户名" align="center"></el-table-column>
+          <el-table-column prop="name" label="商户名" align="center">
+            <template slot-scope="scope">
+              <el-button @click="viewGood(scope.row)" type="text" size="small">{{scope.row.name}}</el-button>
+            </template>
+          </el-table-column>
           <el-table-column prop="bailPercentage" sortable label="费率" align="center"></el-table-column>
-          <el-table-column prop="quota" sortable label="剩余交易额度" align="center"></el-table-column>
-          <el-table-column prop="todayTradeAmount" sortable label="今日交易额" align="center"></el-table-column>
-          <el-table-column prop="lastTradeAmount" sortable label="昨日交易额" align="center"></el-table-column>
-          <el-table-column prop="lastRechargeAmount" sortable label="最近一笔充值" align="center"></el-table-column>
-          <el-table-column prop="dailyLimit" sortable label="日交易额上限" align="center"></el-table-column>
+          <el-table-column prop="quota" label="剩余交易额度" align="center"></el-table-column>
+          <el-table-column prop="todayTradeAmount" label="今日交易额" align="center"></el-table-column>
+          <el-table-column prop="lastTradeAmount" label="昨日交易额" align="center"></el-table-column>
+          <el-table-column prop="lastRechargeAmount" label="最近一笔充值" align="center"></el-table-column>
+          <el-table-column prop="dailyLimit" label="日交易额上限" align="center"></el-table-column>
           <el-table-column label="操作" align="center">
             <template slot-scope="scope">
               <el-button class="handle"
                 size="mini" type="info" plain
                 @click="view(scope.row)">查看参数
               </el-button>
-              <template v-if="scope.row.channels[0].paymentGateway === 'CHINAUMSH5'||scope.row.channels[0].paymentGateway === 'CHINAUMSAPP'">
-                <el-button class="handle"
-                           size="mini" type="primary" plain
-                           @click="handleRecharge(scope.row)">充值
-                </el-button>
-              </template>
+
+                  <el-button class="handle"
+                             size="mini" type="primary" plain
+                             @click="handleRecharge(scope.row)">充值
+                  </el-button>
+
             </template>
           </el-table-column>
         </el-table>
@@ -82,12 +85,12 @@
         center>
           <el-form ref="formRecharge" :model="formRecharge" label-width="100px">
             <el-form-item label="充值金额">
-              <el-input-number v-model="formRecharge.amount" :min="100" :step="100"></el-input-number>
-            </el-form-item>
-            <el-form-item label="支付方式">
-              <el-select v-model="formRecharge.channel" placeholder="请选择支付方式">
-                <el-option label="支付宝" value="ALIPAY"></el-option>
-                <el-option label="微信" value="WECHAT"></el-option>
+              <el-select v-model="formRecharge.amount" placeholder="请选择充值金额">
+                <el-option label="100元" value='100'></el-option>
+                <el-option label="300元" value='300'></el-option>
+                <el-option label="500元" value='500'></el-option>
+                <el-option label="1000元" value='1000'></el-option>
+                <el-option label="2000元" value='2000'></el-option>
               </el-select>
             </el-form-item>
           </el-form>
@@ -117,6 +120,8 @@
 </template>
 
 <script>
+  import QRCode from 'qrcode'
+
   let placeholders = {
     "name":"请输入商户名",
     "channelType":"请输入通道类型",
@@ -133,9 +138,7 @@
           role:''
         },
         formRecharge: {
-          amount: '',
-          channel: '',
-          quota: 0
+          amount: ''
         },
         result: {
           title: '',
@@ -187,6 +190,7 @@
               val.channelType = '银联快捷'
             }
             val.bailPercentage += '%';
+            val.quota -= val.todayTradeAmount;
             val.quota += '元';
             val.todayTradeAmount += '元';
             val.lastTradeAmount += '元';
@@ -198,15 +202,15 @@
                 val.quota = '不限';
               }
             }
+            else {
+              val.paymentGateway = 'CHINAUMS'
+            }
           });
           this.rechargeInfo = res.data.data;
         }
       })
     },
     methods: {
-      tableSelectionChange(val) {
-        this.selected = val;
-      },
       searchFieldChange(val) {
         this.select = val;
         this.placeholder=placeholders[val];
@@ -224,7 +228,7 @@
       },
       getStores() {
         this.loading = true;
-        this.$http.get(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/stores`).then(res => {
+        this.$http.get(`/xpay/admin/${this.userInfo.id}/stores`).then(res => {
           if(res.data.data){
             res.data.data.forEach(val =>{
               if(val.channelType === 'WECHAT'){
@@ -237,9 +241,20 @@
                 val.channelType = '银联快捷'
               }
               val.bailPercentage += '%';
+              val.quota -= val.todayTradeAmount;
               val.quota += '元';
               val.todayTradeAmount += '元';
               val.dailyLimit += '元';
+              if(val.channels){
+                if(val.channels[0].paymentGateway === 'IPSQUICK'){
+                  val.dailyLimit = '不限';
+                  val.quota = '不限';
+                }
+                val.paymentGateway = val.channels[0].paymentGateway;
+              }
+              else {
+                val.paymentGateway = 'CHINAUMS'
+              }
             });
             this.stores = res.data.data;
           }
@@ -259,20 +274,25 @@
           this.filter.beginIndex = (this.filter.currentPage-1)*this.filter.pageSize;
           this.stores = queryData.splice(this.filter.beginIndex,this.filter.pageSize);
           this.loading = false;
-          this.selected.splice(0,this.selected.length);
         })
       },
       view(row){
         this.$refs.table.toggleRowExpansion(row);
+      },
+      viewGood(row){
+        if(row.id){
+          sessionStorage.setItem('currentStoreId',row.id);
+        }
+        this.$router.push({ path: '/store/Goods' });
       },
       handleRecharge(row){
         this.outerVisible = true;
         this.storeId = row.id
       },
       validate() {
-        let transactionId = sessionStorage.getItem("transactionId");
-        if(transactionId){
-          this.$http.get(`http://www.wfpay.xyz/xpay/admin/${JSON.parse(sessionStorage.getItem('access-user')).id}/transactions/${transactionId}`).then(
+        let orderNo = sessionStorage.getItem("orderNo");
+        if(orderNo){
+          this.$http.get(`/xpay/admin/${this.userInfo.id}/transactions/orders/${orderNo}`).then(
             res =>  {
               if(res.data.data.status === "SUCCESS"){
                 clearInterval(this.intervalId);
@@ -280,7 +300,8 @@
                 this.result.status = "success" ;
                 this.formRecharge.quota = res.data.data.quota;
                 let profile ={quota:res.data.data.quota, bailPercentage:res.data.data.bailPercentage};
-                sessionStorage.setItem('profile',profile)
+                sessionStorage.setItem('profile',profile);
+                sessionStorage.removeItem('orderNo');
               }
               console.log(res.data.data.status)
             }
@@ -288,22 +309,41 @@
         }
       },
       recharge() {
-        if (!this.formRecharge.channel){
-          this.$message.error('请选择支付方式！');
+        if (!this.formRecharge.amount){
+          this.$message.error('请选择充值金额！');
           return false;
         }
         else {
           this.innerVisible = true;
-          let userInfo = JSON.parse(sessionStorage.getItem('access-user'));
-          let params = {amount:this.formRecharge.amount,channel:this.formRecharge.channel};
-          this.$http.post(`http://www.wfpay.xyz/xpay/admin/${userInfo.id}/stores/${this.storeId}/recharge_order`,params).then(
+          let url;
+          if(Number(this.formRecharge.amount) === 100){
+            url = 'http://www.zmpay.top/xpay/qrcode/G2018011715245861872'
+          }
+          if(Number(this.formRecharge.amount) === 300){
+            url = 'http://www.zmpay.top/xpay/qrcode/G2018011715255378614'
+          }
+          if(Number(this.formRecharge.amount) === 500){
+            url = 'http://www.zmpay.top/xpay/qrcode/G2018011715263969406'
+          }
+          if(Number(this.formRecharge.amount) === 1000){
+            url = 'http://www.zmpay.top/xpay/qrcode/G2018011715272586496'
+          }
+          if(Number(this.formRecharge.amount) === 2000){
+            url = 'http://www.zmpay.top/xpay/qrcode/G2018011715275924714'
+          }
+          let params = {codeUrl:url};
+          this.$http.post(`http://www.zmpay.top/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/recharge_order`,params).then(
             res => {
-              this.result.qrcode = "http://pan.baidu.com/share/qrcode?w=200&h=200&url="+ res.data.data.codeUrl;
+              QRCode.toDataURL(res.data.data.codeUrl).then(url=>{
+                this.result.qrcode = url
+              }).catch(err=>{
+                console.log(err)
+              });
               this.result.closable = true;
               this.result.icon = true;
               this.result.title = "请扫描二维码完成支付";
               this.result.status = "info" ;
-              sessionStorage.setItem("transactionId",res.data.data.transactionId);
+              sessionStorage.setItem("orderNo",res.data.data.orderNo);
               this.intervalId = setInterval(this.validate,10000);
             })
         }

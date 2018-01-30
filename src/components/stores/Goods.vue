@@ -3,9 +3,11 @@
     <el-col :span="24" class="warp-breadcrum">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item :to="{ path: '/' }"><b>首页</b></el-breadcrumb-item>
-        <el-breadcrumb-item>商户管理</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/store/storeAdmins'}">商户列表</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/store/storeDetails'}">商户详情</el-breadcrumb-item>
+        <template v-if=" userInfo.role === 'ADMIN'">
+          <el-breadcrumb-item>商户管理</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/store/storeAdmins'}">商户管理员列表</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/store/storeDetails'}">商户详情</el-breadcrumb-item>
+        </template>
         <el-breadcrumb-item>商品列表</el-breadcrumb-item>
       </el-breadcrumb>
     </el-col>
@@ -37,10 +39,14 @@
                 ref="table"
                 :default-sort = "{prop: 'amount', order: 'ascending'}">
         <el-table-column prop="extStoreId" label="小微商户ID" align="center"></el-table-column>
-        <el-table-column prop="name" label="商品名" align="center"></el-table-column>
-        <el-table-column prop="amount" label="金额" align="center"></el-table-column>
+        <el-table-column prop="name" label="商品名" align="center">
+          <template slot-scope="scope">
+            <el-button @click="viewDetail(scope.row)" type="text" size="small">{{scope.row.name}}</el-button>
+           </template>
+        </el-table-column>
+        <el-table-column prop="amount" label="金额" align="center" sortable></el-table-column>
         <el-table-column prop="desc" label="描述" align="center"></el-table-column>
-        <el-table-column prop="extQrCode" label="小微商品二维码" align="center"></el-table-column>
+        <el-table-column prop="number" label="商品个数" align="center"></el-table-column>
         <el-table-column prop="url" label="支付链接" align="center"></el-table-column>
         <template v-if="this.userInfo.role === 'ADMIN'">
           <el-table-column label="操作" align="center">
@@ -61,7 +67,7 @@
       <template v-if="userInfo.role === 'ADMIN'">
         <!-- 新增商品-->
         <el-dialog title="新增商品" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
-          <el-form id="#create" ref="create" :model="create" :rules="createRules"  label-width="120px">
+          <el-form id="#create" ref="create" :model="create" :rules="createRules"  label-width="150px">
             <el-form-item prop="extStoreId" label="小微商户ID">
               <el-input v-model="create.extStoreId"></el-input>
             </el-form-item>
@@ -76,9 +82,25 @@
             <el-form-item prop="desc" label="描述">
               <el-input v-model="create.desc"></el-input>
             </el-form-item>
-            <el-form-item prop="extQrCode" label="小微商品二维码">
-              <el-input v-model="create.extQrCode"></el-input>
+            <el-form-item
+              v-for="(code, index) in create.extGoodsList"
+              :label="'商品二维码&&备注' + Number(index+1)"
+              :prop="'extGoodsList.' + index + '.extQrCode'"
+              :key="code.key"
+              :rules="{required: true, message: '商品二维码&&备注不能为空', trigger: 'blur' }">
+              <el-input v-model="code.extQrCode" class="qrCode mb"></el-input>
+              <el-button type="primary" size="small"  icon="el-icon-document" plain class="copy-btn right-float mb" data-clipboard-target=".qrCode">复制</el-button>
+              <el-input v-model="code.note" class="mb"></el-input>
+              <el-button type="danger" @click.prevent="removeCreateCode(code)" size="small"  icon="el-icon-delete" plain class="right-float">删除</el-button>
             </el-form-item>
+            <!--<el-form-item
+              v-for="(note, index) in create.extGoodsList"
+              :label="'备注' + Number(index+1)"
+              :prop="'extGoodsList.' + index + 'note'"
+              :key="note.key">
+              <el-input v-model="note.note"></el-input>
+            </el-form-item>-->
+            <el-button type="info" size="small" icon="el-icon-plus" plain class="right-float" @click="addCreateCode">添加二维码</el-button>
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button plain @click="dialogCreateVisible = false">取 消</el-button>
@@ -87,7 +109,7 @@
         </el-dialog>
 
         <el-dialog title="修改商品信息" center v-model="dialogUpdateVisible" :visible.sync="dialogUpdateVisible" :close-on-click-modal="false">
-          <el-form ref="update" :model="update" :rules="updateRules" label-width="120px">
+          <el-form ref="update" :model="update" :rules="updateRules" label-width="150px">
             <el-form-item prop="extStoreId" label="小微商户ID">
               <el-input v-model="update.extStoreId"></el-input>
             </el-form-item>
@@ -102,19 +124,35 @@
             <el-form-item prop="desc" label="描述">
               <el-input v-model="update.desc"></el-input>
             </el-form-item>
-            <el-form-item prop="extQrCode" label="小微商品二维码">
-              <el-input v-model="update.extQrCode"></el-input>
+            <el-form-item
+              v-for="(code, index) in update.extGoodsList"
+              :label="'商品二维码&&备注' + Number(index+1)"
+              :prop="'extGoodsList.' + index + '.extQrCode'"
+              :key="code.key"
+              :rules="{required: true, message: '商品二维码&&备注不能为空', trigger: 'blur' }">
+              <el-input v-model="code.extQrCode" class="qrCode mb"></el-input>
+              <el-button type="primary" size="small" icon="el-icon-document" plain class="copy-btn right-float mb" data-clipboard-target=".qrCode">复制</el-button>
+
+              <el-input v-model="code.note" class="mb"></el-input>
+              <el-button type="danger" @click.prevent="removeUpdateCode(code)" size="small"  icon="el-icon-delete" plain class="right-float">删除</el-button>
             </el-form-item>
+            <!--<el-form-item
+              v-for="(note, index) in update.extGoodsList"
+              :label="'备注' + Number(index+1)"
+              :prop="'extGoodsList.' + index + 'note'"
+              :key="note.key">
+              <el-input v-model="note.note"></el-input>
+            </el-form-item>-->
             <el-form-item prop="url" label="支付链接">
               <el-input v-model="url" disabled></el-input>
             </el-form-item>
+            <el-button type="info" size="small" icon="el-icon-plus" plain class="right-float" @click="addUpdateCode">添加二维码</el-button>
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button plain @click="dialogUpdateVisible = false">取 消</el-button>
             <el-button type="primary" plain :loading="createLoading" @click="handleUpdate">提交</el-button>
           </div>
         </el-dialog>
-
       </template>
 
       <el-pagination class="paging"
@@ -131,9 +169,11 @@
 </template>
 
 <script>
+  import Clipboard from 'clipboard'
+
   let placeholders = {
     "name":"请输入商品名",
-    "amount":"金额"
+    "amount":"请输入金额"
   };
 
   export default {
@@ -152,7 +192,20 @@
           desc: '',
           amount: '',
           extStoreId: '',
-          extQrCode: ''
+          extGoodsList: [
+            {
+              extQrCode:'',
+              note:''
+            },
+            {
+              extQrCode:'',
+              note:''
+            },
+            {
+              extQrCode:'',
+              note:''
+            }
+          ]
         },
         goodsId: '',
         update: {
@@ -160,7 +213,7 @@
           desc: '',
           amount: '',
           extStoreId: '',
-          extQrCode: '',
+          extGoodsList: [],
         },
         url: '',
         createRules: {
@@ -175,9 +228,6 @@
           ],
           desc: [
             { required: true, message: '请输入商品描述', trigger: 'blur' },
-          ],
-          extQrCode: [
-            { required: true, message: '请输入小微商品二维码（多个用，分开）', trigger: 'blur' },
           ]
         },
         updateRules: {
@@ -192,9 +242,6 @@
           ],
           desc: [
             { required: true, message: '请输入商品描述', trigger: 'blur' },
-          ],
-          extQrCode: [
-            { required: true, message: '请输入小微商品二维码（多个用，分开）', trigger: 'blur' },
           ]
         },
         filter: {
@@ -215,6 +262,17 @@
       };
     },
     mounted: function() {
+      const clipboard = new Clipboard('.copy-btn');
+      clipboard.on('success', function(e) {
+        console.info('Action:', e.action);
+        console.info('Text:', e.text);
+        console.info('Trigger:', e.trigger);
+      });
+
+      clipboard.on('error', function(e) {
+        console.error('Action:', e.action);
+        console.error('Trigger:', e.trigger);
+      });
       let userInfo = sessionStorage.getItem('access-user');
       if (userInfo) {
         userInfo = JSON.parse(userInfo);
@@ -245,14 +303,30 @@
       // 重置
       reset() {
         this.$refs.create.resetFields();
+        this.create.extGoodsList = [{
+          extQrCode:'',
+          note:''
+        },
+          {
+            extQrCode:'',
+            note:''
+          },
+          {
+            extQrCode:'',
+            note:''
+          }]
       },
-      //获取商户列表
+
       getGoods() {
         this.loading = true;
         this.$http.get(`/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/goods`).then(res => {
           if (res.data.data) {
             res.data.data.forEach(row => {
-              row.url = `${this.$http.defaults.baseURL}/xpay/qrcode/${row.code}`;
+              if(row.extGoodsList){
+                row.number = row.extGoodsList.length;
+              }
+              else row.number = 0;
+              row.url = `http://www.zmpay.top/xpay/qrcode/${row.code}`;
               row.amount += '元';
             });
             this.goods = res.data.data;
@@ -275,11 +349,37 @@
           this.loading = false;
         })
       },
-
+      addCreateCode() {
+        this.create.extGoodsList.push({
+          extQrCode:'',
+          note:''
+        });
+      },
+      addUpdateCode() {
+        this.update.extGoodsList.push({
+          extQrCode:'',
+          note:''
+        });
+      },
+      removeCreateCode(code) {
+        var index = this.create.extGoodsList.indexOf(code);
+        if (index !== -1) {
+          this.create.extGoodsList.splice(index, 1)
+        }
+      },
+      removeUpdateCode(code) {
+        var index = this.update.extGoodsList.indexOf(code);
+        if (index !== -1) {
+          this.update.extGoodsList.splice(index, 1)
+        }
+      },
       handleCreate(){
         this.$refs.create.validate((valid) => {
           if (valid) {
             this.create.storeId = this.storeId;
+            this.create.extGoodsList = this.create.extGoodsList.filter(q => {
+              if(q.extQrCode&&q.note){return q}
+            });
             this.$http.put(`/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/goods`,this.create).then(() => {
               this.$message.success('创建成功！');
               this.reset();
@@ -302,10 +402,18 @@
         this.update.name = row.name;
         this.update.desc = row.desc;
         this.update.amount = parseFloat(row.amount);
-        this.update.extQrCode = row.extQrCode;
+        if(row.extGoodsList){
+          this.update.extGoodsList = row.extGoodsList.filter(q => {
+            if(q.extQrCode&& q.note){return q}
+          });
+        }
+        else this.update.extGoodsList = [];
         this.url = row.url
       },
       handleUpdate() {
+        this.update.extGoodsList = this.update.extGoodsList.filter(q => {
+          if(q.extQrCode&&q.note){return q}
+        });
         this.$http.patch(`/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/goods/${this.goodsId}`,this.update).then(() => {
           this.$message.success('修改成功！');
           this.$refs.update.resetFields();
@@ -332,7 +440,18 @@
           .catch(() => {
             this.$message.info('已取消操作!');
           });
-      }
+      },
+      viewDetail(row){
+        if(this.userInfo.role === 'ADMIN'){
+          if(row.extGoodsList){
+            row.extGoodsList.forEach(v =>{
+              v.name = row.name
+            });
+            sessionStorage.setItem('extGoodsList',JSON.stringify(row.extGoodsList));
+          }
+          this.$router.push({ path: '/store/GoodDetails' });
+        }
+      },
     }
   }
 </script>
@@ -342,4 +461,19 @@
     text-align: center;
     margin:12px 0;
   }
+  .right-float{
+    float: right;
+  }
+  .mb{
+    margin-bottom: 10px;
+  }
+  .el-dialog__body{
+    margin: 0 10%!important;
+  }
+  @media screen and (max-width: 1440px){
+    .el-dialog{
+      width: 88%;
+    }
+  }
+
 </style>

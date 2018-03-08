@@ -18,18 +18,16 @@
             <template slot="prepend">订单号</template>
             <el-button slot="append" icon="el-icon-search" @click="query">查询</el-button>
           </el-input>
-          <template v-if="userInfo.role !== 'STORE'">
-            <el-form-item label="商户名称">
-              <el-select v-model="filter.name" filterable placeholder="请选择商户名称">
-                <el-option
-                  v-for="item in storesInfo"
-                  :key="item[2]"
-                  :label="item[1]"
-                  :value="item[2]">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </template>
+          <el-form-item label="商户名称">
+            <el-select v-model="filter.name" filterable placeholder="请选择商户名称">
+              <el-option
+                v-for="item in storesInfo"
+                :key="item[2]"
+                :label="item[1]"
+                :value="item[2]">
+              </el-option>
+            </el-select>
+          </el-form-item>
           <el-form-item label="下单时间">
             <el-col :span="11">
               <el-date-picker
@@ -79,7 +77,22 @@
               close-transition>{{scope.row.status}}</el-tag>
           </template>
         </el-table-column>
-        <!--<el-table-column prop="status" label="状态" align="center"></el-table-column>-->
+        <template v-if="userInfo.role === 'ADMIN'">
+          <el-table-column
+            prop="payChannel"
+            label="渠道"
+            align="center"
+            :filters="[{ text: '小微', value: 'XIAOWEI' }, { text: '小微H5', value: 'XIAOWEI_H5' }]"
+            :filter-multiple="false"
+            filter-placement="bottom-end"
+            :column-key="'b'">
+            <template slot-scope="scope">
+              <el-tag
+                :type="scope.row.payChannel === '小微' ? 'primary' : 'success'"
+                close-transition>{{scope.row.payChannel}}</el-tag>
+            </template>
+          </el-table-column>
+        </template>
         <el-table-column prop="totalFee" sortable  label="金额 （元）" align="center"></el-table-column>
         <el-table-column label="操作" align="center">
           <template slot-scope="scope">
@@ -175,7 +188,6 @@
       this.pickerTime.push(startTime,endTime);
       this.storesInfo = JSON.parse(sessionStorage.getItem('storesInfo'));
       //console.log(this.storesInfo);
-
       this.getOrders();
     },
     methods: {
@@ -205,6 +217,7 @@
             if (orders){
               orders.forEach((order) =>{
                 let _order = order;
+
                 this.storesInfo.forEach(info =>{
                   if(_order.storeId === info[0]){
                     _order.name = info[1];
@@ -212,7 +225,7 @@
                 })
               });
               let filterData = [];
-              if(val.a !==""){
+              if(val.a&&val.a !==""){
                 for (var i=0,lenI=orders.length;i<lenI;i++) {
                   let reg = new RegExp(val.a[0]);
                   if(orders[i].status.match(reg)){
@@ -220,8 +233,24 @@
                   }
                 }
               }
+              else if(val.b&&val.b !==""){
+                for (var i=0,lenI=orders.length;i<lenI;i++) {
+                  let reg = new RegExp(val.b[0]);
+                  if(orders[i].payChannel.match(reg)){
+                    filterData.push(orders[i]);
+                  }
+                }
+              }
               else filterData = orders;
               console.log(filterData);
+              filterData.forEach(order =>{
+                if(order.payChannel === 'XIAOWEI'){
+                  order.payChannel = '小微'
+                }
+                if(order.payChannel === 'XIAOWEI_H5'){
+                  order.payChannel = '小微H5'
+                }
+              });
               this.totalRows = filterData.length;
               this.filterData = filterData;
               //分页
@@ -318,12 +347,25 @@
                 this.originalData = this.originalData.concat(res.data.data);
               }
               let orders = res.data.data;
+              if(this.userInfo.role === 'H5PROVIDER'){
+                orders.filter(v => {
+                  if(v.payChannel === 'XIAOWEI_H5'){
+                    return v
+                  }
+                })
+              }
               if(url === `/xpay/admin/${this.userInfo.id}/orders?startDate=${this.pickerTime[0]}&endDate=${this.pickerTime[1]}`){
                 orders.reverse();
               }
               if (orders){
                 orders.forEach((order) =>{
                   let _order = order;
+                  if(_order.payChannel === 'XIAOWEI'){
+                    _order.payChannel = '小微'
+                  }
+                  if(_order.payChannel === 'XIAOWEI_H5'){
+                    _order.payChannel = '小微H5'
+                  }
                   this.storesInfo.forEach(info =>{
                     if(_order.storeId === info[0]){
                       _order.name = info[1];
@@ -340,6 +382,7 @@
             }
             else {
               this.orders = [];
+              this.totalRows = this.orders.length;
             }
             this.loading = false;
           }).catch(() => {

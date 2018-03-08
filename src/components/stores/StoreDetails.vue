@@ -65,6 +65,8 @@
         <el-table-column prop="quota" sortable label="剩余交易额度" align="center"></el-table-column>
         <el-table-column prop="todayTradeAmount" sortable label="今日交易额" align="center"></el-table-column>
         <el-table-column prop="dailyLimit" sortable label="日交易额上限" align="center"></el-table-column>
+        <el-table-column prop="notifyUrl" label="通知地址" align="center"></el-table-column>
+        <el-table-column prop="returnUrl" label="回调地址" align="center"></el-table-column>
         <el-table-column label="对接参数" align="center">
           <template slot-scope="scope">
             <el-button @click="view(scope.row)" type="text" size="small">查看</el-button>
@@ -81,13 +83,29 @@
                          size="mini" type="primary" plain
                          @click="increaseQuota(scope.row)">增加额度
               </el-button>
-              <el-button class="handle"
+              <!--<el-button class="handle"
                          size="mini" type="danger" plain
                          @click="dialogCreateChannelVisible = true">添加通道ID
-              </el-button>
+              </el-button>-->
             </template>
           </el-table-column>
         </template>
+        <el-table-column label="商户池" align="center">
+          <template slot-scope="scope">
+            <el-tooltip :content="'Switch state: ' + stores[scope.$index].state" placement="top">
+              <el-switch
+                v-model="stores[scope.$index].state"
+                active-color="#13ce66"
+                inactive-color="#ff4949"
+                active-text="in"
+                inactive-text="out"
+                active-value="in"
+                inactive-value="out"
+                @change="switchState(scope.row)">
+              </el-switch>
+            </el-tooltip>
+          </template>
+        </el-table-column>
       </el-table>
 
       <el-dialog title="创建商户" center v-model="dialogCreateStoreVisible" :visible.sync="dialogCreateStoreVisible" @close="resetCreateStore">
@@ -99,6 +117,12 @@
             <el-input v-model="createStore.bailPercentage">
               <template slot="append">%</template>
             </el-input>
+          </el-form-item>
+          <el-form-item label="通知地址" prop="notifyUrl">
+            <el-input v-model="createStore.notifyUrl"></el-input>
+          </el-form-item>
+          <el-form-item label="回调地址" prop="returnUrl">
+            <el-input v-model="createStore.returnUrl"></el-input>
           </el-form-item>
           <el-form-item label="通道类型" prop="channelType">
             <el-select v-model="createStore.channelType" placeholder="请选择通道类型">
@@ -128,6 +152,12 @@
               <template slot="append">%</template>
             </el-input>
           </el-form-item>
+          <el-form-item label="通知地址" prop="notifyUrl">
+            <el-input v-model="update.notifyUrl"></el-input>
+          </el-form-item>
+          <el-form-item label="回调地址" prop="returnUrl">
+            <el-input v-model="update.returnUrl"></el-input>
+          </el-form-item>
           <template v-if="update.paymentGateway === 'CHINAUMSH5'||update.paymentGateway === 'CHINAUMSAPP'">
             <el-form-item label="日限额" prop="dailyLimit">
               <el-input v-model="update.dailyLimit">
@@ -137,9 +167,6 @@
           </template>
           <el-form-item label="客服联系方式" prop="csrTel">
             <el-input v-model="update.csrTel"></el-input>
-          </el-form-item>
-          <el-form-item label="通知地址" prop="notifyUrl">
-            <el-input v-model="update.notifyUrl"></el-input>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -230,23 +257,24 @@
           name:'',
           role:''
         },
+        adminId: '',
         agentsInfo:{},
+        storePool: [],
         stores: [],
         update:{
           name: '',
-          appId: '',
           bailPercentage: '',
-          code: '',
           csrTel: '（投诉电话:,客服微信:）',
           notifyUrl: '',
-          dailyLimit: '',
-          paymentGateway: ''
+          returnUrl: ''
         },
         createStore: {
           name: '',
           bailPercentage: '',
           appId: '',
           agentId: '',
+          notifyUrl: '',
+          returnUrl: '',
           channelType: ''
         },
         createChannel: {
@@ -272,26 +300,18 @@
           transaction_type: 'FREE'
         },
         storeId: '',
-        createAdminRules: {
-          account: [
-            { required: true, message: '请输入账号', trigger: 'blur' },
-          ],
-          password: [
-            { required: true, message: '请输入密码', trigger: 'blur' },
-          ],
-          name: [
-            { required: true, message: '请输入用户名', trigger: 'blur' },
-          ],
-          role: [
-            { required: true, message: '请选择权限', trigger: 'blur' },
-          ]
-        },
         createStoreRules: {
           name: [
             { required: true, message: '请输入商户名称', trigger: 'blur' },
           ],
           bailPercentage: [
             { required: true, message: '请输入费率', trigger: 'blur' },
+          ],
+          notifyUrl: [
+            { required: true, message: '请输入通知地址', trigger: 'blur' },
+          ],
+          returnUrl: [
+            { required: true, message: '请输入回调地址', trigger: 'blur' },
           ],
           channelType: [
             { required: true, message: '请输入通道类型', trigger: 'blur' },
@@ -314,6 +334,12 @@
           ],
           csrTel: [
             { required: true, message: '请输入客服联系方式', trigger: 'blur' },
+          ],
+          notifyUrl: [
+            { required: true, message: '请输入通知地址', trigger: 'blur' },
+          ],
+          returnUrl: [
+            { required: true, message: '请输入回调地址', trigger: 'blur' },
           ]
         },
         filter: {
@@ -336,10 +362,15 @@
         dialogUpdateVisible: false,
         createLoading: false,
         updateLoading: false,
-        placeholder:placeholders["name"]
+        placeholder:placeholders["name"],
+        storeState: [],
       };
     },
     mounted: function() {
+      this.adminId = sessionStorage.getItem('currentAdminId');
+      this.createStore.appId = sessionStorage.getItem('currentAppId');
+      this.createStore.agentId = sessionStorage.getItem('currentAgentId');
+      this.createStore.adminId = sessionStorage.getItem('currentAdminId');
       let userInfo = sessionStorage.getItem('access-user');
       if (userInfo) {
         userInfo = JSON.parse(userInfo);
@@ -348,7 +379,7 @@
         this.userInfo.name = userInfo.name;
         this.userInfo.role = userInfo.role;
       }
-      this.getStores()
+      this.getStores();
     },
     methods: {
       searchFieldChange(val) {
@@ -379,9 +410,16 @@
       //获取商户列表
       getStores() {
         this.loading = true;
-        let adminId = sessionStorage.getItem('currentAdminId');
-        //let id = sessionStorage.getItem('currentId');
-        this.$http.get(`/xpay/admin/${adminId}/stores`).then(res => {
+        this.$http.get(`/xpay/admin/${this.adminId}/store_pool`).then(res=>{
+          this.storePool = [];
+          let storePool = res.data.data;
+          if(storePool){
+            storePool.forEach(store=> {
+              this.storePool.push(store.extStoreName);
+            });
+          }
+
+          this.$http.get(`/xpay/admin/${this.adminId}/stores`).then(res => {
             if(res.data.data.constructor !== Array){
               this.stores = [];
               this.stores.push(res.data.data);
@@ -412,24 +450,31 @@
               else {
                 val.paymentGateway = 'CHINAUMS'
               }
+              if(this.storePool.includes(val.name)){
+                val.state = 'in'
+              }
+              else {
+                val.state = 'out'
+              }
             });
-          //查询
-          let queryData = [];
-          if(this.keywords !==""){
-            for (var i=0,lenI=this.stores.length;i<lenI;i++) {
-              let reg = new RegExp(this.keywords);
-              if(this.stores[i][this.select].toString().match(reg)){
-                queryData.push(this.stores[i]);
+            //查询
+            let queryData = [];
+            if(this.keywords !==""){
+              for (var i=0,lenI=this.stores.length;i<lenI;i++) {
+                let reg = new RegExp(this.keywords);
+                if(this.stores[i][this.select].toString().match(reg)){
+                  queryData.push(this.stores[i]);
+                }
               }
             }
-          }
-          else queryData = this.stores;
-          this.totalRows = queryData.length;
-          //分页
-          this.filter.beginIndex = (this.filter.currentPage-1)*this.filter.pageSize;
-          this.stores = queryData.splice(this.filter.beginIndex,this.filter.pageSize);
-          this.loading = false;
-        })
+            else queryData = this.stores;
+            this.totalRows = queryData.length;
+            //分页
+            this.filter.beginIndex = (this.filter.currentPage-1)*this.filter.pageSize;
+            this.stores = queryData.splice(this.filter.beginIndex,this.filter.pageSize);
+            this.loading = false;
+          })
+        });
       },
       view(row){
         this.$refs.table.toggleRowExpansion(row);
@@ -464,8 +509,8 @@
           this.update.csrTel=row.csrTel;
         }
         this.update.notifyUrl= row.notifyUrl;
+        this.update.returnUrl= row.returnUrl;
         this.update.bailPercentage = parseFloat(row.bailPercentage);
-        this.update.dailyLimit = parseInt(row.dailyLimit);
         if(row.channels){
           this.update.paymentGateway = row.paymentGateway;
         }
@@ -527,8 +572,42 @@
           }
         });
       },
+      switchState(row){
+        this.$http.get(`/xpay/admin/${row.admin.id}/stores/${row.id}/goods`).then(res=>{
+
+          let param = {
+            extStoreId: res.data.data[0].extStoreId,
+            extStoreName: row.name
+          };
+
+          if(row.state === 'in'){
+            this.$http.put(`/xpay/admin/${row.admin.id}/store_pool/`,param).then(() => {
+              this.$message.success('添加成功！');
+              this.getStores();
+            }).catch(() => {
+              this.$message.error('添加失败！');
+              this.getStores();
+            })
+          }
+
+          if(row.state === 'out'){
+            this.$http.delete(`/xpay/admin/${row.admin.id}/store_pool/${param.extStoreId}`).then(()=>{
+              this.$message.success('删除成功!');
+              this.getStores();
+            }).catch(()=>{
+              this.$message.error('删除失败!');
+              this.getStores();
+            })
+          }
+
+        }).catch(()=>{
+          this.$message.error('操作失败!');
+          this.getStores();
+        })
+      },
       viewGood(row){
         if(row.id){
+          sessionStorage.setItem('currentAdminId',row.admin.id);
           sessionStorage.setItem('currentStoreId',row.id);
         }
         this.$router.push({ path: '/store/Goods' });

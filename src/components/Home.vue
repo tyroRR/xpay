@@ -94,7 +94,7 @@
           if (route.meta && route.meta.role) {
             //console.log(route.meta.role);
             //console.log(role);
-            if(route.meta.role.length === 2){
+            if(route.meta.role.length === 2||route.meta.role.length === 3||route.meta.role.length === 4){
               return route.meta.role.some(r => r === role);
             }
             else return route.meta.role === role;

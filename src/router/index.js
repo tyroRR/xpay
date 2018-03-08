@@ -13,6 +13,10 @@ import StoreDetails from '@/components/stores/StoreDetails'
 import StoreChannels from '@/components/stores/StoreChannels'
 import Goods from '@/components/stores/Goods'
 import GoodDetails from '@/components/stores/GoodDetails'
+import AttachGoods from '@/components/stores/AttachGoods'
+import StorePool from '@/components/store-pool/StorePool'
+import PoolList from '@/components/store-pool/PoolList'
+import PoolGoods from '@/components/store-pool/PoolGoods'
 import DomainName from '@/components/stores/DomainName'
 import Orders from '@/components/Orders'
 import Complain from '@/components/Complain'
@@ -32,6 +36,7 @@ let router = new Router({
     {
       path: '/',
       name: 'home',
+      meta: { role:['ADMIN','AGENT','STORE'] },
       component: Home,
       redirect: '/dashboard',
       leaf: true, // 只有一个节点
@@ -67,7 +72,35 @@ let router = new Router({
         {path: '/store/storeDetails', component: StoreDetails, name: '商户详情'},
         {path: '/store/storeChannels', component: StoreChannels, name: '商户通道'},
         {path: '/store/Goods', component: Goods, name: '商品列表'},
-        {path: '/store/GoodDetails', component: GoodDetails, name: '商品详情'}
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      meta: { role: 'ADMIN'},
+      iconCls: 'iconfont icon-users1',
+      leaf: true,
+      menuShow: true,
+      children: [
+        {path: '/storePool', component: StorePool, name: '商户池管理', menuShow: true},
+        {path: '/storePool/poolList', component: PoolList, name: '商户池列表', menuShow: true},
+        {path: '/storePool/poolList/poolGoods', component: PoolGoods, name: '商户池内商品', menuShow: true},
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      meta: { role: 'ADMIN'},
+      children: [
+        {path: '/GoodDetails', component: GoodDetails, name: '商品详情'}
+      ]
+    },
+    {
+      path: '/',
+      component: Home,
+      meta: { role: 'ADMIN'},
+      children: [
+        {path: '/AttachGoods', component: AttachGoods, name: '关联商品列表'}
       ]
     },
     {
@@ -128,6 +161,7 @@ let router = new Router({
     {
       path: '/',
       component: Home,
+      meta: { role:['ADMIN','AGENT','STORE','H5PROVIDER'] },
       iconCls: 'iconfont icon-home1',
       leaf: true,
       menuShow: true,
@@ -138,6 +172,7 @@ let router = new Router({
     {
       path: '/',
       component: Home,
+      meta: { role:['ADMIN','AGENT','STORE'] },
       iconCls: 'iconfont icon-home1',
       leaf: true,
       menuShow: true,
@@ -148,6 +183,7 @@ let router = new Router({
     {
       path: '/',
       component: Home,
+      meta: { role:['ADMIN','AGENT','STORE'] },
       iconCls: 'iconfont icon-home1',
       leaf: true,
       menuShow: true,
@@ -183,6 +219,7 @@ router.beforeEach((to, from, next) => {
       next()
     }
   }
+
 });
 
 export default router

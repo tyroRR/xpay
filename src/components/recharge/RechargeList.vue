@@ -251,6 +251,7 @@
             }
             else {
               this.recharges = [];
+              this.totalRows = this.recharges.length;
             }
             this.loading = false;
           }).catch(() => {

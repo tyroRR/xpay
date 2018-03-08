@@ -32,8 +32,7 @@
       <el-table :data="stores"
                 style="width: 100%"
                 height="680"
-                ref="table"
-                :default-sort = "{prop: 'bailPercentage', order: 'descending'}">
+                ref="table">
                 <!--@selection-change="tableSelectionChange"-->
         <el-table-column type="expand">
           <template slot-scope="props">
@@ -93,6 +92,9 @@
             </el-form-item>
             <el-form-item label="通知地址" prop="notifyUrl">
               <el-input v-model="createAdmin.notifyUrl"></el-input>
+            </el-form-item>
+            <el-form-item label="回调地址" prop="returnUrl">
+              <el-input v-model="createAdmin.returnUrl"></el-input>
             </el-form-item>
             <el-form-item label="代理商" prop="agentId">
               <el-select v-model="createAdmin.agentId" placeholder="请选择代理商(没有可不选)">
@@ -158,8 +160,9 @@
             </el-form-item>
             <el-form-item prop="role" label="权限">
               <el-select v-model="formEdit.role" placeholder="请选择用户权限">
-                <el-option label="代理商" value="AGENT"></el-option>
                 <el-option label="商户管理员" value="STORE"></el-option>
+                <el-option label="代理商" value="AGENT"></el-option>
+                <el-option label="破解方" value="H5PROVIDER"></el-option>
               </el-select>
             </el-form-item>
           </el-form>
@@ -214,6 +217,7 @@
           name: '',
           bailPercentage: '',
           notifyUrl: 'http://www.zmpay.top/messages',
+          returnUrl: '',
           dailyLimit: '',
           quota: '',
           agentId: "",
@@ -244,6 +248,9 @@
           ],
           notifyUrl: [
             { required: true, message: '请输入通知地址', trigger: 'blur' },
+          ],
+          returnUrl: [
+            { required: true, message: '请输入回调地址', trigger: 'blur' },
           ],
           extStoreId: [
             { required: true, message: '请输入通道ID'},
@@ -421,7 +428,7 @@
           this.$message.error('修改失败！');
           this.$refs.formEdit.resetFields();
         })
-      },
+      }
     }
   }
 </script>

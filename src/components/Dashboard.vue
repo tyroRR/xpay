@@ -53,6 +53,7 @@
           <el-table-column prop="lastTradeAmount" label="昨日交易额" align="center"></el-table-column>
           <el-table-column prop="lastRechargeAmount" label="最近一笔充值" align="center"></el-table-column>
           <el-table-column prop="dailyLimit" label="日交易额上限" align="center"></el-table-column>
+          <el-table-column prop="notifyUrl" label="通知地址" align="center"></el-table-column>
           <el-table-column label="操作" align="center">
             <template slot-scope="scope">
               <el-button class="handle"

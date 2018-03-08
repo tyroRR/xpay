@@ -3,12 +3,11 @@
     <el-col :span="24" class="warp-breadcrum">
       <el-breadcrumb separator="/">
         <el-breadcrumb-item :to="{ path: '/' }"><b>首页</b></el-breadcrumb-item>
-        <template v-if=" userInfo.role === 'ADMIN'">
-          <el-breadcrumb-item>商户管理</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/store/storeAdmins'}">商户管理员列表</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/store/storeDetails'}">商户详情</el-breadcrumb-item>
-        </template>
-        <el-breadcrumb-item>商品列表</el-breadcrumb-item>
+        <el-breadcrumb-item>商户管理</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/store/storeAdmins'}">商户管理员列表</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/store/storeDetails'}">商户详情</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/store/Goods'}">商品列表</el-breadcrumb-item>
+        <el-breadcrumb-item>关联商品列表</el-breadcrumb-item>
       </el-breadcrumb>
     </el-col>
     <el-col :span="24" class="warp-main"
@@ -27,7 +26,7 @@
             <el-button slot="append" icon="el-icon-search" @click="getGoods">查询</el-button>
           </el-input>
           <template v-if="userInfo.role === 'ADMIN'">
-            <el-button type="info" plain icon="el-icon-plus" @click="dialogCreateVisible = true">新增商品</el-button>
+            <el-button type="info" plain icon="el-icon-plus" @click="dialogCreateVisible = true">添加商品</el-button>
           </template>
         </el-form>
       </el-col>
@@ -38,22 +37,16 @@
                 height="680"
                 ref="table">
         <el-table-column prop="extStoreId" label="小微商户ID" align="center"></el-table-column>
+        <el-table-column prop="extStoreName" label="商户名" align="center"></el-table-column>
         <el-table-column prop="name" label="商品名" align="center">
           <template slot-scope="scope">
-            <el-button @click="viewDetail(scope.row,scope.column)" type="text" size="small">{{scope.row.name}}</el-button>
+            <el-button @click="viewDetail(scope.row)" type="text" size="small">{{scope.row.name}}</el-button>
           </template>
         </el-table-column>
         <el-table-column prop="amount" label="金额" align="center"></el-table-column>
-        <el-table-column prop="desc" label="描述" align="center"></el-table-column>
         <el-table-column prop="number" label="商品个数" align="center"></el-table-column>
-        <el-table-column prop="attachNumber" label="关联个数" align="center">
-          <template slot-scope="scope">
-            <el-button @click="viewDetail(scope.row,scope.column)" type="text" size="small">{{scope.row.attachNumber}}</el-button>
-          </template>
-        </el-table-column>
-        <el-table-column prop="url" label="支付链接" align="center"></el-table-column>
         <template v-if="this.userInfo.role === 'ADMIN'">
-          <el-table-column label="操作" align="center" width="160px">
+          <el-table-column label="操作" align="center">
             <template slot-scope="scope">
               <el-button
                 size="mini" type="info" plain
@@ -65,23 +58,7 @@
               </el-button>
             </template>
           </el-table-column>
-          <el-table-column label="商户池" align="center" width="260px">
-            <template slot-scope="scope">
-              <el-button
-                size="mini" type="info" plain
-                @click="updateStorePoolRow(scope.row)">编辑
-              </el-button>
-              <el-button
-                size="mini" type="primary" plain
-                @click="inPool(scope.row)">加入
-              </el-button>
-              <el-button
-                size="mini" type="danger" plain
-                @click="outPool(scope.row)">删除
-              </el-button>
-            </template>
-          </el-table-column>
-          <!--<el-table-column label="商品关联/解除" align="center">
+          <el-table-column label="商品关联/解除" align="center">
             <template slot-scope="scope">
               <el-button
                 size="mini" type="primary" plain
@@ -92,17 +69,14 @@
                 @click="detachGoods(scope.row)">解除
               </el-button>
             </template>
-          </el-table-column>-->
+          </el-table-column>
         </template>
       </el-table>
 
       <template v-if="userInfo.role === 'ADMIN'">
         <!-- 新增商品-->
-        <el-dialog title="新增商品" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
+        <el-dialog title="添加商品" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
           <el-form id="#create" ref="create" :model="create" :rules="createRules"  label-width="150px">
-            <el-form-item prop="extStoreId" label="小微商户ID">
-              <el-input v-model="create.extStoreId"></el-input>
-            </el-form-item>
             <el-form-item prop="name" label="商品名">
               <el-input v-model="create.name"></el-input>
             </el-form-item>
@@ -110,9 +84,6 @@
               <el-input v-model="create.amount">
                 <template slot="append">元</template>
               </el-input>
-            </el-form-item>
-            <el-form-item prop="desc" label="描述">
-              <el-input v-model="create.desc"></el-input>
             </el-form-item>
             <el-form-item
               v-for="(code, index) in create.extGoodsList"
@@ -125,13 +96,6 @@
               <el-input v-model="code.note" class="mb"></el-input>
               <el-button type="danger" @click.prevent="removeCreateCode(code)" size="small"  icon="el-icon-delete" plain class="right-float">删除</el-button>
             </el-form-item>
-            <!--<el-form-item
-              v-for="(note, index) in create.extGoodsList"
-              :label="'备注' + Number(index+1)"
-              :prop="'extGoodsList.' + index + 'note'"
-              :key="note.key">
-              <el-input v-model="note.note"></el-input>
-            </el-form-item>-->
             <el-button type="info" size="small" icon="el-icon-plus" plain class="right-float" @click="addCreateCode">添加二维码</el-button>
           </el-form>
           <div slot="footer" class="dialog-footer">
@@ -142,19 +106,13 @@
 
         <el-dialog title="修改商品信息" center v-model="dialogUpdateVisible" :visible.sync="dialogUpdateVisible" :close-on-click-modal="false">
           <el-form ref="update" :model="update" :rules="updateRules" label-width="150px">
-            <el-form-item prop="extStoreId" label="小微商户ID">
-              <el-input v-model="update.extStoreId"></el-input>
-            </el-form-item>
             <el-form-item prop="name" label="商品名">
               <el-input v-model="update.name"></el-input>
             </el-form-item>
-            <el-form-item prop="amount" label="价格">
+            <el-form-item prop="amount" label="金额">
               <el-input v-model="update.amount">
                 <template slot="append">元</template>
               </el-input>
-            </el-form-item>
-            <el-form-item prop="desc" label="描述">
-              <el-input v-model="update.desc"></el-input>
             </el-form-item>
             <el-form-item
               v-for="(code, index) in update.extGoodsList"
@@ -167,50 +125,11 @@
               <el-input v-model="code.note" class="mb"></el-input>
               <el-button type="danger" @click.prevent="removeUpdateCode(code)" size="small"  icon="el-icon-delete" plain class="right-float">删除</el-button>
             </el-form-item>
-            <!--<el-form-item
-              v-for="(note, index) in update.extGoodsList"
-              :label="'备注' + Number(index+1)"
-              :prop="'extGoodsList.' + index + 'note'"
-              :key="note.key">
-              <el-input v-model="note.note"></el-input>
-            </el-form-item>-->
-            <el-form-item prop="url" label="支付链接">
-              <el-input v-model="url" disabled></el-input>
-            </el-form-item>
             <el-button type="info" size="small" icon="el-icon-plus" plain class="right-float" @click="addUpdateCode">添加二维码</el-button>
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button plain @click="dialogUpdateVisible = false">取 消</el-button>
             <el-button type="primary" plain :loading="createLoading" @click="handleUpdate">提交</el-button>
-          </div>
-        </el-dialog>
-
-        <el-dialog title="修改商品池商品信息" center v-model="dialogUpdatePoolVisible" :visible.sync="dialogUpdatePoolVisible" :close-on-click-modal="false">
-          <el-form ref="update" :model="update" :rules="updatePoolRules" label-width="150px">
-            <el-form-item prop="name" label="商品名">
-              <el-input v-model="updatePool.name"></el-input>
-            </el-form-item>
-            <el-form-item prop="amount" label="价格">
-              <el-input v-model="updatePool.amount">
-                <template slot="append">元</template>
-              </el-input>
-            </el-form-item>
-            <el-form-item
-              v-for="(code, index) in updatePool.extGoodsList"
-              :label="'商品二维码&&备注' + Number(index+1)"
-              :prop="'extGoodsList.' + index + '.extQrCode'"
-              :key="code.key"
-              :rules="{required: true, message: '商品二维码&&备注不能为空', trigger: 'blur' }">
-              <el-input v-model="code.extQrCode" class="mb"></el-input>
-              <el-button type="primary" size="small" icon="el-icon-document" plain class="copy-btn right-float mb">复制</el-button>
-              <el-input v-model="code.note" class="mb"></el-input>
-              <el-button type="danger" @click.prevent="removeUpdateCode(code)" size="small"  icon="el-icon-delete" plain class="right-float">删除</el-button>
-            </el-form-item>
-            <el-button type="info" size="small" icon="el-icon-plus" plain class="right-float" @click="addUpdateCode">添加二维码</el-button>
-          </el-form>
-          <div slot="footer" class="dialog-footer">
-            <el-button plain @click="dialogUpdatePoolVisible = false">取 消</el-button>
-            <el-button type="primary" plain :loading="createLoading" @click="handleUpdatePool">提交</el-button>
           </div>
         </el-dialog>
 
@@ -251,6 +170,7 @@
             <el-button type="primary" plain @click="handleDetach">提交</el-button>
           </div>
         </el-dialog>
+
       </template>
 
       <el-pagination class="paging"
@@ -284,13 +204,11 @@
           role:''
         },
         adminId: '',
-        storeId: '',
+        extStoreId: '',
         goods: [],
         create: {
           name: '',
-          desc: '',
           amount: '',
-          extStoreId: '',
           extGoodsList: [
             {
               extQrCode:'',
@@ -308,49 +226,20 @@
         },
         goodsId: '',
         update: {
-          name: '',
-          desc: '',
-          amount: '',
-          extStoreId: '',
-          extGoodsList: [],
-        },
-        updatePool:{
           id: '',
           name: '',
           amount: '',
           extGoodsList: [],
         },
-        updatePoolExtStoreId: '',
-        url: '',
         createRules: {
-          extStoreId: [
-            { required: true, message: '请输入小微商户ID', trigger: 'blur' },
-          ],
           name: [
             { required: true, message: '请输入商品名', trigger: 'blur' },
           ],
           amount: [
             { required: true, message: '请输入商品金额', trigger: 'blur' },
-          ],
-          desc: [
-            { required: true, message: '请输入商品描述', trigger: 'blur' },
           ]
         },
         updateRules: {
-          extStoreId: [
-            { required: true, message: '请输入小微商户ID', trigger: 'blur' },
-          ],
-          name: [
-            { required: true, message: '请输入商品名', trigger: 'blur' },
-          ],
-          amount: [
-            { required: true, message: '请输入商品金额', trigger: 'blur' },
-          ],
-          desc: [
-            { required: true, message: '请输入商品描述', trigger: 'blur' },
-          ]
-        },
-        updatePoolRules: {
           name: [
             { required: true, message: '请输入商品名', trigger: 'blur' },
           ],
@@ -358,7 +247,7 @@
             { required: true, message: '请输入商品金额', trigger: 'blur' },
           ]
         },
-        currentExtStoreId: '',
+        attachGoodsList: [],
         attachGood: [],
         detachGood: [],
         goodsList: [],
@@ -374,7 +263,6 @@
         loading: false,
         dialogCreateVisible: false, //创建对话框的显示状态
         dialogUpdateVisible: false,
-        dialogUpdatePoolVisible: false,
         dialogAttachVisible: false,
         dialogDetachVisible: false,
         createLoading: false,
@@ -407,7 +295,7 @@
         this.userInfo.role = userInfo.role;
       }
       this.adminId = sessionStorage.getItem('currentAdminId');
-      this.storeId = sessionStorage.getItem('currentStoreId');
+      this.extStoreId = sessionStorage.getItem('currentExtStoreId');
       this.getGoods();
     },
     methods: {
@@ -443,22 +331,23 @@
           }]
       },
       getGoods() {
-        this.loading = true;
-        this.$http.get(`/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/goods`).then(res => {
-          if (res.data.data) {
-            res.data.data.forEach(row => {
-              if(row.extGoodsList){
-                row.number = row.extGoodsList.length;
-              }
-              else row.number = 0;
-              if(row.storeExtGoodsList){
-                row.attachNumber = row.storeExtGoodsList.length;
-              }
-              else row.attachNumber = 0;
-              row.url = `http://www.zmpay.top/xpay/qrcode/${row.code}`;
-              row.amount += '元';
+          this.loading = true;
+          if(sessionStorage.getItem('storeExtGoodsList')){
+            const extStoreIdList = JSON.parse(sessionStorage.getItem('storeExtGoodsList'));
+            console.log(extStoreIdList);
+            let attachGoodsList = [];
+            extStoreIdList.map(store=>{
+              this.$http.get(`/xpay/admin/${this.adminId}/store_pool/${store.extStoreId}/goods`).then(res=>{
+                if(res.data.data[0].extGoodsList){
+                  res.data.data[0].number = res.data.data[0].extGoodsList.length;
+                }
+                else res.data.data[0].number = 0;
+                res.data.data[0].amount += '元';
+                attachGoodsList = attachGoodsList.concat(res.data.data);
+              }).then(()=>{
+                this.goods = attachGoodsList;
+              })
             });
-            this.goods = res.data.data;
           }
           else {
             this.goods = []
@@ -479,10 +368,6 @@
           this.filter.beginIndex = (this.filter.currentPage-1)*this.filter.pageSize;
           this.goods = queryData.splice(this.filter.beginIndex,this.filter.pageSize);
           this.loading = false;
-          if(this.goods[0]){
-            this.create.extStoreId = this.goods[0].extStoreId
-          }
-        })
       },
       addCreateCode() {
         this.create.extGoodsList.push({
@@ -511,17 +396,16 @@
       handleCreate(){
         this.$refs.create.validate((valid) => {
           if (valid) {
-            this.create.storeId = this.storeId;
             this.create.extGoodsList = this.create.extGoodsList.filter(q => {
               if(q.extQrCode&&q.note){return q}
             });
-            this.$http.put(`/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/goods`,this.create).then(() => {
-              this.$message.success('创建成功！');
+            this.$http.post(`/xpay/admin/${this.adminId}/store_pool/${this.extStoreId}/goods`,this.create).then(() => {
+              this.$message.success('添加成功！');
+              this.getGoods();
               this.reset();
               this.dialogCreateVisible = false;
-              this.getGoods();
             }).catch(() => {
-              this.$message.error('创建失败！');
+              this.$message.error('添加失败！');
               this.reset();
             })
           }
@@ -532,10 +416,8 @@
       },
       updateRow(row) {
         this.dialogUpdateVisible = true;
-        this.goodsId = row.id;
-        this.update.extStoreId = row.extStoreId;
+        this.update.id = row.id;
         this.update.name = row.name;
-        this.update.desc = row.desc;
         this.update.amount = parseFloat(row.amount);
         if(row.extGoodsList){
           this.update.extGoodsList = row.extGoodsList.filter(q => {
@@ -543,13 +425,12 @@
           });
         }
         else this.update.extGoodsList = [];
-        this.url = row.url
       },
       handleUpdate() {
         this.update.extGoodsList = this.update.extGoodsList.filter(q => {
           if(q.extQrCode&&q.note){return q}
         });
-        this.$http.patch(`/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/goods/${this.goodsId}`,this.update).then(() => {
+        this.$http.post(`/xpay/admin/${this.adminId}/store_pool/${this.extStoreId}/goods`,this.update).then(() => {
           this.$message.success('修改成功！');
           this.$refs.update.resetFields();
           this.dialogUpdateVisible = false;
@@ -562,8 +443,7 @@
       handleDelete(row) {
         this.$confirm('此操作将删除商品\n' + row.name + ', 是否继续?', '提示', { type: 'warning' })
           .then(() => {
-            let goodsId = row.id  ;
-            this.$http.delete(`/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/goods/${goodsId}`).then(() => {
+            this.$http.delete(`/xpay/admin/${this.adminId}/store_pool/${row.extStoreId}/goods/${row.id}`).then(() => {
               this.$message.success('成功删除了商品\n' + row.name + '!');
               this.getGoods();
             })
@@ -575,65 +455,6 @@
             this.$message.info('已取消操作!');
           });
       },
-
-      updateStorePoolRow(row){
-        this.dialogUpdatePoolVisible = true;
-        this.$http.get(`/xpay/admin/${this.adminId}/store_pool/${row.extStoreId}/goods`).then(res=>{
-          this.updatePool.id = res.data.data[0].id;
-        });
-        this.updatePoolExtStoreId = row.extStoreId;
-        this.updatePool.name = row.name;
-        this.updatePool.amount = parseFloat(row.amount);
-        if(row.extGoodsList){
-          this.updatePool.extGoodsList = row.extGoodsList.filter(q => {
-            if(q.extQrCode&& q.note){return q}
-          });
-        }
-        else this.updatePool.extGoodsList = [];
-      },
-      handleUpdatePool() {
-        this.updatePool.extGoodsList = this.updatePool.extGoodsList.filter(q => {
-          if(q.extQrCode&&q.note){return q}
-        });
-        this.$http.post(`/xpay/admin/${this.adminId}/store_pool/${this.updatePoolExtStoreId}/goods`,this.updatePool).then(() => {
-          this.$message.success('修改成功！');
-          this.dialogUpdatePoolVisible = false;
-          this.getGoods();
-        }).catch(() => {
-          this.$message.error('修改失败！');
-        })
-      },
-      inPool(row){
-        const createParam = {
-          name: row.name,
-          amount: parseInt(row.amount),
-          extGoodsList: row.extGoodsList
-        };
-        this.$http.post(`/xpay/admin/${this.adminId}/store_pool/${row.extStoreId}/goods`,createParam).then(() => {
-          this.$message.success('添加成功！');
-          this.getGoods();
-        }).catch(() => {
-          this.$message.error('添加失败！');
-          this.reset();
-        })
-      },
-      outPool(row){
-        this.$confirm('此操作将从商户池中删除商品\n' + row.name + ', 是否继续?', '提示', { type: 'warning' })
-          .then(() => {
-            this.$http.get(`/xpay/admin/${this.adminId}/store_pool/${row.extStoreId}/goods`).then(res=>{
-              this.$http.delete(`/xpay/admin/${this.adminId}/store_pool/${row.extStoreId}/goods/${res.data.data[0].id}`).then(() => {
-                this.$message.success('成功删除了商品\n' + row.name + '!');
-                this.getGoods();
-              })
-            }).catch(() => {
-              this.$message.error('删除失败!');
-            });
-          })
-          .catch(() => {
-            this.$message.info('已取消操作!');
-          });
-      },
-
       attachGoods(row){
         this.dialogAttachVisible = true;
         this.currentExtStoreId = row.extStoreId;
@@ -689,23 +510,16 @@
             this.$message.error('解除关联失败!');
           });
       },
-      viewDetail(row,column){
+      viewDetail(row){
         if(this.userInfo.role === 'ADMIN'){
           if(row.extGoodsList){
             row.extGoodsList.forEach(v =>{
               v.name = row.name
             });
-            if(column.property === 'attachNumber'){
-              if(row.storeExtGoodsList){
-                sessionStorage.setItem('storeExtGoodsList',JSON.stringify(row.storeExtGoodsList));
-              }
-              this.$router.push({ path: '/AttachGoods' });
-            }else {
-              sessionStorage.setItem('extGoodsList',JSON.stringify(row.extGoodsList));
-              sessionStorage.setItem('path',this.$route.path);
-              this.$router.push({ path: '/GoodDetails' });
-            }
+            sessionStorage.setItem('extGoodsList',JSON.stringify(row.extGoodsList));
           }
+          sessionStorage.setItem('path',this.$route.path);
+          this.$router.push({ path: '/GoodDetails' });
         }
       },
     }

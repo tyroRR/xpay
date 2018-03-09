@@ -65,34 +65,22 @@
               </el-button>
             </template>
           </el-table-column>
-          <el-table-column label="商户池" align="center" width="260px">
+          <el-table-column label="商品关联/解除" align="center">
             <template slot-scope="scope">
-              <el-button
-                size="mini" type="info" plain
-                @click="updateStorePoolRow(scope.row)">编辑
-              </el-button>
-              <el-button
-                size="mini" type="primary" plain
-                @click="inPool(scope.row)">加入
-              </el-button>
-              <el-button
-                size="mini" type="danger" plain
-                @click="outPool(scope.row)">删除
-              </el-button>
+              <el-tooltip :content="'商品状态: ' + goods[scope.$index].state" placement="top">
+                <el-switch
+                  v-model="goods[scope.$index].state"
+                  active-color="#13ce66"
+                  inactive-color="#ff4949"
+                  active-text="关联"
+                  inactive-text="解除"
+                  active-value="已关联"
+                  inactive-value="未关联"
+                  @change="switchState(scope.row)">
+                </el-switch>
+              </el-tooltip>
             </template>
           </el-table-column>
-          <!--<el-table-column label="商品关联/解除" align="center">
-            <template slot-scope="scope">
-              <el-button
-                size="mini" type="primary" plain
-                @click="attachGoods(scope.row)">关联
-              </el-button>
-              <el-button
-                size="mini" type="danger" plain
-                @click="detachGoods(scope.row)">解除
-              </el-button>
-            </template>
-          </el-table-column>-->
         </template>
       </el-table>
 
@@ -185,36 +173,7 @@
           </div>
         </el-dialog>
 
-        <el-dialog title="修改商品池商品信息" center v-model="dialogUpdatePoolVisible" :visible.sync="dialogUpdatePoolVisible" :close-on-click-modal="false">
-          <el-form ref="update" :model="update" :rules="updatePoolRules" label-width="150px">
-            <el-form-item prop="name" label="商品名">
-              <el-input v-model="updatePool.name"></el-input>
-            </el-form-item>
-            <el-form-item prop="amount" label="价格">
-              <el-input v-model="updatePool.amount">
-                <template slot="append">元</template>
-              </el-input>
-            </el-form-item>
-            <el-form-item
-              v-for="(code, index) in updatePool.extGoodsList"
-              :label="'商品二维码&&备注' + Number(index+1)"
-              :prop="'extGoodsList.' + index + '.extQrCode'"
-              :key="code.key"
-              :rules="{required: true, message: '商品二维码&&备注不能为空', trigger: 'blur' }">
-              <el-input v-model="code.extQrCode" class="mb"></el-input>
-              <el-button type="primary" size="small" icon="el-icon-document" plain class="copy-btn right-float mb">复制</el-button>
-              <el-input v-model="code.note" class="mb"></el-input>
-              <el-button type="danger" @click.prevent="removeUpdateCode(code)" size="small"  icon="el-icon-delete" plain class="right-float">删除</el-button>
-            </el-form-item>
-            <el-button type="info" size="small" icon="el-icon-plus" plain class="right-float" @click="addUpdateCode">添加二维码</el-button>
-          </el-form>
-          <div slot="footer" class="dialog-footer">
-            <el-button plain @click="dialogUpdatePoolVisible = false">取 消</el-button>
-            <el-button type="primary" plain :loading="createLoading" @click="handleUpdatePool">提交</el-button>
-          </div>
-        </el-dialog>
-
-        <el-dialog title="关联商品" center v-model="dialogAttachVisible" :visible.sync="dialogAttachVisible" :close-on-click-modal="false" @open="getStorePool">
+        <!--<el-dialog title="关联商品" center v-model="dialogAttachVisible" :visible.sync="dialogAttachVisible" :close-on-click-modal="false" @open="getStorePool">
           <el-form label-width="35%">
             <el-form-item label="商品名" prop="goodsId">
               <el-select v-model="attachGood" multiple placeholder="请选择商品">
@@ -250,7 +209,7 @@
             <el-button plain @click="dialogDetachVisible = false">取 消</el-button>
             <el-button type="primary" plain @click="handleDetach">提交</el-button>
           </div>
-        </el-dialog>
+        </el-dialog>-->
       </template>
 
       <el-pagination class="paging"
@@ -314,6 +273,7 @@
           extStoreId: '',
           extGoodsList: [],
         },
+        updateStorePool:{},
         updatePool:{
           id: '',
           name: '',
@@ -350,18 +310,10 @@
             { required: true, message: '请输入商品描述', trigger: 'blur' },
           ]
         },
-        updatePoolRules: {
-          name: [
-            { required: true, message: '请输入商品名', trigger: 'blur' },
-          ],
-          amount: [
-            { required: true, message: '请输入商品金额', trigger: 'blur' },
-          ]
-        },
         currentExtStoreId: '',
         attachGood: [],
         detachGood: [],
-        goodsList: [],
+        extGoodsIds: [],
         filter: {
           pageSize: 10,
           currentPage: 1,
@@ -374,7 +326,6 @@
         loading: false,
         dialogCreateVisible: false, //创建对话框的显示状态
         dialogUpdateVisible: false,
-        dialogUpdatePoolVisible: false,
         dialogAttachVisible: false,
         dialogDetachVisible: false,
         createLoading: false,
@@ -444,7 +395,9 @@
       },
       getGoods() {
         this.loading = true;
-        this.$http.get(`/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/goods`).then(res => {
+        let url = `/xpay/admin/${this.userInfo.id}/stores/${this.storeId}/goods`;
+        sessionStorage.setItem('getStateUrl',url);
+        this.$http.get(url).then(res => {
           if (res.data.data) {
             res.data.data.forEach(row => {
               if(row.extGoodsList){
@@ -452,9 +405,13 @@
               }
               else row.number = 0;
               if(row.storeExtGoodsList){
+                row.state = '已关联';
                 row.attachNumber = row.storeExtGoodsList.length;
               }
-              else row.attachNumber = 0;
+              else {
+                row.state = '未关联';
+                row.attachNumber = 0;
+              }
               row.url = `http://www.zmpay.top/xpay/qrcode/${row.code}`;
               row.amount += '元';
             });
@@ -543,7 +500,7 @@
           });
         }
         else this.update.extGoodsList = [];
-        this.url = row.url
+        this.url = row.url;
       },
       handleUpdate() {
         this.update.extGoodsList = this.update.extGoodsList.filter(q => {
@@ -575,119 +532,76 @@
             this.$message.info('已取消操作!');
           });
       },
-
-      updateStorePoolRow(row){
-        this.dialogUpdatePoolVisible = true;
-        this.$http.get(`/xpay/admin/${this.adminId}/store_pool/${row.extStoreId}/goods`).then(res=>{
-          this.updatePool.id = res.data.data[0].id;
-        });
-        this.updatePoolExtStoreId = row.extStoreId;
-        this.updatePool.name = row.name;
-        this.updatePool.amount = parseFloat(row.amount);
-        if(row.extGoodsList){
-          this.updatePool.extGoodsList = row.extGoodsList.filter(q => {
-            if(q.extQrCode&& q.note){return q}
-          });
-        }
-        else this.updatePool.extGoodsList = [];
-      },
-      handleUpdatePool() {
-        this.updatePool.extGoodsList = this.updatePool.extGoodsList.filter(q => {
-          if(q.extQrCode&&q.note){return q}
-        });
-        this.$http.post(`/xpay/admin/${this.adminId}/store_pool/${this.updatePoolExtStoreId}/goods`,this.updatePool).then(() => {
-          this.$message.success('修改成功！');
-          this.dialogUpdatePoolVisible = false;
-          this.getGoods();
-        }).catch(() => {
-          this.$message.error('修改失败！');
-        })
-      },
-      inPool(row){
-        const createParam = {
-          name: row.name,
-          amount: parseInt(row.amount),
-          extGoodsList: row.extGoodsList
-        };
-        this.$http.post(`/xpay/admin/${this.adminId}/store_pool/${row.extStoreId}/goods`,createParam).then(() => {
-          this.$message.success('添加成功！');
-          this.getGoods();
-        }).catch(() => {
-          this.$message.error('添加失败！');
-          this.reset();
-        })
-      },
-      outPool(row){
-        this.$confirm('此操作将从商户池中删除商品\n' + row.name + ', 是否继续?', '提示', { type: 'warning' })
-          .then(() => {
-            this.$http.get(`/xpay/admin/${this.adminId}/store_pool/${row.extStoreId}/goods`).then(res=>{
-              this.$http.delete(`/xpay/admin/${this.adminId}/store_pool/${row.extStoreId}/goods/${res.data.data[0].id}`).then(() => {
-                this.$message.success('成功删除了商品\n' + row.name + '!');
-                this.getGoods();
-              })
-            }).catch(() => {
-              this.$message.error('删除失败!');
+      switchState(row){
+        if(row.state === '已关联'){
+          let storePool = [];
+          let extGoodsIds = [];
+          let count = 0;
+          this.$http.get(`/xpay/admin/${this.adminId}/store_pool`).then(res=>{
+            storePool = res.data.data;
+            storePool.map(store=>{
+              this.$http.get(`/xpay/admin/${this.adminId}/store_pool/${store.extStoreId}/goods`).then(info=>{
+                let extGoods = info.data.data;
+                extGoods.map(good=>{
+                  if(parseInt(row.amount) === good.amount){
+                    console.log(good);
+                    extGoodsIds = extGoodsIds.concat(good.id);
+                  }
+                });
+              }).then(()=>{
+                count++;
+                let attachParam = {
+                  "goodsId": row.id,
+                  "extGoodsIds": extGoodsIds
+                };
+                console.log(count);
+                if(count === storePool.length){
+                  this.$http.post(`/xpay/admin/${this.adminId}/store_pool/goods/attach`,attachParam).then(() => {
+                    this.$message.success('关联成功!');
+                    this.getGoods();
+                  })
+                }
+              });
             });
-          })
-          .catch(() => {
-            this.$message.info('已取消操作!');
-          });
-      },
-
-      attachGoods(row){
-        this.dialogAttachVisible = true;
-        this.currentExtStoreId = row.extStoreId;
-        this.goodsId = row.id
-      },
-      detachGoods(row){
-        this.dialogDetachVisible = true;
-        this.currentExtStoreId = row.extStoreId;
-        this.goodsId = row.id
-      },
-      getStorePool(){
-        let storePool = [];
-        let goodsList = [];
-        this.$http.get(`/xpay/admin/${this.adminId}/store_pool`).then(res=>{
-          storePool = res.data.data;
-          storePool.map(store=>{
-            this.$http.get(`/xpay/admin/${this.adminId}/store_pool/${store.extStoreId}/goods`).then(info=>{
-              if(info.data.data[0].name){
-                goodsList = goodsList.concat(info.data.data);
-                console.log(goodsList);
-              }
-            }).then(()=>{
-              this.goodsList = goodsList
-            });
-          });
-        });
-      },
-      handleAttach(){
-        let attachParam = {
-          "goodsId": this.goodsId,
-          "extGoodsIds": [].concat(this.attachGood)
-        };
-        this.$http.post(`/xpay/admin/${this.adminId}/store_pool/goods/attach`,attachParam).then(() => {
-          this.$message.success('关联成功!');
-          this.dialogAttachVisible = false;
-          this.getGoods();
-        })
-          .catch(() => {
+          }).catch(() => {
             this.$message.error('关联失败!');
           });
-      },
-      handleDetach(){
-        let detachParam = {
-          "goodsId": this.goodsId,
-          "extGoodsIds": [].concat(this.detachGood)
-        };
-        this.$http.post(`/xpay/admin/${this.adminId}/store_pool/goods/detach`,detachParam).then(() => {
-          this.$message.success('解除关联成功!');
-          this.dialogDetachVisible = false;
-          this.getGoods();
-        })
-          .catch(() => {
+        }
+
+        if(row.state === '未关联'){
+          let storePool = [];
+          let extGoodsIds = [];
+          let count = 0;
+          this.$http.get(`/xpay/admin/${this.adminId}/store_pool`).then(res=>{
+            storePool = res.data.data;
+            storePool.map(store=>{
+              this.$http.get(`/xpay/admin/${this.adminId}/store_pool/${store.extStoreId}/goods`).then(info=>{
+                let extGoods = info.data.data;
+                extGoods.map(good=>{
+                  if(parseInt(row.amount) === good.amount){
+                    console.log(good);
+                    extGoodsIds = extGoodsIds.concat(good.id);
+                  }
+                });
+              }).then(()=>{
+                count++;
+                let detachParam = {
+                  "goodsId": row.id,
+                  "extGoodsIds": extGoodsIds
+                };
+                console.log(count);
+                if(count === storePool.length){
+                  this.$http.post(`/xpay/admin/${this.adminId}/store_pool/goods/detach`,detachParam).then(() => {
+                    this.$message.success('解除关联成功!');
+                    this.getGoods();
+                  })
+                }
+              });
+            });
+          }).catch(() => {
             this.$message.error('解除关联失败!');
           });
+        }
       },
       viewDetail(row,column){
         if(this.userInfo.role === 'ADMIN'){
@@ -698,6 +612,9 @@
             if(column.property === 'attachNumber'){
               if(row.storeExtGoodsList){
                 sessionStorage.setItem('storeExtGoodsList',JSON.stringify(row.storeExtGoodsList));
+              }
+              else {
+                sessionStorage.removeItem('storeExtGoodsList');
               }
               this.$router.push({ path: '/AttachGoods' });
             }else {

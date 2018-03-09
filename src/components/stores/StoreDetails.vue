@@ -574,7 +574,7 @@
       },
       switchState(row){
         this.$http.get(`/xpay/admin/${row.admin.id}/stores/${row.id}/goods`).then(res=>{
-
+          let goodsList = res.data.data;
           let param = {
             extStoreId: res.data.data[0].extStoreId,
             extStoreName: row.name
@@ -582,6 +582,15 @@
 
           if(row.state === 'in'){
             this.$http.put(`/xpay/admin/${row.admin.id}/store_pool/`,param).then(() => {
+              goodsList.map(good=>{
+                let storeParam = {
+                  name: good.name,
+                  amount: good.amount,
+                  extGoodsList: good.extGoodsList
+                };
+                this.$http.post(`/xpay/admin/${row.admin.id}/store_pool/${param.extStoreId}/goods`,storeParam)
+              });
+            }).then(()=>{
               this.$message.success('添加成功！');
               this.getStores();
             }).catch(() => {

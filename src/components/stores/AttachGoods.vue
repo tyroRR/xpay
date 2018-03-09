@@ -25,9 +25,6 @@
             </el-select>
             <el-button slot="append" icon="el-icon-search" @click="getGoods">查询</el-button>
           </el-input>
-          <template v-if="userInfo.role === 'ADMIN'">
-            <el-button type="info" plain icon="el-icon-plus" @click="dialogCreateVisible = true">添加商品</el-button>
-          </template>
         </el-form>
       </el-col>
 
@@ -52,57 +49,28 @@
                 size="mini" type="info" plain
                 @click="updateRow(scope.row)">编辑
               </el-button>
-              <el-button
-                size="mini" type="danger" plain
-                @click="handleDelete(scope.row)">删除
-              </el-button>
             </template>
           </el-table-column>
           <el-table-column label="商品关联/解除" align="center">
             <template slot-scope="scope">
-              <el-button
-                size="mini" type="primary" plain
-                @click="attachGoods(scope.row)">关联
-              </el-button>
-              <el-button
-                size="mini" type="danger" plain
-                @click="detachGoods(scope.row)">解除
-              </el-button>
+              <el-tooltip :content="'商品状态: ' + goods[scope.$index].state" placement="top">
+                <el-switch
+                  v-model="goods[scope.$index].state"
+                  active-color="#13ce66"
+                  inactive-color="#ff4949"
+                  active-text="关联"
+                  inactive-text="解除"
+                  active-value="已关联"
+                  inactive-value="未关联"
+                  @change="switchState(scope.row)">
+                </el-switch>
+              </el-tooltip>
             </template>
           </el-table-column>
         </template>
       </el-table>
 
       <template v-if="userInfo.role === 'ADMIN'">
-        <!-- 新增商品-->
-        <el-dialog title="添加商品" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
-          <el-form id="#create" ref="create" :model="create" :rules="createRules"  label-width="150px">
-            <el-form-item prop="name" label="商品名">
-              <el-input v-model="create.name"></el-input>
-            </el-form-item>
-            <el-form-item prop="amount" label="金额">
-              <el-input v-model="create.amount">
-                <template slot="append">元</template>
-              </el-input>
-            </el-form-item>
-            <el-form-item
-              v-for="(code, index) in create.extGoodsList"
-              :label="'商品二维码&&备注' + Number(index+1)"
-              :prop="'extGoodsList.' + index + '.extQrCode'"
-              :key="code.key"
-              :rules="{required: true, message: '商品二维码&&备注不能为空', trigger: 'blur' }">
-              <el-input v-model="code.extQrCode" class="qrCode mb"></el-input>
-              <el-button type="primary" size="small"  icon="el-icon-document" plain class="copy-btn right-float mb" data-clipboard-target=".qrCode">复制</el-button>
-              <el-input v-model="code.note" class="mb"></el-input>
-              <el-button type="danger" @click.prevent="removeCreateCode(code)" size="small"  icon="el-icon-delete" plain class="right-float">删除</el-button>
-            </el-form-item>
-            <el-button type="info" size="small" icon="el-icon-plus" plain class="right-float" @click="addCreateCode">添加二维码</el-button>
-          </el-form>
-          <div slot="footer" class="dialog-footer">
-            <el-button plain @click="dialogCreateVisible = false">取 消</el-button>
-            <el-button type="primary" plain :loading="createLoading" @click="handleCreate">提交</el-button>
-          </div>
-        </el-dialog>
 
         <el-dialog title="修改商品信息" center v-model="dialogUpdateVisible" :visible.sync="dialogUpdateVisible" :close-on-click-modal="false">
           <el-form ref="update" :model="update" :rules="updateRules" label-width="150px">
@@ -129,45 +97,7 @@
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button plain @click="dialogUpdateVisible = false">取 消</el-button>
-            <el-button type="primary" plain :loading="createLoading" @click="handleUpdate">提交</el-button>
-          </div>
-        </el-dialog>
-
-        <el-dialog title="关联商品" center v-model="dialogAttachVisible" :visible.sync="dialogAttachVisible" :close-on-click-modal="false" @open="getStorePool">
-          <el-form label-width="35%">
-            <el-form-item label="商品名" prop="goodsId">
-              <el-select v-model="attachGood" multiple placeholder="请选择商品">
-                <el-option
-                  v-for="item in goodsList"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.id">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-form>
-          <div slot="footer" class="dialog-footer">
-            <el-button plain @click="dialogAttachVisible = false">取 消</el-button>
-            <el-button type="primary" plain @click="handleAttach">提交</el-button>
-          </div>
-        </el-dialog>
-
-        <el-dialog title="解除关联" center v-model="dialogDetachVisible" :visible.sync="dialogDetachVisible" :close-on-click-modal="false" @open="getStorePool">
-          <el-form label-width="35%">
-            <el-form-item label="商品名" prop="goodsId">
-              <el-select v-model="detachGood" multiple placeholder="请选择商品">
-                <el-option
-                  v-for="item in goodsList"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.id">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-form>
-          <div slot="footer" class="dialog-footer">
-            <el-button plain @click="dialogDetachVisible = false">取 消</el-button>
-            <el-button type="primary" plain @click="handleDetach">提交</el-button>
+            <el-button type="primary" plain :loading="updateLoading" @click="handleUpdate">提交</el-button>
           </div>
         </el-dialog>
 
@@ -231,14 +161,6 @@
           amount: '',
           extGoodsList: [],
         },
-        createRules: {
-          name: [
-            { required: true, message: '请输入商品名', trigger: 'blur' },
-          ],
-          amount: [
-            { required: true, message: '请输入商品金额', trigger: 'blur' },
-          ]
-        },
         updateRules: {
           name: [
             { required: true, message: '请输入商品名', trigger: 'blur' },
@@ -247,10 +169,6 @@
             { required: true, message: '请输入商品金额', trigger: 'blur' },
           ]
         },
-        attachGoodsList: [],
-        attachGood: [],
-        detachGood: [],
-        goodsList: [],
         filter: {
           pageSize: 10,
           currentPage: 1,
@@ -261,11 +179,7 @@
         keywords: '', //搜索框的关键字内容
         select: 'name', //搜索框的搜索字段
         loading: false,
-        dialogCreateVisible: false, //创建对话框的显示状态
         dialogUpdateVisible: false,
-        dialogAttachVisible: false,
-        dialogDetachVisible: false,
-        createLoading: false,
         updateLoading: false,
         placeholder:placeholders["name"]
       };
@@ -314,39 +228,29 @@
         this.filter.currentPage = val;
         this.getGoods();
       },
-      // 重置
-      reset() {
-        this.$refs.create.resetFields();
-        this.create.extGoodsList = [{
-          extQrCode:'',
-          note:''
-        },
-          {
-            extQrCode:'',
-            note:''
-          },
-          {
-            extQrCode:'',
-            note:''
-          }]
-      },
       getGoods() {
           this.loading = true;
+          let url = sessionStorage.getItem('getStateUrl');
           if(sessionStorage.getItem('storeExtGoodsList')){
-            const extStoreIdList = JSON.parse(sessionStorage.getItem('storeExtGoodsList'));
-            console.log(extStoreIdList);
-            let attachGoodsList = [];
-            extStoreIdList.map(store=>{
-              this.$http.get(`/xpay/admin/${this.adminId}/store_pool/${store.extStoreId}/goods`).then(res=>{
-                if(res.data.data[0].extGoodsList){
-                  res.data.data[0].number = res.data.data[0].extGoodsList.length;
-                }
-                else res.data.data[0].number = 0;
-                res.data.data[0].amount += '元';
-                attachGoodsList = attachGoodsList.concat(res.data.data);
-              }).then(()=>{
-                this.goods = attachGoodsList;
-              })
+            const storeExtGoodsList = JSON.parse(sessionStorage.getItem('storeExtGoodsList'));
+            console.log(storeExtGoodsList);
+            this.$http.get(url).then(res=>{
+              res.data.data.forEach(val=>{
+                storeExtGoodsList.forEach(good=>{
+                  if(val.amount === parseInt(good.amount)){
+                    let stateList = val.storeExtGoodsList;
+                    console.log(stateList);
+                    console.log(good);
+                    console.log(stateList.indexOf(good));
+                    stateList.indexOf(good)
+                  }
+                })
+              });
+              this.goods = [...storeExtGoodsList];
+              this.goods.map(store=>{
+                store.amount = `${store.amount}元`;
+                store.number = store.extGoodsList.length
+              });
             });
           }
           else {
@@ -369,50 +273,17 @@
           this.goods = queryData.splice(this.filter.beginIndex,this.filter.pageSize);
           this.loading = false;
       },
-      addCreateCode() {
-        this.create.extGoodsList.push({
-          extQrCode:'',
-          note:''
-        });
-      },
       addUpdateCode() {
         this.update.extGoodsList.push({
           extQrCode:'',
           note:''
         });
       },
-      removeCreateCode(code) {
-        var index = this.create.extGoodsList.indexOf(code);
-        if (index !== -1) {
-          this.create.extGoodsList.splice(index, 1)
-        }
-      },
       removeUpdateCode(code) {
         var index = this.update.extGoodsList.indexOf(code);
         if (index !== -1) {
           this.update.extGoodsList.splice(index, 1)
         }
-      },
-      handleCreate(){
-        this.$refs.create.validate((valid) => {
-          if (valid) {
-            this.create.extGoodsList = this.create.extGoodsList.filter(q => {
-              if(q.extQrCode&&q.note){return q}
-            });
-            this.$http.post(`/xpay/admin/${this.adminId}/store_pool/${this.extStoreId}/goods`,this.create).then(() => {
-              this.$message.success('添加成功！');
-              this.getGoods();
-              this.reset();
-              this.dialogCreateVisible = false;
-            }).catch(() => {
-              this.$message.error('添加失败！');
-              this.reset();
-            })
-          }
-          else {
-            return false;
-          }
-        })
       },
       updateRow(row) {
         this.dialogUpdateVisible = true;
@@ -440,75 +311,34 @@
           this.$refs.update.resetFields();
         })
       },
-      handleDelete(row) {
-        this.$confirm('此操作将删除商品\n' + row.name + ', 是否继续?', '提示', { type: 'warning' })
-          .then(() => {
-            this.$http.delete(`/xpay/admin/${this.adminId}/store_pool/${row.extStoreId}/goods/${row.id}`).then(() => {
-              this.$message.success('成功删除了商品\n' + row.name + '!');
-              this.getGoods();
-            })
-              .catch(() => {
-                this.$message.error('删除失败!');
-              });
+      switchState(row){
+        if(row.state === '已关联'){
+          let attachParam = {
+            goodsId: row.goodsId,
+            extGoodsIds: [row.id]
+          };
+          this.$http.post(`/xpay/admin/${this.adminId}/store_pool/goods/attach`,attachParam).then(()=>{
+            this.$message.success('关联成功!');
+            this.getGoods();
           })
-          .catch(() => {
-            this.$message.info('已取消操作!');
-          });
-      },
-      attachGoods(row){
-        this.dialogAttachVisible = true;
-        this.currentExtStoreId = row.extStoreId;
-        this.goodsId = row.id
-      },
-      detachGoods(row){
-        this.dialogDetachVisible = true;
-        this.currentExtStoreId = row.extStoreId;
-        this.goodsId = row.id
-      },
-      getStorePool(){
-        let storePool = [];
-        let goodsList = [];
-        this.$http.get(`/xpay/admin/${this.adminId}/store_pool`).then(res=>{
-          storePool = res.data.data;
-          storePool.map(store=>{
-            this.$http.get(`/xpay/admin/${this.adminId}/store_pool/${store.extStoreId}/goods`).then(info=>{
-              if(info.data.data[0].name){
-                goodsList = goodsList.concat(info.data.data);
-                console.log(goodsList);
-              }
-            }).then(()=>{
-              this.goodsList = goodsList
+            .catch(() => {
+              this.$message.error('关联失败!');
             });
-          });
-        });
-      },
-      handleAttach(){
-        let attachParam = {
-          "goodsId": this.goodsId,
-          "extGoodsIds": [].concat(this.attachGood)
-        };
-        this.$http.post(`/xpay/admin/${this.adminId}/store_pool/goods/attach`,attachParam).then(() => {
-          this.$message.success('关联成功!');
-          this.dialogAttachVisible = false;
-          this.getGoods();
-        })
-          .catch(() => {
-            this.$message.error('关联失败!');
-          });
-      },
-      handleDetach(){
-        let detachParam = {
-          "goodsId": this.goodsId,
-          "extGoodsIds": [].concat(this.detachGood)
-        };
-        this.$http.post(`/xpay/admin/${this.adminId}/store_pool/goods/detach`,detachParam).then(() => {
-          this.$message.success('解除关联成功!');
-          this.dialogDetachVisible = false;
-          this.getGoods();
-        })
-          .catch(() => {
-            this.$message.error('解除关联失败!');
-          });
+        }
+
+        if(row.state === '未关联'){
+          let detachParam = {
+            goodsId: row.goodsId,
+            extGoodsIds: [row.id]
+          };
+          this.$http.post(`/xpay/admin/${this.adminId}/store_pool/goods/detach`,detachParam).then(()=>{
+            this.$message.success('解除关联成功!');
+            this.getGoods();
+          })
+            .catch(() => {
+              this.$message.error('解除关联失败!');
+            });
+        }
       },
       viewDetail(row){
         if(this.userInfo.role === 'ADMIN'){

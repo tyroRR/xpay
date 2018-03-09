@@ -236,13 +236,13 @@
             console.log(storeExtGoodsList);
             this.$http.get(url).then(res=>{
               res.data.data.forEach(val=>{
-                storeExtGoodsList.forEach(good=>{
+                let temp = JSON.parse(sessionStorage.getItem('storeExtGoodsList'))
+                temp.forEach(good=>{
                   if(val.amount === parseInt(good.amount)){
                     let stateList = val.storeExtGoodsList;
                     console.log(stateList);
                     console.log(good);
-                    console.log(stateList.indexOf(good));
-                    stateList.indexOf(good)
+                    console.log(JSON.stringify(stateList).indexOf(JSON.stringify(good)));
                   }
                 })
               });

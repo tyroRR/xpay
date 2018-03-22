@@ -45,12 +45,14 @@
         </el-table-column>
         <el-table-column prop="amount" label="金额" align="center"></el-table-column>
         <el-table-column prop="desc" label="描述" align="center"></el-table-column>
-        <el-table-column prop="number" label="商品个数" align="center"></el-table-column>
-        <el-table-column prop="attachNumber" label="关联个数" align="center">
-          <template slot-scope="scope">
-            <el-button @click="viewDetail(scope.row,scope.column)" type="text" size="small">{{scope.row.attachNumber}}</el-button>
-          </template>
-        </el-table-column>
+        <template v-if="userInfo.role === 'ADMIN'">
+          <el-table-column prop="number" label="商品个数" align="center"></el-table-column>
+          <el-table-column prop="attachNumber" label="关联个数" align="center">
+            <template slot-scope="scope">
+              <el-button @click="viewDetail(scope.row,scope.column)" type="text" size="small">{{scope.row.attachNumber}}</el-button>
+            </template>
+          </el-table-column>
+        </template>
         <el-table-column prop="url" label="支付链接" align="center"></el-table-column>
         <template v-if="this.userInfo.role === 'ADMIN'">
           <el-table-column label="操作" align="center" width="160px">
@@ -543,7 +545,7 @@
               this.$http.get(`/xpay/admin/${this.adminId}/store_pool/${store.extStoreId}/goods`).then(info=>{
                 let extGoods = info.data.data;
                 extGoods.map(good=>{
-                  if(parseInt(row.amount) === good.amount){
+                  if(parseInt(row.amount) === parseInt(good.amount)){
                     console.log(good);
                     extGoodsIds = extGoodsIds.concat(good.id);
                   }

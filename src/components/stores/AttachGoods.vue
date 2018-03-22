@@ -232,25 +232,41 @@
           this.loading = true;
           let url = sessionStorage.getItem('getStateUrl');
           if(sessionStorage.getItem('storeExtGoodsList')){
-            const storeExtGoodsList = JSON.parse(sessionStorage.getItem('storeExtGoodsList'));
-            console.log(storeExtGoodsList);
             this.$http.get(url).then(res=>{
-              res.data.data.forEach(val=>{
-                let temp = JSON.parse(sessionStorage.getItem('storeExtGoodsList'))
-                temp.forEach(good=>{
+              let resData = res.data.data;
+
+              let storeExtGoodsList = JSON.parse(sessionStorage.getItem('storeExtGoodsList'));
+              storeExtGoodsList.forEach(good=>{
+                resData.forEach(val=>{
                   if(val.amount === parseInt(good.amount)){
                     let stateList = val.storeExtGoodsList;
-                    console.log(stateList);
-                    console.log(good);
-                    console.log(JSON.stringify(stateList).indexOf(JSON.stringify(good)));
+                    if(!stateList){
+                      good.state = '未关联';
+                    }
+                    else {
+                      //console.log(stateList);
+                      //console.log(good);
+                      //console.log(JSON.stringify(stateList).indexOf(JSON.stringify(good)));
+                      let judge = JSON.stringify(stateList).indexOf(JSON.stringify(good));
+                      if(judge !==-1){
+                        good.state = '已关联';
+                      }
+                      else {
+                        good.state = '未关联';
+                      }
+                    }
                   }
-                })
+                });
+                good.amount = `${good.amount}元`;
+                good.number = good.extGoodsList.length
               });
               this.goods = [...storeExtGoodsList];
-              this.goods.map(store=>{
-                store.amount = `${store.amount}元`;
-                store.number = store.extGoodsList.length
-              });
+
+//              this.goods = [...storeExtGoodsList];
+//              this.goods.map(store=>{
+//                store.amount = `${store.amount}元`;
+//                store.number = store.extGoodsList.length
+//              });
             });
           }
           else {
@@ -319,10 +335,12 @@
           };
           this.$http.post(`/xpay/admin/${this.adminId}/store_pool/goods/attach`,attachParam).then(()=>{
             this.$message.success('关联成功!');
-            this.getGoods();
+            row.state = '已关联';
+            //this.getGoods();
           })
             .catch(() => {
               this.$message.error('关联失败!');
+              row.state = '未关联';
             });
         }
 
@@ -333,10 +351,11 @@
           };
           this.$http.post(`/xpay/admin/${this.adminId}/store_pool/goods/detach`,detachParam).then(()=>{
             this.$message.success('解除关联成功!');
-            this.getGoods();
+            row.state = '未关联';
           })
             .catch(() => {
               this.$message.error('解除关联失败!');
+              row.state = '已关联';
             });
         }
       },

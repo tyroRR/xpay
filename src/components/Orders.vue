@@ -425,8 +425,8 @@
         this.downloadLoading = true;
         require.ensure([], () => {
           const { export_json_to_excel } = require('@/utils/Export2Excel');
-          const tHeader = ['商户名称', '订单号', '下单时间', '卖家单号','状态','金额'];
-          const filterVal = ['name','orderNo','createDate','sellerOrderNo','status','totalFee'];
+          const tHeader = ['商户名称','商品名', '订单号', '下单时间', '卖家单号','状态','金额'];
+          const filterVal = ['name','subject','orderNo','createDate','sellerOrderNo','status','totalFee'];
           console.log(this.originalData);
           const list = this.originalData;
           const data = this.formatJson(filterVal, list);

@@ -21,7 +21,7 @@
           </el-form>
         </el-col>
 
-        <el-table :data="rechargeInfo"
+        <el-table :data="stores"
                   style="width: 100%"
                   height="680"
                   ref="table">
@@ -60,12 +60,26 @@
                 size="mini" type="info" plain
                 @click="view(scope.row)">查看参数
               </el-button>
-
-                  <el-button class="handle"
+              <el-button class="handle"
                              size="mini" type="primary" plain
                              @click="handleRecharge(scope.row)">充值
-                  </el-button>
-
+              </el-button>
+            </template>
+          </el-table-column>
+          <el-table-column label="商户池" align="center">
+            <template slot-scope="scope">
+              <el-tooltip :content="'Switch state: ' + stores[scope.$index].state" placement="top">
+                <el-switch
+                  v-model="stores[scope.$index].state"
+                  active-color="#13ce66"
+                  inactive-color="#ff4949"
+                  active-text="in"
+                  inactive-text="out"
+                  active-value="in"
+                  inactive-value="out"
+                  @change="switchState(scope.row)">
+                </el-switch>
+              </el-tooltip>
             </template>
           </el-table-column>
         </el-table>
@@ -150,7 +164,7 @@
         },
         storeId:'',
         intervalId:'',
-        rechargeInfo: [],
+        stores: [],
         filter: {
           name: '',
           channelType: '',
@@ -178,7 +192,7 @@
       }
     },
     mounted: function () {
-      this.$http.get(`/xpay/admin/${this.userInfo.id}/stores`).then(res => {
+      /*this.$http.get(`/xpay/admin/${this.userInfo.id}/stores`).then(res => {
         if (res.data.data) {
           res.data.data.forEach(val =>{
             if(val.channelType === 'WECHAT'){
@@ -207,9 +221,10 @@
               val.paymentGateway = 'CHINAUMS'
             }
           });
-          this.rechargeInfo = res.data.data;
+          this.stores = res.data.data;
         }
-      })
+      })*/
+      this.getStores();
     },
     methods: {
       searchFieldChange(val) {
@@ -229,52 +244,68 @@
       },
       getStores() {
         this.loading = true;
-        this.$http.get(`/xpay/admin/${this.userInfo.id}/stores`).then(res => {
-          if(res.data.data){
-            res.data.data.forEach(val =>{
-              if(val.channelType === 'WECHAT'){
-                val.channelType = '微信公众号'
-              }
-              if(val.channelType === 'ALIPAY'){
-                val.channelType = '支付宝'
-              }
-              if(val.channelType === 'BANK'){
-                val.channelType = '银联快捷'
-              }
-              val.bailPercentage += '%';
-              val.quota -= val.todayTradeAmount;
-              val.quota += '元';
-              val.todayTradeAmount += '元';
-              val.dailyLimit += '元';
-              if(val.channels){
-                if(val.channels[0].paymentGateway === 'IPSQUICK'){
-                  val.dailyLimit = '不限';
-                  val.quota = '不限';
-                }
-                val.paymentGateway = val.channels[0].paymentGateway;
-              }
-              else {
-                val.paymentGateway = 'CHINAUMS'
-              }
+        this.$http.get(`/xpay/admin/${this.userInfo.id}/store_pool`).then(res=> {
+          this.storePool = [];
+          let storePool = res.data.data;
+          if (storePool) {
+            storePool.forEach(store => {
+              this.storePool.push(store.extStoreName);
             });
-            this.stores = res.data.data;
           }
-          //查询
-          let queryData = [];
-          if(this.keywords !==""){
-            for (var i=0,lenI=this.stores.length;i<lenI;i++) {
-              let reg = new RegExp(this.keywords);
-              if(this.stores[i][this.select].toString().match(reg)){
-                queryData.push(this.stores[i]);
+
+          this.$http.get(`/xpay/admin/${this.userInfo.id}/stores`).then(res => {
+            if (res.data.data) {
+              res.data.data.forEach(val => {
+                if (val.channelType === 'WECHAT') {
+                  val.channelType = '微信公众号'
+                }
+                if (val.channelType === 'ALIPAY') {
+                  val.channelType = '支付宝'
+                }
+                if (val.channelType === 'BANK') {
+                  val.channelType = '银联快捷'
+                }
+                val.bailPercentage += '%';
+                val.quota -= val.todayTradeAmount;
+                val.quota += '元';
+                val.todayTradeAmount += '元';
+                val.dailyLimit += '元';
+                if (val.channels) {
+                  if (val.channels[0].paymentGateway === 'IPSQUICK') {
+                    val.dailyLimit = '不限';
+                    val.quota = '不限';
+                  }
+                  val.paymentGateway = val.channels[0].paymentGateway;
+                }
+                else {
+                  val.paymentGateway = 'CHINAUMS'
+                }
+                if(this.storePool.includes(val.name)){
+                  val.state = 'in'
+                }
+                else {
+                  val.state = 'out'
+                }
+              });
+              this.stores = res.data.data;
+            }
+            //查询
+            let queryData = [];
+            if (this.keywords !== "") {
+              for (var i = 0, lenI = this.stores.length; i < lenI; i++) {
+                let reg = new RegExp(this.keywords);
+                if (this.stores[i][this.select].toString().match(reg)) {
+                  queryData.push(this.stores[i]);
+                }
               }
             }
-          }
-          else queryData = this.stores;
-          this.totalRows = queryData.length;
-          //分页
-          this.filter.beginIndex = (this.filter.currentPage-1)*this.filter.pageSize;
-          this.stores = queryData.splice(this.filter.beginIndex,this.filter.pageSize);
-          this.loading = false;
+            else queryData = this.stores;
+            this.totalRows = queryData.length;
+            //分页
+            this.filter.beginIndex = (this.filter.currentPage - 1) * this.filter.pageSize;
+            this.stores = queryData.splice(this.filter.beginIndex, this.filter.pageSize);
+            this.loading = false;
+          })
         })
       },
       view(row){
@@ -348,6 +379,54 @@
               this.intervalId = setInterval(this.validate,10000);
             })
         }
+      },
+      switchState(row){
+        this.$http.get(`/xpay/admin/${row.admin.id}/stores/${row.id}/goods`).then(res=>{
+          let goodsList = res.data.data;
+          let param = {
+            extStoreId: res.data.data[0].extStoreId,
+            extStoreName: row.name
+          };
+
+          if(row.state === 'out'){
+            this.$http.delete(`/xpay/admin/${row.admin.id}/store_pool/${param.extStoreId}`).then(()=>{
+              this.$message.success('删除成功!');
+              this.getStores();
+            }).catch(()=>{
+              this.$message.error('删除失败!');
+              this.getStores();
+            })
+          }
+
+          if(row.state === 'in'){
+            if(this.userInfo.role === 'ADMIN'){
+              this.$http.put(`/xpay/admin/${row.admin.id}/store_pool/`,param).then(() => {
+                goodsList.map(good=>{
+                  let storeParam = {
+                    name: good.name,
+                    amount: good.amount,
+                    extGoodsList: good.extGoodsList
+                  };
+                  this.$http.post(`/xpay/admin/${row.admin.id}/store_pool/${param.extStoreId}/goods`,storeParam)
+                });
+              }).then(()=>{
+                this.$message.success('添加成功！');
+                this.getStores();
+              }).catch(() => {
+                this.$message.error('添加失败！');
+                this.getStores();
+              })
+            }
+            else {
+              row.state = 'out';
+              this.$message.error('无操作权限！');
+            }
+          }
+
+        }).catch(()=>{
+          this.$message.error('操作失败!');
+          this.getStores();
+        })
       },
       destroy() {
         clearInterval(this.intervalId);

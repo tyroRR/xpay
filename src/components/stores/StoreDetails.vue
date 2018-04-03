@@ -26,6 +26,7 @@
             </el-input>
             <template v-if="userInfo.role === 'ADMIN'">
               <el-button type="info" plain icon="el-icon-plus" @click="dialogCreateStoreVisible = true">添加</el-button>
+              <el-button type="info" plain icon="el-icon-plus" @click="dialogCreateChannelVisible = true">创建通道</el-button>
             </template>
         </el-form>
       </el-col>
@@ -83,10 +84,10 @@
                          size="mini" type="primary" plain
                          @click="increaseQuota(scope.row)">增加额度
               </el-button>
-              <!--<el-button class="handle"
+              <el-button class="handle"
                          size="mini" type="danger" plain
-                         @click="dialogCreateChannelVisible = true">添加通道ID
-              </el-button>-->
+                         @click="setCurrentStoreId(scope.row)">绑定通道
+              </el-button>
             </template>
           </el-table-column>
         </template>
@@ -188,8 +189,8 @@
         </div>
       </el-dialog>
 
-      <!-- 添加通道ID-->
-      <el-dialog title="添加通道ID" center v-model="dialogCreateChannelVisible" :visible.sync="dialogCreateChannelVisible" @close="resetCreateChannel">
+      <!-- 添加通道-->
+      <el-dialog title="添加通道" center v-model="dialogCreateChannelVisible" :visible.sync="dialogCreateChannelVisible" @close="resetCreateChannel">
         <el-form id="#createChannel" :model="createChannel" :rules="createChannelRules" ref="createChannel" label-width="120px">
           <el-form-item label="通道ID" prop="extStoreId">
             <el-input v-model="createChannel.extStoreId"></el-input>
@@ -199,9 +200,10 @@
           </el-form-item>
           <el-form-item label="支付网关类型" prop="paymentGateway">
             <el-select v-model="createChannel.paymentGateway" placeholder="请选择支付网关类型">
+              <el-option label="环迅扫码" value="IPSSCAN"></el-option>
+              <el-option label="环迅快捷" value="IPSQUICK"></el-option>
               <el-option label="银商H5" value="CHINAUMSH5"></el-option>
               <el-option label="银商APP" value="CHINAUMSAPP"></el-option>
-              <el-option label="环迅" value="IPS"></el-option>
             </el-select>
           </el-form-item>
           <template v-if="createChannel.paymentGateway === 'CHINAUMSH5'||createChannel.paymentGateway === 'CHINAUMSAPP'">
@@ -225,6 +227,21 @@
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogCreateChannelVisible = false">取 消</el-button>
           <el-button type="primary" @click="handleCreateChannel">提交</el-button>
+        </div>
+      </el-dialog>
+
+      <el-dialog title="绑定通道" center v-model="dialogBindChannelVisible" :visible.sync="dialogBindChannelVisible">
+        <el-form id="#bindChannel" :model="bindChannel" label-width="120px">
+          <el-form-item label="选择通道">
+            <el-select v-model="bindChannel.channels" multiple placeholder="请选择通道">
+              <el-option label="乐晶游环迅扫码" value="2268"></el-option>
+              <el-option label="乐晶游环迅快捷" value="2267"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="dialogBindChannelVisible = false">取 消</el-button>
+          <el-button type="primary" @click="handleBindChannel">提交</el-button>
         </div>
       </el-dialog>
 
@@ -288,6 +305,10 @@
             signKey: "",
             InstMid: ""
           },
+        },
+        currentStoreId: '',
+        bindChannel: {
+          channels: []
         },
         formEdit: {
           account: '',
@@ -358,6 +379,7 @@
         loading: true,
         dialogCreateStoreVisible: false,
         dialogCreateChannelVisible: false,
+        dialogBindChannelVisible: false,
         dialogIncreaseVisible: false,
         dialogUpdateVisible: false,
         createLoading: false,
@@ -571,6 +593,17 @@
             return false;
           }
         });
+      },
+      setCurrentStoreId(row) {
+        this.dialogBindChannelVisible = true;
+        this.currentStoreId = row.id;
+      },
+      handleBindChannel(){
+        this.$http.patch(`/xpay/admin/${this.userInfo.id}/stores/${this.currentStoreId}/channels`,).then(()=>{
+          this.$message.success('绑定成功!');
+        }).catch(()=>{
+          this.$message.error('绑定失败!');
+        })
       },
       switchState(row){
         this.$http.get(`/xpay/admin/${row.admin.id}/stores/${row.id}/goods`).then(res=>{

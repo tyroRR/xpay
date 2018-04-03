@@ -83,10 +83,10 @@
                          size="mini" type="primary" plain
                          @click="increaseQuota(scope.row)">增加额度
               </el-button>
-              <!--<el-button class="handle"
+              <el-button class="handle"
                          size="mini" type="danger" plain
-                         @click="dialogCreateChannelVisible = true">添加通道ID
-              </el-button>-->
+                         @click="createChannels(scope.row)">添加通道
+              </el-button>
             </template>
           </el-table-column>
         </template>
@@ -188,8 +188,8 @@
         </div>
       </el-dialog>
 
-      <!-- 添加通道ID-->
-      <el-dialog title="添加通道ID" center v-model="dialogCreateChannelVisible" :visible.sync="dialogCreateChannelVisible" @close="resetCreateChannel">
+      <!-- 添加通道-->
+      <el-dialog title="添加通道" center v-model="dialogCreateChannelVisible" :visible.sync="dialogCreateChannelVisible" @close="resetCreateChannel">
         <el-form id="#createChannel" :model="createChannel" :rules="createChannelRules" ref="createChannel" label-width="120px">
           <el-form-item label="通道ID" prop="extStoreId">
             <el-input v-model="createChannel.extStoreId"></el-input>
@@ -199,9 +199,10 @@
           </el-form-item>
           <el-form-item label="支付网关类型" prop="paymentGateway">
             <el-select v-model="createChannel.paymentGateway" placeholder="请选择支付网关类型">
+              <el-option label="环迅扫码" value="IPSSCAN"></el-option>
+              <el-option label="环迅快捷" value="IPSQUICK"></el-option>
               <el-option label="银商H5" value="CHINAUMSH5"></el-option>
               <el-option label="银商APP" value="CHINAUMSAPP"></el-option>
-              <el-option label="环迅" value="IPS"></el-option>
             </el-select>
           </el-form-item>
           <template v-if="createChannel.paymentGateway === 'CHINAUMSH5'||createChannel.paymentGateway === 'CHINAUMSAPP'">
@@ -289,6 +290,7 @@
             InstMid: ""
           },
         },
+        currentStoreId: '',
         formEdit: {
           account: '',
           password: '',
@@ -554,17 +556,22 @@
           this.$message.error('增加额度失败！');
         })
       },
+      createChannels(row){
+        this.dialogCreateChannelVisible = true;
+        this.currentStoreId = row.storeId;
+      },
       handleCreateChannel(){
         this.$refs.createChannel.validate((valid) => {
           if (valid) {
             this.createLoading = true;
             this.$http.put(`/xpay/admin/${this.userInfo.id}/channels`,this.create).then(res => {
-              console.log(res);
-              this.$message.success('新增通道成功！');
-              this.dialogCreateVisible = false;
-              this.createLoading = false;
-              resetCreateChannel();
-              this.getChannels();
+              this.$http.patch(`/xpay/admin/${this.userInfo.id}/stores/${this.currentStoreId}/channels`,[res.data.data.id]).then(()=>{
+                this.$message.success('新增通道成功！');
+                this.dialogCreateVisible = false;
+                this.createLoading = false;
+                resetCreateChannel();
+                this.getChannels();
+              });
             })
           }
           else {

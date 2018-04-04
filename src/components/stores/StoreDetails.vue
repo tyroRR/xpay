@@ -599,7 +599,7 @@
         this.currentStoreId = row.id;
       },
       handleBindChannel(){
-        this.$http.patch(`/xpay/admin/${this.userInfo.id}/stores/${this.currentStoreId}/channels`,).then(()=>{
+        this.$http.patch(`/xpay/admin/${this.userInfo.id}/stores/${this.currentStoreId}/channels`,this.bindChannel).then(()=>{
           this.$message.success('绑定成功!');
         }).catch(()=>{
           this.$message.error('绑定失败!');

@@ -25,7 +25,7 @@
             <el-button slot="append" icon="el-icon-search" @click="getChannels">查询</el-button>
           </el-input>
           <template v-if="userInfo.role === 'ADMIN'">
-            <el-button type="primary" icon="el-icon-plus" @click="dialogCreateVisible = true">添加</el-button>
+            <el-button type="info" plain icon="el-icon-plus" @click="dialogCreateVisible = true">添加</el-button>
           </template>
         </el-form>
       </el-col>
@@ -36,17 +36,17 @@
                 height="680"
                 :default-sort = "{prop: 'updateDate', order: 'descending'}"
                 @selection-change="tableSelectionChange">
-        <el-table-column prop="extStoreId" label="通道ID"></el-table-column>
-        <el-table-column prop="extStoreName" label="通道名称"></el-table-column>
-        <el-table-column prop="paymentGateway" label="通道类型"></el-table-column>
-        <el-table-column sortable prop="updateDate" label="末次使用时间"></el-table-column>
+        <el-table-column prop="extStoreId" label="通道ID"  align="center"></el-table-column>
+        <el-table-column prop="extStoreName" label="通道名称"  align="center"></el-table-column>
+        <el-table-column prop="paymentGateway" label="通道类型"  align="center"></el-table-column>
+        <el-table-column sortable prop="updateDate" label="末次使用时间"  align="center"></el-table-column>
         <template v-if="userInfo.role === 'ADMIN'">
-          <el-table-column label="操作">
+          <el-table-column label="操作"  align="center">
             <template slot-scope="scope">
               <el-button
                 size="mini"
                 type="danger"
-                @click="removeChannel(scope.$index, scope.row)">删除</el-button>
+                @click="removeChannel(scope.row)">删除</el-button>
             </template>
           </el-table-column>
         </template>
@@ -55,7 +55,7 @@
       <template v-if="userInfo.role === 'ADMIN'">
         <!-- 新增通道-->
         <el-dialog title="新增通道" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
-          <el-form id="#create" :model="create"  ref="create" label-width="100px">
+          <el-form id="#create" :model="create"  ref="create" :rules="rules" label-width="100px">
             <el-form-item label="通道ID" prop="extStoreId">
               <el-input v-model="create.extStoreId"></el-input>
             </el-form-item>
@@ -64,32 +64,13 @@
             </el-form-item>
             <el-form-item label="通道类型" prop="paymentGateway">
               <el-select v-model="create.paymentGateway" placeholder="请选择通道类型">
-                <el-option label="银商H5" value="CHINAUMSH5"></el-option>
-                <el-option label="银商APP" value="CHINAUMSAPP"></el-option>
+                <el-option label="环迅扫码" value="IPSSCAN"></el-option>
+                <el-option label="环迅快捷" value="IPSQUICK"></el-option>
+                <el-option label="银商小微" value="CHINAUMS"></el-option>
               </el-select>
             </el-form-item>
-            <template v-if="create.paymentGateway === 'CHINAUMSH5'||create.paymentGateway === 'CHINAUMSAPP'">
-              <el-form-item label="终端号" prop="tid">
-                <el-input v-model="create.chinaUmsProps.tid"></el-input>
-              </el-form-item>
-              <el-form-item label="消息源ID" prop="msgSrcId">
-                <el-input v-model="create.chinaUmsProps.msgSrcId"></el-input>
-              </el-form-item>
-              <el-form-item label="消息源" prop="msgSrc">
-                <el-input v-model="create.chinaUmsProps.msgSrc"></el-input>
-              </el-form-item>
-              <el-form-item label="签名秘钥" prop="signKey">
-                <el-input v-model="create.chinaUmsProps.signKey"></el-input>
-              </el-form-item>
-              <el-form-item label="机构号" prop="instMid">
-                <el-input v-model="create.chinaUmsProps.instMid"></el-input>
-              </el-form-item>
-            </template>
-            <el-form-item label="代理商" prop="agentId">
-              <el-input v-model="agentId"></el-input>
-            </el-form-item>
-            <!--<el-form-item label="代理商" prop="agent">
-              <el-select v-model="create.agent" placeholder="请选择代理商">
+            <el-form-item label="代理商(选填)" prop="agent">
+              <el-select v-model="create.agent" placeholder="请选择代理商(选填)">
                 <el-option
                   v-for="item in agentsInfo"
                   :key="item[0]"
@@ -97,7 +78,7 @@
                   :value="item[0]">
                 </el-option>
               </el-select>
-            </el-form-item>-->
+            </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogCreateVisible = false">取 消</el-button>
@@ -163,34 +144,17 @@
           paymentGateway: "",
           updateDate: ""
         },
-        /*rules: {
+        rules: {
           extStoreId: [
             { required: true, message: '请输入通道ID', trigger: 'blur' },
           ],
           extStoreName: [
-            { required: true, message: '请输入用户名', trigger: 'blur' },
+            { required: true, message: '请输入通道名称', trigger: 'blur' },
           ],
           paymentGateway: [
             { required: true, message: '请输入通道类型', trigger: 'blur' },
-          ],
-          tid: [
-            { required: true, message: '请输入终端号', trigger: 'blur' },
-          ],
-          msgSrcId: [
-            { required: true, message: '请输入消息源ID', trigger: 'blur' },
-          ],
-          msgSrc: [
-            { required: true, message: '请输入消息源', trigger: 'blur' },
-          ],
-          signKey: [
-            { required: true, message: '请输入消息源', trigger: 'blur' },
-          ],
-          agent: [
-            { required: true, message: '请输入代理商', trigger: 'blur' },
           ]
-        },*/
-
-
+        },
         filter: {
           pageSize: 10,
           currentPage: 1,
@@ -281,28 +245,28 @@
 
       // 新增通道
       createChannel(){
-
+        this.$refs.create.validate((valid) => {
+          if (valid) {
             this.createLoading = true;
-            this.$http.put(`http://www.wfpay.xyz/xpay/admin/${this.userInfo.id}/channels`,this.create).then(res => {
-              console.log(res);
+            this.$http.put(`/xpay/admin/${this.userInfo.id}/channels`,this.create).then(res => {
               this.$message.success('创建通道成功！');
               this.dialogCreateVisible = false;
               this.createLoading = false;
-              this.$http.patch(`/xpay/admin/${this.userInfo.id}/stores/267/channels`,)
+              this.$http.patch(`/xpay/admin/${this.userInfo.id}/stores/267/channels`,);
               this.reset();
-
               this.getChannels();
             }).catch(() =>{
               this.$message.error('创建通道失败！');
               this.reset();
               this.createLoading = false;
             })
-
+          }
+          else return false
+        })
       },
 
       // 删除单个通道
       removeChannel(row) {
-              console.log(row);
               this.$confirm('此操作将删除通道 ' + row.extStoreName + ', 是否继续?', '提示', { type: 'warning' })
                 .then(() => {
                   // 向请求服务端删除

@@ -82,7 +82,7 @@
             prop="payChannel"
             label="渠道"
             align="center"
-            :filters="[{ text: '小微', value: 'XIAOWEI' }, { text: '小微H5', value: 'XIAOWEI_H5' }]"
+            :filters="[{ text: '小微', value: 'XIAOWEI' }, { text: '支付宝', value: 'ALIPAY' }]"
             :filter-multiple="false"
             filter-placement="bottom-end"
             :column-key="'b'">
@@ -247,8 +247,8 @@
                 if(order.payChannel === 'XIAOWEI'){
                   order.payChannel = '小微'
                 }
-                if(order.payChannel === 'XIAOWEI_H5'){
-                  order.payChannel = '小微H5'
+                if(order.payChannel === 'ALIPAY'){
+                  order.payChannel = '支付宝'
                 }
               });
               this.totalRows = filterData.length;
@@ -363,8 +363,8 @@
                   if(_order.payChannel === 'XIAOWEI'){
                     _order.payChannel = '小微'
                   }
-                  if(_order.payChannel === 'XIAOWEI_H5'){
-                    _order.payChannel = '小微H5'
+                  if(_order.payChannel === 'ALIPAY'){
+                    _order.payChannel = '支付宝'
                   }
                   this.storesInfo.forEach(info =>{
                     if(_order.storeId === info[0]){

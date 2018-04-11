@@ -202,8 +202,6 @@
             <el-select v-model="createChannel.paymentGateway" placeholder="请选择支付网关类型">
               <el-option label="环迅扫码" value="IPSSCAN"></el-option>
               <el-option label="环迅快捷" value="IPSQUICK"></el-option>
-              <el-option label="银商H5" value="CHINAUMSH5"></el-option>
-              <el-option label="银商APP" value="CHINAUMSAPP"></el-option>
             </el-select>
           </el-form-item>
           <template v-if="createChannel.paymentGateway === 'CHINAUMSH5'||createChannel.paymentGateway === 'CHINAUMSAPP'">

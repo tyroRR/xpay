@@ -7,6 +7,7 @@ import Dashboard from '@/components/Dashboard'
 import Channels from '@/components/Channels'
 import AgentList from '@/components/AgentList'
 import Replenishment from '@/components/Replenishment'
+//import Compare from '@/components/Compare'
 import RechargeList from '@/components/Recharge/RechargeList'
 import StoreAdmins from '@/components/stores/StoreAdmins'
 import StoreDetails from '@/components/stores/StoreDetails'
@@ -17,9 +18,14 @@ import AttachGoods from '@/components/stores/AttachGoods'
 import StorePool from '@/components/store-pool/StorePool'
 import PoolList from '@/components/store-pool/PoolList'
 import PoolGoods from '@/components/store-pool/PoolGoods'
-import DomainName from '@/components/stores/DomainName'
+//import DomainName from '@/components/stores/DomainName'
 import Orders from '@/components/Orders'
-import Complain from '@/components/Complain'
+//import Complain from '@/components/Complain'
+import IpsOpen from '@/components/ips/IpsOpen'
+import IpsUpdate from '@/components/ips/IpsUpdate'
+import IpsTransfer from '@/components/ips/IpsTransfer'
+import IpsWithdraw from '@/components/ips/IpsWithdraw'
+import IpsQueryOrders from '@/components/ips/IpsQueryOrders'
 
 // 懒加载方式，当路由被访问的时候才加载对应组件
 const Login = resolve => require(['@/components/Login'], resolve);
@@ -114,6 +120,18 @@ let router = new Router({
         {path: '/agent', component: AgentList, name: '代理商管理', menuShow: true}
       ]
     },
+    {
+      path: '/',
+      component: Home,
+      meta: { role: 'ADMIN'},
+      name: '通道管理',
+      iconCls: 'iconfont icon-home1',
+      leaf: true,
+      menuShow: true,
+      children: [
+        {path: '/channel/channelList', component: Channels, name: '通道列表', menuShow: true}
+      ]
+    },
 /*{
   path: '/',
   component: Home,
@@ -123,17 +141,6 @@ let router = new Router({
   menuShow: true,
   children: [
     {path: '/agent/AppList', component: AppList, name: 'App列表', menuShow: true}
-  ]
-},
-{
-  path: '/',
-  component: Home,
-  name: '通道管理',
-  iconCls: 'iconfont icon-users',
-  leaf: true,
-  menuShow: true,
-  children: [
-    {path: '/channel/channelList', component: Channels, name: '通道列表', menuShow: true}
   ]
 },
 {
@@ -180,6 +187,14 @@ let router = new Router({
         {path: '/replenishment', component: Replenishment, name: '丢单查询', menuShow: true}
       ]
     },
+    /*{
+      path: '/',
+      component: Home,
+      meta: { role:['ADMIN','AGENT','STORE'] },
+      children: [
+        {path: '/compare', component: Compare, name: '丢单详情'}
+      ]
+    },*/
     {
       path: '/',
       component: Home,
@@ -194,12 +209,16 @@ let router = new Router({
     {
       path: '/',
       component: Home,
+      name: '环迅易收付',
       meta: { role: 'ADMIN'},
       iconCls: 'iconfont icon-leaf',
-      leaf: true,
       menuShow: true,
       children: [
-        {path: '/complain', component: Complain, name: '投诉查询', menuShow: true},
+        {path: '/ips/open', component: IpsOpen, name: '环迅开户', menuShow: true},
+        {path: '/ips/update', component: IpsUpdate, name: '更新用户信息', menuShow: true},
+        {path: '/ips/transfer', component: IpsTransfer, name: '环迅转账', menuShow: true},
+        {path: '/ips/withdraw', component: IpsWithdraw, name: '环迅提现', menuShow: true},
+        {path: '/ips/queryOrders', component: IpsQueryOrders, name: '转账记录', menuShow: true},
       ]
     }
   ]

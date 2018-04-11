@@ -16,7 +16,7 @@ Vue.use(ElementUI);
 Vue.prototype.$http = axios;
 
 
-axios.defaults.baseURL = 'http://www.zmpay.xyz';
+axios.defaults.baseURL = 'http://www.zmpay.top';
 axios.interceptors.request.use(config => {
   if (getToken()) {
     config.headers.Access_token = getToken() // 让每个请求携带自定义token 请根据实际情况自行修改

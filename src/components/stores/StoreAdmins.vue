@@ -108,36 +108,33 @@
             </el-form-item>
             <el-form-item label="支付网关类型" prop="paymentGateway">
               <el-select v-model="createAdmin.paymentGateway" placeholder="请选择支付网关类型" @change="onChange">
+                <el-option label="环迅扫码" value="IPSSCAN"></el-option>
+                <el-option label="环迅快捷" value="IPSQUICK"></el-option>
                 <el-option label="银商小微" value="CHINAUMS"></el-option>
-                <el-option label="银商H5" value="CHINAUMSH5"></el-option>
-                <el-option label="银商APP" value="CHINAUMSAPP"></el-option>
-                <el-option label="环迅" value="IPSQUICK"></el-option>
               </el-select>
             </el-form-item>
-            <template v-if="createAdmin.paymentGateway === 'CHINAUMSH5'||createAdmin.paymentGateway === 'CHINAUMSAPP'||createAdmin.paymentGateway === 'IPSQUICK'">
+            <template v-if="createAdmin.paymentGateway === 'CHINAUMSH5'||createAdmin.paymentGateway === 'CHINAUMSAPP'">
               <el-form-item label="通道名称" prop="extStoreName">
                 <el-input v-model="createAdmin.extStoreName"></el-input>
               </el-form-item>
-              <template v-if="createAdmin.paymentGateway === 'CHINAUMSH5'||createAdmin.paymentGateway === 'CHINAUMSAPP'">
-                <el-form-item label="通道ID" prop="extStoreId">
-                  <el-input v-model="createAdmin.extStoreId"></el-input>
-                </el-form-item>
-                <el-form-item label="终端号" prop="tid">
-                  <el-input v-model="createAdmin.chinaUmsProps.tid"></el-input>
-                </el-form-item>
-                <el-form-item label="消息源ID" prop="msgSrcId">
-                  <el-input v-model="createAdmin.chinaUmsProps.msgSrcId"></el-input>
-                </el-form-item>
-                <el-form-item label="消息源" prop="msgSrc">
-                  <el-input v-model="createAdmin.chinaUmsProps.msgSrc"></el-input>
-                </el-form-item>
-                <el-form-item label="签名秘钥" prop="signKey">
-                  <el-input v-model="createAdmin.chinaUmsProps.signKey"></el-input>
-                </el-form-item>
-                <el-form-item label="机构号" prop="InstMid">
-                  <el-input v-model="createAdmin.chinaUmsProps.InstMid"></el-input>
-                </el-form-item>
-              </template>
+              <el-form-item label="通道ID" prop="extStoreId">
+                <el-input v-model="createAdmin.extStoreId"></el-input>
+              </el-form-item>
+              <el-form-item label="终端号" prop="tid">
+                <el-input v-model="createAdmin.chinaUmsProps.tid"></el-input>
+              </el-form-item>
+              <el-form-item label="消息源ID" prop="msgSrcId">
+                <el-input v-model="createAdmin.chinaUmsProps.msgSrcId"></el-input>
+              </el-form-item>
+              <el-form-item label="消息源" prop="msgSrc">
+                <el-input v-model="createAdmin.chinaUmsProps.msgSrc"></el-input>
+              </el-form-item>
+              <el-form-item label="签名秘钥" prop="signKey">
+                <el-input v-model="createAdmin.chinaUmsProps.signKey"></el-input>
+              </el-form-item>
+              <el-form-item label="机构号" prop="InstMid">
+                <el-input v-model="createAdmin.chinaUmsProps.InstMid"></el-input>
+              </el-form-item>
             </template>
           </el-form>
 

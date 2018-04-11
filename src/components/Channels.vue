@@ -57,7 +57,7 @@
         <el-dialog title="新增通道" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
           <el-form id="#create" :model="create"  ref="create" :rules="rules" label-width="100px">
             <el-form-item label="通道ID" prop="extStoreId">
-              <el-input v-model="create.extStoreId"></el-input>
+              <el-input v-model="create.extStoreId" placeholder="商户号,账户号,MD5证书"></el-input>
             </el-form-item>
             <el-form-item label="通道名称" prop="extStoreName">
               <el-input v-model="create.extStoreName"></el-input>

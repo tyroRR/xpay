@@ -193,7 +193,7 @@
       <el-dialog title="添加通道" center v-model="dialogCreateChannelVisible" :visible.sync="dialogCreateChannelVisible" @close="resetCreateChannel">
         <el-form id="#createChannel" :model="createChannel" :rules="createChannelRules" ref="createChannel" label-width="120px">
           <el-form-item label="通道ID" prop="extStoreId">
-            <el-input v-model="createChannel.extStoreId"></el-input>
+            <el-input v-model="createChannel.extStoreId" placeholder="商户号,账户号,MD5证书"></el-input>
           </el-form-item>
           <el-form-item label="通道名称" prop="extStoreName">
             <el-input v-model="createChannel.extStoreName"></el-input>

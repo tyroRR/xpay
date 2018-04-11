@@ -124,12 +124,11 @@ let router = new Router({
       path: '/',
       component: Home,
       meta: { role: 'ADMIN'},
-      name: '通道管理',
       iconCls: 'iconfont icon-home1',
       leaf: true,
       menuShow: true,
       children: [
-        {path: '/channel/channelList', component: Channels, name: '通道列表', menuShow: true}
+        {path: '/channel/channelList', component: Channels, name: '通道管理', menuShow: true}
       ]
     },
 /*{

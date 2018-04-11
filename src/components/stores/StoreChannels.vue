@@ -26,7 +26,7 @@
             <el-button slot="append" icon="el-icon-search" @click="getChannels">查询</el-button>
           </el-input>
           <template v-if="userInfo.role === 'ADMIN'">
-            <el-button type="primary" icon="el-icon-plus" @click="dialogCreateVisible = true">添加</el-button>
+            <el-button type="info" plain icon="el-icon-plus" @click="dialogCreateVisible = true">绑定</el-button>
           </template>
         </el-form>
       </el-col>
@@ -37,12 +37,12 @@
                 height="680"
                 :default-sort = "{prop: 'updateDate', order: 'descending'}"
                 @selection-change="tableSelectionChange">
-        <el-table-column prop="extStoreId" label="通道ID"></el-table-column>
-        <el-table-column prop="extStoreName" label="通道名称"></el-table-column>
-        <el-table-column prop="paymentGateway" label="通道类型"></el-table-column>
-        <el-table-column sortable prop="updateDate" label="末次使用时间"></el-table-column>
+        <el-table-column prop="extStoreId" label="通道ID" align="center"></el-table-column>
+        <el-table-column prop="extStoreName" label="通道名称" align="center"></el-table-column>
+        <el-table-column prop="paymentGateway" label="通道类型" align="center"></el-table-column>
+        <el-table-column sortable prop="updateDate" label="末次使用时间" align="center"></el-table-column>
         <template v-if="userInfo.role === 'ADMIN'">
-          <el-table-column label="操作">
+          <el-table-column label="操作" align="center">
             <template slot-scope="scope">
               <el-button
                 size="mini"
@@ -53,8 +53,8 @@
         </template>
       </el-table>
 
-      <!-- 新增通道-->
-      <el-dialog title="新增通道" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
+      <!-- 绑定通道-->
+      <el-dialog title="绑定通道" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
         <el-form id="#create" :model="create"  ref="create" label-width="100px">
           <el-form-item label="通道ID" prop="extStoreId">
             <el-input v-model="create.extStoreId"></el-input>
@@ -68,23 +68,6 @@
               <el-option label="银商APP" value="CHINAUMSAPP"></el-option>
             </el-select>
           </el-form-item>
-          <template v-if="create.paymentGateway === 'CHINAUMSH5'||create.paymentGateway === 'CHINAUMSAPP'">
-            <el-form-item label="终端号" prop="tid">
-              <el-input v-model="create.chinaUmsProps.tid"></el-input>
-            </el-form-item>
-            <el-form-item label="消息源ID" prop="msgSrcId">
-              <el-input v-model="create.chinaUmsProps.msgSrcId"></el-input>
-            </el-form-item>
-            <el-form-item label="消息源" prop="msgSrc">
-              <el-input v-model="create.chinaUmsProps.msgSrc"></el-input>
-            </el-form-item>
-            <el-form-item label="签名秘钥" prop="signKey">
-              <el-input v-model="create.chinaUmsProps.signKey"></el-input>
-            </el-form-item>
-            <el-form-item label="机构号" prop="instMid">
-              <el-input v-model="create.chinaUmsProps.instMid"></el-input>
-            </el-form-item>
-          </template>
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button @click="dialogCreateVisible = false">取 消</el-button>
@@ -240,14 +223,14 @@
         this.loading = false;
         this.selected.splice(0,this.selected.length);
       },
-      // 新增通道
+      // 绑定通道
       createChannel(){
         this.$refs.create.validate((valid) => {
           if (valid) {
             this.createLoading = true;
             this.$http.put(`/xpay/admin/${this.userInfo.id}/channels`,this.create).then(res => {
               console.log(res);
-              this.$message.success('新增通道成功！');
+              this.$message.success('绑定通道成功！');
               this.dialogCreateVisible = false;
               this.createLoading = false;
               this.reset();

@@ -228,12 +228,16 @@
         </div>
       </el-dialog>
 
-      <el-dialog title="绑定通道" center v-model="dialogBindChannelVisible" :visible.sync="dialogBindChannelVisible">
-        <el-form id="#bindChannel" :model="bindChannel" label-width="120px">
+      <el-dialog title="绑定通道" center v-model="dialogBindChannelVisible" :visible.sync="dialogBindChannelVisible" @close="resetBindChannel">
+        <el-form id="#bindChannel" :model="bindChannel" ref="bindChannel" label-width="120px">
           <el-form-item label="选择通道">
             <el-select v-model="bindChannel.channels" multiple placeholder="请选择通道">
-              <el-option label="乐晶游环迅扫码" value="2268"></el-option>
-              <el-option label="乐晶游环迅快捷" value="2267"></el-option>
+              <el-option
+                v-for="item in channelList"
+                :key="item.id"
+                :label="item.extStoreName"
+                :value="item.id">
+              </el-option>
             </el-select>
           </el-form-item>
         </el-form>
@@ -276,6 +280,7 @@
         agentsInfo:{},
         storePool: [],
         stores: [],
+        channelList:[],
         update:{
           name: '',
           bailPercentage: '',
@@ -391,9 +396,11 @@
       this.createStore.appId = sessionStorage.getItem('currentAppId');
       this.createStore.agentId = sessionStorage.getItem('currentAgentId');
       this.createStore.adminId = sessionStorage.getItem('currentAdminId');
-      let userInfo = sessionStorage.getItem('access-user');
+      let userInfo = JSON.parse(sessionStorage.getItem('access-user'));
+      this.$http.get(`/xpay/admin/${userInfo.id}/channels`).then(res=> {
+        this.channelList = res.data.data;
+      });
       if (userInfo) {
-        userInfo = JSON.parse(userInfo);
         this.userInfo.id = userInfo.id;
         this.userInfo.account = userInfo.account;
         this.userInfo.name = userInfo.name;
@@ -426,6 +433,9 @@
       },
       resetCreateChannel() {
         this.$refs.createChannel.resetFields();
+      },
+      resetBindChannel(){
+        this.bindChannel.channels = [];
       },
       //获取商户列表
       getStores() {
@@ -468,7 +478,7 @@
                 val.paymentGateway = val.channels[0].paymentGateway;
               }
               else {
-                val.paymentGateway = 'CHINAUMS'
+                val.paymentGateway = 'No Channel'
               }
               if(this.storePool.includes(val.name)){
                 val.state = 'in'
@@ -599,8 +609,10 @@
       handleBindChannel(){
         this.$http.patch(`/xpay/admin/${this.userInfo.id}/stores/${this.currentStoreId}/channels`,this.bindChannel).then(()=>{
           this.$message.success('绑定成功!');
+          this.resetBindChannel();
         }).catch(()=>{
           this.$message.error('绑定失败!');
+          this.resetBindChannel();
         })
       },
       switchState(row){
@@ -646,22 +658,18 @@
         })
       },
       viewGood(row){
-        if(row.id){
-          sessionStorage.setItem('currentAdminId',row.admin.id);
-          sessionStorage.setItem('currentStoreId',row.id);
-        }
-        this.$router.push({ path: '/store/Goods' });
-      },
-      //查看商户通道列表
-      viewChannel(row){
         if(row.channels){
           sessionStorage.setItem('channelData', JSON.stringify(row.channels));
           this.$router.push({ path: '/store/storeChannels' });
         }
         else {
-          this.$message.error('尚未对该商户分配通道！')
+          if(row.id){
+            sessionStorage.setItem('currentAdminId',row.admin.id);
+            sessionStorage.setItem('currentStoreId',row.id);
+            this.$router.push({ path: '/store/Goods' });
+          }
         }
-     }
+      }
     }
   }
 </script>

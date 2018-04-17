@@ -63,6 +63,7 @@
         <el-table-column prop="orderNo" label="订单号" align="center"></el-table-column>
         <el-table-column prop="createDate" sortable label="下单时间" align="center"></el-table-column>
         <el-table-column prop="sellerOrderNo" label="卖家单号" align="center"></el-table-column>
+        <el-table-column prop="subChannelId" label="子商户id" align="center"></el-table-column>
         <el-table-column
           prop="status"
           label="状态"
@@ -425,8 +426,8 @@
         this.downloadLoading = true;
         require.ensure([], () => {
           const { export_json_to_excel } = require('@/utils/Export2Excel');
-          const tHeader = ['商户名称','商品名', '订单号', '下单时间', '卖家单号','状态','金额'];
-          const filterVal = ['name','subject','orderNo','createDate','sellerOrderNo','status','totalFee'];
+          const tHeader = ['商户名称','商品名', '订单号', '下单时间', '卖家单号','状态','金额','子商户Id'];
+          const filterVal = ['name','subject','orderNo','createDate','sellerOrderNo','status','totalFee','subChannelId'];
           console.log(this.originalData);
           const list = this.originalData;
           const data = this.formatJson(filterVal, list);

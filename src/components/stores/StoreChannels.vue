@@ -4,7 +4,8 @@
       <el-breadcrumb separator="/">
         <el-breadcrumb-item :to="{ path: '/' }"><b>首页</b></el-breadcrumb-item>
         <el-breadcrumb-item>商户管理</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/store/storeList' }">商户列表</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/store/storeAdmins' }">商户列表</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/store/storeDetails' }">商户详情</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ path: '/store/storeChannels' }">商户通道</el-breadcrumb-item>
       </el-breadcrumb>
     </el-col>
@@ -26,7 +27,7 @@
             <el-button slot="append" icon="el-icon-search" @click="getChannels">查询</el-button>
           </el-input>
           <template v-if="userInfo.role === 'ADMIN'">
-            <el-button type="info" plain icon="el-icon-plus" @click="dialogCreateVisible = true">绑定</el-button>
+            <el-button type="info" plain icon="el-icon-plus" @click="dialogBindChannelVisible = true">绑定</el-button>
           </template>
         </el-form>
       </el-col>
@@ -47,31 +48,29 @@
               <el-button
                 size="mini"
                 type="danger"
-                @click="removeChannel(scope.$index, scope.row)">删除</el-button>
+                @click="removeChannel(scope.$index, scope.row)">解绑</el-button>
             </template>
           </el-table-column>
         </template>
       </el-table>
 
       <!-- 绑定通道-->
-      <el-dialog title="绑定通道" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
-        <el-form id="#create" :model="create"  ref="create" label-width="100px">
-          <el-form-item label="通道ID" prop="extStoreId">
-            <el-input v-model="create.extStoreId"></el-input>
-          </el-form-item>
-          <el-form-item label="通道名称" prop="extStoreName">
-            <el-input v-model="create.extStoreName"></el-input>
-          </el-form-item>
-          <el-form-item label="通道类型" prop="paymentGateway">
-            <el-select v-model="create.paymentGateway" placeholder="请选择通道类型">
-              <el-option label="银商H5" value="CHINAUMSH5"></el-option>
-              <el-option label="银商APP" value="CHINAUMSAPP"></el-option>
+      <el-dialog title="绑定通道" center v-model="dialogBindChannelVisible" :visible.sync="dialogBindChannelVisible" @close="resetBindChannel" width="30%">
+        <el-form id="#bindChannel" :model="bindChannel" ref="bindChannel" label-width="80px">
+          <el-form-item label="选择通道">
+            <el-select v-model="bindChannel.channels" multiple placeholder="请选择通道">
+              <el-option
+                v-for="item in channelList"
+                :key="item.id"
+                :label="item.extStoreName"
+                :value="item.id">
+              </el-option>
             </el-select>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="dialogCreateVisible = false">取 消</el-button>
-          <el-button type="primary" :loading="createLoading" @click="createChannel">确 定</el-button>
+          <el-button @click="dialogBindChannelVisible = false">取 消</el-button>
+          <el-button type="primary" @click="handleBindChannel">提交</el-button>
         </div>
       </el-dialog>
 
@@ -108,40 +107,10 @@
           role:''
         },
         channels: [],
-        create: {
-          extStoreId: "",
-          extStoreName: "",
-          paymentGateway: "",
-          chinaUmsProps: {
-            tid: "",
-            msgSrcId: "",
-            msgSrc: "",
-            signKey: "",
-            instMid: ""
-          }
-        },
-        rules: {
-          extStoreId: [
-            { required: true, message: '请输入通道ID', trigger: 'blur' },
-          ],
-          extStoreName: [
-            { required: true, message: '请输入用户名', trigger: 'blur' },
-          ],
-          paymentGateway: [
-            { required: true, message: '请输入通道类型', trigger: 'blur' },
-          ],
-          tid: [
-            { required: true, message: '请输入终端号', trigger: 'blur' },
-          ],
-          msgSrcId: [
-            { required: true, message: '请输入消息源ID', trigger: 'blur' },
-          ],
-          msgSrc: [
-            { required: true, message: '请输入消息源', trigger: 'blur' },
-          ],
-          signKey: [
-            { required: true, message: '请输入消息源', trigger: 'blur' },
-          ],
+        channelList: "",
+        currentStoreId: "",
+        bindChannel: {
+          channels: []
         },
         filter: {
           pageSize: 10,
@@ -157,15 +126,21 @@
         select: 'extStoreId', //搜索框的搜索字段
         loading: false,
         selected: [], //已选择项
-        dialogCreateVisible: false, //创建对话框的显示状态
+        dialogBindChannelVisible: false,
         createLoading: false,
         placeholder:placeholders["extStoreId"]
       };
     },
     mounted: function() {
-      var userInfo = sessionStorage.getItem('access-user');
+      let userInfo = JSON.parse(sessionStorage.getItem('access-user'));
+      let currentStoreId = JSON.parse(sessionStorage.getItem('currentStoreId'));
+      this.$http.get(`/xpay/admin/${userInfo.id}/channels`).then(res=> {
+        this.channelList = res.data.data;
+      });
+      if(currentStoreId){
+        this.currentStoreId = currentStoreId;
+      }
       if (userInfo) {
-        userInfo = JSON.parse(userInfo);
         this.userInfo.id = userInfo.id;
         this.userInfo.account = userInfo.account;
         this.userInfo.name = userInfo.name;
@@ -223,38 +198,31 @@
         this.loading = false;
         this.selected.splice(0,this.selected.length);
       },
-      // 绑定通道
-      createChannel(){
-        this.$refs.create.validate((valid) => {
-          if (valid) {
-            this.createLoading = true;
-            this.$http.put(`/xpay/admin/${this.userInfo.id}/channels`,this.create).then(res => {
-              console.log(res);
-              this.$message.success('绑定通道成功！');
-              this.dialogCreateVisible = false;
-              this.createLoading = false;
-              this.reset();
-              this.getChannels();
-            })
-          }
-          else {
-            return false;
-          }
-        });
+      handleBindChannel(){
+        this.$http.patch(`/xpay/admin/${this.userInfo.id}/stores/${this.currentStoreId}/channels`,this.bindChannel).then(res =>{
+          this.$message.success('绑定成功!');
+          this.resetBindChannel();
+        }).catch(()=>{
+          this.$message.error('绑定失败!');
+          this.resetBindChannel();
+        })
       },
-      // 删除单个通道
+      resetBindChannel(){
+        this.bindChannel.channels = [];
+      },
       removeChannel(index,row) {
-        console.log(index, row);
-        this.$confirm('此操作将删除通道 ' + row.extStoreName + ', 是否继续?', '提示', { type: 'warning' })
+        this.$confirm('此操作将解绑通道 ' + row.extStoreName + ', 是否继续?', '提示', { type: 'warning' })
           .then(() => {
-            // 向请求服务端删除
             let channelId = row.id  ;
-            this.$http.delete(`/xpay/admin/${this.userInfo.id}/${channelId}`).then(() => {
-              this.$message.success('成功删除了通道' + row.extStoreName + '!');
-              this.getChannels();
+            let channelList = JSON.parse(JSON.stringify(this.channelList));
+            channelList.splice(channelList.findIndex(id => id === channelId), 1);
+            this.$http.patch(`/xpay/admin/${this.userInfo.id}/stores/${this.currentStoreId}/channels`,this.bindChannel).then(() => {
+              this.$message.success('成功解绑了通道' + row.extStoreName + '!');
+              this.channels.splice(this.channels.findIndex(id => id === channelId), 1);
+              sessionStorage.setItem('channelData', JSON.stringify(row.channels));
             })
               .catch(() => {
-                this.$message.error('删除失败!');
+                this.$message.error('解绑失败!');
               });
           })
           .catch(() => {

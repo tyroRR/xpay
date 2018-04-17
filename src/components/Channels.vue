@@ -15,8 +15,8 @@
       <!-- 查询 -->
       <el-col :span="24" class="toolbar">
         <el-form :inline="true" class="demo-form-inline">
-          <el-input :placeholder="placeholder" v-model="keywords" style="width: 35%">
-            <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:130px">
+          <el-input :placeholder="placeholder" v-model="keywords" style="width: 25%">
+            <el-select class="sel-placeholder" v-model="select" @change="searchFieldChange" slot="prepend" style="width:135px">
               <el-option label="通道ID" value="extStoreId"></el-option>
               <el-option label="通道名称" value="extStoreName"></el-option>
               <el-option label="通道类型" value="paymentGateway"></el-option>
@@ -66,7 +66,6 @@
               <el-select v-model="create.paymentGateway" placeholder="请选择通道类型">
                 <el-option label="环迅扫码" value="IPSSCAN"></el-option>
                 <el-option label="环迅快捷" value="IPSQUICK"></el-option>
-                <el-option label="银商小微" value="CHINAUMS"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="代理商(选填)" prop="agent">

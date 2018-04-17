@@ -93,18 +93,22 @@
         </template>
         <el-table-column label="商户池" align="center">
           <template slot-scope="scope">
-            <el-tooltip :content="'Switch state: ' + stores[scope.$index].state" placement="top">
-              <el-switch
-                v-model="stores[scope.$index].state"
-                active-color="#13ce66"
-                inactive-color="#ff4949"
-                active-text="in"
-                inactive-text="out"
-                active-value="in"
-                inactive-value="out"
-                @change="switchState(scope.row)">
-              </el-switch>
-            </el-tooltip>
+            <template v-if="scope.row.channels">
+            </template>
+            <template v-else>
+              <el-tooltip :content="'Switch state: ' + stores[scope.$index].state" placement="top">
+                <el-switch
+                  v-model="stores[scope.$index].state"
+                  active-color="#13ce66"
+                  inactive-color="#ff4949"
+                  active-text="in"
+                  inactive-text="out"
+                  active-value="in"
+                  inactive-value="out"
+                  @change="switchState(scope.row)">
+                </el-switch>
+              </el-tooltip>
+            </template>
           </template>
         </el-table-column>
       </el-table>
@@ -228,8 +232,8 @@
         </div>
       </el-dialog>
 
-      <el-dialog title="绑定通道" center v-model="dialogBindChannelVisible" :visible.sync="dialogBindChannelVisible" @close="resetBindChannel">
-        <el-form id="#bindChannel" :model="bindChannel" ref="bindChannel" label-width="120px">
+      <el-dialog title="绑定通道" center v-model="dialogBindChannelVisible" :visible.sync="dialogBindChannelVisible" @close="resetBindChannel" width="30%">
+        <el-form id="#bindChannel" :model="bindChannel" ref="bindChannel" label-width="80px">
           <el-form-item label="选择通道">
             <el-select v-model="bindChannel.channels" multiple placeholder="请选择通道">
               <el-option
@@ -659,6 +663,7 @@
       },
       viewGood(row){
         if(row.channels){
+          sessionStorage.setItem('currentStoreId', JSON.stringify(row.id));
           sessionStorage.setItem('channelData', JSON.stringify(row.channels));
           this.$router.push({ path: '/store/storeChannels' });
         }

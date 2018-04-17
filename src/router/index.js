@@ -26,6 +26,7 @@ import IpsUpdate from '@/components/ips/IpsUpdate'
 import IpsTransfer from '@/components/ips/IpsTransfer'
 import IpsWithdraw from '@/components/ips/IpsWithdraw'
 import IpsQueryOrders from '@/components/ips/IpsQueryOrders'
+import payTest from '@/components/ips/payTest'
 
 // 懒加载方式，当路由被访问的时候才加载对应组件
 const Login = resolve => require(['@/components/Login'], resolve);
@@ -209,7 +210,7 @@ let router = new Router({
       path: '/',
       component: Home,
       name: '环迅易收付',
-      meta: { role: 'ADMIN'},
+      meta: { role: ['ADMIN','STORE']},
       iconCls: 'iconfont icon-leaf',
       menuShow: true,
       children: [
@@ -218,6 +219,7 @@ let router = new Router({
         {path: '/ips/transfer', component: IpsTransfer, name: '环迅转账', menuShow: true},
         {path: '/ips/withdraw', component: IpsWithdraw, name: '环迅提现', menuShow: true},
         {path: '/ips/queryOrders', component: IpsQueryOrders, name: '转账记录', menuShow: true},
+        {path: '/ips/payTest', component: payTest, name: '生成测试链接', menuShow: true},
       ]
     }
   ]

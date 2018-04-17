@@ -91,7 +91,7 @@
         const identityNo = this.open.identityNo;
         const userName = this.open.userName;
         const mobileNo = this.open.mobileNo;
-        window.open(`http://www.zmpay.top/xpay/h5/pay/ips/transfer?md5Signature=${md5Signature}&desKey=${desKey}&desIv=${desIv}&merCode=${merCode}&merAcctNo=${merAcctNo}&customerCode=${customerCode}&identityNo=${identityNo}&userName=${userName}&mobileNo=${mobileNo}`)
+        window.open(`http://www.zmpay.top/xpay/h5/pay/ips/open?md5Signature=${md5Signature}&desKey=${desKey}&desIv=${desIv}&merCode=${merCode}&merAcctNo=${merAcctNo}&customerCode=${customerCode}&identityNo=${identityNo}&userName=${userName}&mobileNo=${mobileNo}`)
       }
     }
   }

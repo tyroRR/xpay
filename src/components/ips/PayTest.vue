@@ -54,7 +54,27 @@
     methods: {
       onSubmit() {
         let now = new Date();
-        let orderTime = `${now.getFullYear()}${now.getMonth()}${now.getHours()}${now.getMinutes()}${now.getSeconds()}`;
+        let month = now.getMonth()+1;
+        let date = now.getDate();
+        let hours = now.getHours();
+        let minutes = now.getMinutes();
+        let seconds = now.getSeconds();
+        if(month.toString().length === 1){
+          month = `0${month}`
+        }
+        if(date.toString().length === 1){
+          date = `0${date}`
+        }
+        if(hours.toString().length === 1){
+          hours = `0${hours}`
+        }
+        if(minutes.toString().length === 1){
+          minutes = `0${minutes}`
+        }
+        if(seconds.toString().length === 1){
+          seconds = `0${seconds}`
+        }
+        let orderTime = `${now.getFullYear()}${month}${date}${hours}${minutes}${seconds}`;
         let sellerOrderNo = new Date().getTime();
         let totalFee = this.totalFee;
         let subChannelId = this.subId;
@@ -108,7 +128,27 @@
 
           for(let i=this.startId; i<this.endId; i++){
             let now = new Date();
-            let orderTime = `${now.getFullYear()}${now.getMonth()}${now.getHours()}${now.getMinutes()}${now.getSeconds()}`;
+            let month = now.getMonth()+1;
+            let date = now.getDate();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+            if(month.toString().length === 1){
+              month = `0${month}`
+            }
+            if(date.toString().length === 1){
+              date = `0${date}`
+            }
+            if(hours.toString().length === 1){
+              hours = `0${hours}`
+            }
+            if(minutes.toString().length === 1){
+              minutes = `0${minutes}`
+            }
+            if(seconds.toString().length === 1){
+              seconds = `0${seconds}`
+            }
+            let orderTime = `${now.getFullYear()}${month}${date}${hours}${minutes}${seconds}`;
             let sellerOrderNo = new Date().getTime();
 
             const body = {

@@ -290,7 +290,7 @@
           if (index === 0) {
             sums[index] = '总计';
           }
-          if (index === 5) {
+          if (index === 6) {
             const counts = originalData.map(item => item[column.property]);
             let count = 0;
             counts.forEach(status => {
@@ -300,7 +300,7 @@
               });
               sums[index] = `成功 ${count} 笔`;
           }
-          if (index === 6) {
+          if (index === 7) {
             sums[index] = successSum;
             sums[index] = Math.floor(sums[index]) + ' 元';
           }
@@ -426,8 +426,8 @@
         this.downloadLoading = true;
         require.ensure([], () => {
           const { export_json_to_excel } = require('@/utils/Export2Excel');
-          const tHeader = ['商户名称','商品名', '订单号', '下单时间', '卖家单号','状态','金额','子商户Id'];
-          const filterVal = ['name','subject','orderNo','createDate','sellerOrderNo','status','totalFee','subChannelId'];
+          const tHeader = ['商户名称','商品名', '订单号', '下单时间', '卖家单号','状态','金额','子商户Id','支付链接'];
+          const filterVal = ['name','subject','orderNo','createDate','sellerOrderNo','status','totalFee','subChannelId','codeUrl'];
           console.log(this.originalData);
           const list = this.originalData;
           const data = this.formatJson(filterVal, list);

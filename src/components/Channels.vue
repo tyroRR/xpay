@@ -57,7 +57,7 @@
         <el-dialog title="新增通道" center v-model="dialogCreateVisible" :visible.sync="dialogCreateVisible" :close-on-click-modal="false" @close="reset" >
           <el-form id="#create" :model="create"  ref="create" :rules="rules" label-width="100px">
             <el-form-item label="通道ID" prop="extStoreId">
-              <el-input v-model="create.extStoreId" placeholder="商户号,账户号,MD5证书"></el-input>
+              <el-input v-model="create.extStoreId" placeholder="商户号,账户号,MD5证书,3des秘钥,3des向量"></el-input>
             </el-form-item>
             <el-form-item label="通道名称" prop="extStoreName">
               <el-input v-model="create.extStoreName"></el-input>
@@ -126,15 +126,7 @@
         create: {
           extStoreId: "",
           extStoreName: "",
-          paymentGateway: "",
-          chinaUmsProps:{
-            tid: "",
-            msgSrcId: "",
-            msgSrc: "",
-            signKey: "",
-            instMid: ""
-          },
-          agentId: 12
+          paymentGateway: ""
         },
         currentId:'',
         update:{
@@ -251,7 +243,6 @@
               this.$message.success('创建通道成功！');
               this.dialogCreateVisible = false;
               this.createLoading = false;
-              this.$http.patch(`/xpay/admin/${this.userInfo.id}/stores/267/channels`,);
               this.reset();
               this.getChannels();
             }).catch(() =>{

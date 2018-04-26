@@ -68,7 +68,7 @@
           prop="status"
           label="状态"
           align="center"
-          :filters="[{ text: 'SUCCESS', value: 'SUCCESS' }, { text: 'NOTPAY', value: 'NOTPAY' }]"
+          :filters="[{ text: 'SUCCESS', value: 'SUCCESS' }, { text: 'NOTPAY', value: 'NOTPAY' }, { text: 'PAYERROR', value: 'PAYERROR' }]"
           :filter-multiple="false"
           filter-placement="bottom-end"
           :column-key="'a'">
@@ -83,7 +83,7 @@
             prop="payChannel"
             label="渠道"
             align="center"
-            :filters="[{ text: '小微', value: 'XIAOWEI' }, { text: '支付宝', value: 'ALIPAY' }]"
+            :filters="[{ text: '小微', value: 'XIAOWEI' }, { text: '支付宝', value: 'ALIPAY' }, { text: '快捷', value: 'CASH' }]"
             :filter-multiple="false"
             filter-placement="bottom-end"
             :column-key="'b'">

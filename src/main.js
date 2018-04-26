@@ -15,8 +15,8 @@ Vue.config.productionTip = false;
 Vue.use(ElementUI);
 Vue.prototype.$http = axios;
 
-
-axios.defaults.baseURL = 'http://www.zmpay.top';
+//axios.defaults.baseURL = 'http://www.zmpay.top';
+axios.defaults.baseURL = 'http://localhost:8080';
 axios.interceptors.request.use(config => {
   if (getToken()) {
     config.headers.Access_token = getToken() // 让每个请求携带自定义token 请根据实际情况自行修改

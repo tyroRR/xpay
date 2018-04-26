@@ -22,12 +22,6 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="3DES密钥">
-          <el-input v-model="transfer.desKey" placeholder="请输入3DES密钥"></el-input>
-        </el-form-item>
-        <el-form-item label="3DES向量">
-          <el-input v-model="transfer.desIv" placeholder="请输入3DES向量"></el-input>
-        </el-form-item>
         <el-form-item label="客户号">
           <el-input v-model="transfer.customerCode" placeholder="请输入客户号"></el-input>
         </el-form-item>
@@ -54,7 +48,9 @@
         extParam:{
           md5Signature: '',
           merCode: '',
-          merAcctNo: ''
+          merAcctNo: '',
+          desKey: '',
+          desIv: ''
         },
         transfer: {
           desKey: '',
@@ -76,16 +72,24 @@
         this.extParam.md5Signature = this.channelParam.split(",")[2];
         this.extParam.merCode = this.channelParam.split(",")[0];
         this.extParam.merAcctNo = this.channelParam.split(",")[1];
+        this.extParam.desKey = this.channelParam.split(",")[3];
+        this.extParam.desIv = this.channelParam.split(",")[4];
       },
       onSubmit() {
         const md5Signature = this.extParam.md5Signature;
-        const desKey = this.transfer.desKey;
-        const desIv = this.transfer.desIv;
         const merCode = this.extParam.merCode;
         const merAcctNo = this.extParam.merAcctNo;
+        const desKey = this.extParam.desKey;
+        const desIv = this.extParam.desIv;
         const customerCode = this.transfer.customerCode;
         const transferAmount = this.transfer.transferAmount;
-        const collectionItemName = this.transfer.collectionItemName;
+        let collectionItemName;
+        if(this.transfer.collectionItemName){
+          collectionItemName = this.transfer.collectionItemName;
+        }
+        else {
+          collectionItemName = "货款";
+        }
         window.open(`http://www.zmpay.top/xpay/h5/pay/ips/transfer?md5Signature=${md5Signature}&desKey=${desKey}&desIv=${desIv}&merCode=${merCode}&merAcctNo=${merAcctNo}&customerCode=${customerCode}&transferAmount=${transferAmount}&collectionItemName=${collectionItemName}`)
       }
     }

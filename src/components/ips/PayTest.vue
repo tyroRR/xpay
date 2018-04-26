@@ -115,6 +115,8 @@
               this.result = response.data.codeUrl;
             },
             error => error
+          ).catch(
+            this.$message.error('疑似商户被关闭了！')
           );
         })
       },
@@ -184,6 +186,8 @@
                 this.result = response.data.codeUrl;
               },
               error => error
+            ).catch(
+              this.$message.error('疑似商户被关闭了！')
             );
           }
         })

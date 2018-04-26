@@ -22,12 +22,6 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="3DES密钥">
-          <el-input v-model="update.desKey" placeholder="请输入3DES密钥"></el-input>
-        </el-form-item>
-        <el-form-item label="3DES向量">
-          <el-input v-model="update.desIv" placeholder="请输入3DES向量"></el-input>
-        </el-form-item>
         <el-form-item label="客户号">
           <el-input v-model="update.customerCode" placeholder="请输入客户号"></el-input>
         </el-form-item>
@@ -47,11 +41,11 @@
         channelParam:'',
         extParam:{
           md5Signature: '',
-          merCode: ''
+          merCode: '',
+          desKey: '',
+          desIv: ''
         },
         update: {
-          desKey: '',
-          desIv: '',
           customerCode: ''
         },
       }
@@ -66,12 +60,19 @@
       setParam() {
         this.extParam.md5Signature = this.channelParam.split(",")[2];
         this.extParam.merCode = this.channelParam.split(",")[0];
+        this.extParam.desKey = this.channelParam.split(",")[3];
+        this.extParam.desIv = this.channelParam.split(",")[4];
+        console.log(this.extParam.md5Signature);
+        console.log(this.extParam.merCode);
+        console.log(this.extParam.desKey);
+        console.log(this.extParam.desIv);
       },
       onSubmit() {
+        console.log(this.channelList[0].extStoreId.split(",")[2]);
         const md5Signature = this.extParam.md5Signature;
-        const desKey = this.update.desKey;
-        const desIv = this.update.desIv;
         const merCode = this.extParam.merCode;
+        const desKey = this.extParam.desKey;
+        const desIv = this.extParam.desIv;
         const customerCode = this.update.customerCode;
         window.open(`http://www.zmpay.top/xpay/h5/pay/ips/withdraw?md5Signature=${md5Signature}&desKey=${desKey}&desIv=${desIv}&merCode=${merCode}&customerCode=${customerCode}`)
       }
